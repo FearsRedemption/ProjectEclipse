@@ -1,0 +1,91 @@
+using System;
+using System.Collections;
+using ProjectEclipse.Utilities;
+using UnityEngine;
+
+namespace ProjectEclipse.Combat
+{
+    public class Health : MonoBehaviour, IDamageable
+    {
+        [SerializeField] private int maxHealth = 10;
+        [SerializeField] private float invulnerabilitySeconds = 0.25f;
+
+        private int currentHealth;
+        private bool invulnerable;
+        private bool dead;
+        private VisualStateAnimator visualState;
+
+        public event Action<int, int> Damaged;
+        public event Action Died;
+
+        public int MaxHealth { get { return Mathf.Max(1, maxHealth); } }
+        public int CurrentHealth { get { return currentHealth; } }
+        public bool IsAlive { get { return !dead; } }
+
+        private void Awake()
+        {
+            currentHealth = MaxHealth;
+            visualState = GetComponent<VisualStateAnimator>();
+        }
+
+        public void SetMaxHealth(int value, bool refill)
+        {
+            maxHealth = Mathf.Max(1, value);
+            if (refill)
+            {
+                currentHealth = MaxHealth;
+            }
+            else
+            {
+                currentHealth = Mathf.Clamp(currentHealth, 0, MaxHealth);
+            }
+        }
+
+        public void TakeDamage(DamageInfo damage)
+        {
+            if (dead || invulnerable || damage.Amount <= 0)
+            {
+                return;
+            }
+
+            currentHealth = Mathf.Max(0, currentHealth - damage.Amount);
+            Damaged?.Invoke(currentHealth, MaxHealth);
+
+            Rigidbody2D body = GetComponent<Rigidbody2D>();
+            if (body != null)
+            {
+                body.AddForce(damage.Knockback, ForceMode2D.Impulse);
+            }
+
+            if (visualState != null)
+            {
+                visualState.TriggerHurt();
+            }
+
+            if (currentHealth <= 0)
+            {
+                dead = true;
+                if (visualState != null)
+                {
+                    visualState.TriggerDie();
+                }
+
+                Died?.Invoke();
+                return;
+            }
+
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(InvulnerabilityRoutine());
+            }
+        }
+
+        private IEnumerator InvulnerabilityRoutine()
+        {
+            invulnerable = true;
+            yield return new WaitForSeconds(invulnerabilitySeconds);
+            invulnerable = false;
+        }
+    }
+}
+

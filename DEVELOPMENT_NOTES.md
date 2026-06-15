@@ -1,0 +1,118 @@
+# Project Eclipse Development Notes
+
+## Architecture Overview
+
+The MVP scene is intentionally small and runtime-driven. `PrototypeBootstrapper` builds the test world, player, enemies, item definitions, recipes, furnace model, and HUD when the scene enters play mode.
+
+This keeps the first commit clean while still giving C# systems real Unity components to grow from.
+
+## Folder Map
+
+- `Assets/ProjectEclipse/Scripts/Player`: movement, jumping, facing, input, and ground checks.
+- `Assets/ProjectEclipse/Scripts/Combat`: health, damage, damageable interface, and weapon hit detection.
+- `Assets/ProjectEclipse/Scripts/Enemies`: enemy definitions, AI controller, states, and drop tables.
+- `Assets/ProjectEclipse/Scripts/Items`: item definitions, weapon definitions, drops, and drop spawning.
+- `Assets/ProjectEclipse/Scripts/Inventory`: storage stacks and slot category enums.
+- `Assets/ProjectEclipse/Scripts/Crafting`: recipe definitions and crafting execution.
+- `Assets/ProjectEclipse/Scripts/Equipment`: equipped weapon and armor placeholders.
+- `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
+- `Assets/ProjectEclipse/Scripts/Progression`: resource tiers and dimension/boss-lock definitions.
+- `Assets/ProjectEclipse/Scripts/UI`: test HUD, storage, crafting, and furnace panels.
+- `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, camera follow, and runtime animation feedback.
+- `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
+
+## Adding Items
+
+Short term: add item definitions in `PrototypeBootstrapper.BuildCatalog`.
+
+Long term: create committed `ItemDefinition` assets under `Assets/ProjectEclipse/Data/Items` and reference them from recipes, drops, enemies, and equipment.
+
+## Adding Weapons
+
+Weapons are `WeaponDefinition` objects and are also items. Add new weapon data with:
+
+- Archetype
+- Damage
+- Attack range
+- Attack height
+- Cooldown
+- Knockback
+
+The current combat code supports horizontal melee. Future weapon behaviors should branch from weapon archetype or a dedicated weapon behavior strategy.
+
+Planned archetypes already exist:
+
+- Fast claws
+- Heavy hammer
+- Bow
+- Magic staff
+- Summon
+
+## Adding Enemies
+
+Add a new `EnemyDefinition` with health, damage, speed, chase range, attack range, cooldown, placeholder color, and drop entries.
+
+For a new behavior family, keep the definition data-focused and add specialized behavior through an enemy controller variant or behavior module.
+
+## Adding Recipes
+
+Recipes are `CraftingRecipe` objects. Add required `CraftingIngredient` entries and an output item. The crafting system already checks storage, consumes ingredients, and adds the result back to storage.
+
+Weapon recipe outputs can auto-equip when `equipOutputIfWeapon` is true.
+
+## Expanding Furnace Logic
+
+The current `FurnaceSystem` has:
+
+- Furnace level
+- Fuel slot
+- Input slot
+- Output slot
+- Smelting time
+
+TODO:
+
+- Add data-driven smelting recipes.
+- Make Coal fuel value explicit.
+- Add Copper processing output.
+- Add upgrade slots and furnace upgrades.
+- Add station interaction rules instead of always showing the furnace panel.
+
+## Expanding Progression
+
+Progression tiers are represented by `DimensionTierDefinition`.
+
+Each tier can define:
+
+- Tier ID
+- Display name
+- Required defeated boss ID
+- Resource tier
+- Available enemies
+- Main boss placeholder
+- Mini-boss placeholders
+
+Current seed tiers are Earth / Forest, Stone, Coal, and Copper. Future dimensions should add Moon, Mars, cosmic tiers, elemental tiers, and god bosses.
+
+## Animation Setup
+
+`AnimationAssetGenerator` creates placeholder Unity Animator Controllers and AnimationClips for Player and Enemy objects. The generated state names are intentionally stable:
+
+- Idle
+- Move
+- Attack
+- Hurt
+- Die
+
+Runtime code drives Animator parameters named `IsMoving`, `IsGrounded`, `Attack`, `Hurt`, and `Die`. Final art can replace the generated clips without changing gameplay code.
+
+## Known TODOs
+
+- Replace runtime-created ScriptableObjects with committed data assets after initial tuning.
+- Add true weapon behavior modules for ranged, magic, summon, and fast melee styles.
+- Add armor and upgrade stat effects.
+- Add proper UI Toolkit or UGUI UI after gameplay loops settle.
+- Add respawn and checkpoint handling.
+- Add boss gates and tier unlock persistence.
+- Add automated play-mode tests once Unity is installed in the development environment.
+
