@@ -25,15 +25,16 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Stone Cleaver craftable from Stone drops.
 - Tree, Stone, Coal, and Copper creatures with distinct original chibi side-scroller sprite sheets, sizes, animations, combat stats, and reusable drop table assets.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
-- Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore have distinct homemade inventory icons and world drop sprites.
-- Starter Blade, Stone Cleaver, Training Shield, Traveler Cape, Furnace Port, and Cauldron Port now have dedicated original item art instead of borrowing material icons.
+- Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore have distinct homemade inventory icons that also serve as ground drop sprites.
+- Starter Blade and Stone Cleaver now have dedicated original inventory art plus held/equipped art instead of borrowing material icons.
+- Training Shield, Traveler Cape, Furnace Port, and Cauldron Port now have dedicated original item art.
 - Forest, Stone, Coal, and Copper platform art has clearer area-specific surfaces and top edges.
 - Infinite-style storage foundation with stack sizes up to 999.
 - Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
 - Data structures for Earth/Forest, Stone, Coal, and Copper progression tiers.
 - Progression skeleton models for stages, world tiers, bosses, unlock requirements, resource tiers, crafting tiers, and recommended levels.
-- Weapon data now supports separate inventory icons, world drop sprites, and equipped in-hand visual sprites.
+- Weapon data supports inventory icons and separate equipped in-hand visual sprites.
 - Equipment data models support mainhand, offhand, helmet, chest, boots, gloves, accessories, belt, and back/cape slots.
 - Inventory crafting port data seeds support furnace and cauldron ports for future inventory-based crafting.
 - World drops now have magnet pickup behavior after a short delay and warn when art is missing.
@@ -141,7 +142,7 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs visual inspection in Unity: confirm player base sprite no longer appears to permanently include the weapon once a separate weapon anchor/renderer is added to the player prefab or scene object.
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
-- Needs visual inspection in Unity: check new item icons, world drop sprites, equipment visuals, and platforms at gameplay zoom and actual UI size.
+- Needs visual inspection in Unity: check new item icons, reused ground drop sprites, equipment visuals, and platforms at gameplay zoom and actual UI size.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.

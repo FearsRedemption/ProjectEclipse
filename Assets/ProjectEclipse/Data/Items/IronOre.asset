@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 999
   placeholderColor: {r: 0.63, g: 0.63, b: 0.68, a: 1}
   icon: {fileID: 21300000, guid: b3aafcf58b74422f81b459e2ce6e602a, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: 2770e65da27d4647ae9dbb1dd330218f, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: b3aafcf58b74422f81b459e2ce6e602a, type: 3}
   description: Future iron-tier monster material.
   droppedBy: Future Iron Creature
   craftingUsage: Iron smelting and heavier Warrior gear later.

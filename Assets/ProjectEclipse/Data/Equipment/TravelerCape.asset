@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 1
   placeholderColor: {r: 0.2, g: 0.35, b: 0.68, a: 1}
   icon: {fileID: 21300000, guid: 1469242f269342029d30033014905861, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: cfc9969775714f0ea14f1c994748a2eb, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 1469242f269342029d30033014905861, type: 3}
   description: Back-slot movement gear seed for cape, cloak, glider, or wing progression.
   droppedBy:
   craftingUsage: Early movement gear testing and future air-control upgrades.

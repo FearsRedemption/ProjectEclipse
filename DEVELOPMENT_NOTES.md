@@ -34,9 +34,8 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
 - `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet and edit-time idle sprite.
 - `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
-- `Assets/ProjectEclipse/Art/Items`: homemade inventory icons for materials, equipment seeds, and crafting ports.
-- `Assets/ProjectEclipse/Art/Drops`: dedicated world drop sprites for materials and inventory-port items.
-- `Assets/ProjectEclipse/Art/Equipment`: dedicated equipment icons, world sprites, and equipped visual sprites.
+- `Assets/ProjectEclipse/Art/Items`: homemade inventory/ground icons for materials, equipment seeds, and crafting ports.
+- `Assets/ProjectEclipse/Art/Equipment`: dedicated equipment inventory icons and held/equipped visual sprites.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
 - `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, crafting ports, drop tables, items, weapons, enemies, recipes, and progression.
 
@@ -239,8 +238,9 @@ Palette consistency:
 
 Icon/drop readability:
 
-- Each material needs a matching inventory icon and a separate world drop sprite.
-- Equipment that can appear in inventory, on the ground, or on the player should have separate art where scale or silhouette differs.
+- Each material needs a strong inventory icon that can also read as its ground drop sprite.
+- Equipment should normally need only an inventory icon and, when worn/held, an equipped visual sprite.
+- Do not create extra item variants unless there is a clear gameplay or readability reason.
 - Crafting ports are compact magical/tool-port items, not full world stations, unless a separate world prop asset is explicitly being authored.
 - Missing icon/drop art should be treated as a development warning, not acceptable MVP presentation.
 - Icons should remain legible at small UI slot sizes.
@@ -255,26 +255,28 @@ Platform/world rules:
 Animation expectations:
 
 - No duplicate fake animation frames.
-- Player run needs distinct leg/body motion.
-- Attacks need anticipation, swing, and follow-through.
+- Player run needs distinct leg/body motion, not whole-body stretch/squeeze.
+- Attacks need anticipation, strike, and recovery/follow-through poses.
 - Creature idle/move/attack/hurt/death rows need visibly different silhouettes.
-- Animation quality requires Unity/visual review before claiming it is fixed.
+- Current sheets have an intermediate cutout-style staging pass, but final animation quality still requires hand-authored review and Unity playback inspection before calling it fixed.
 
 Art cleanup performed:
 
-- Replaced the material icons with larger stylized sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
-- Added separate world drop sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, Gold Ore, Furnace Port, and Cauldron Port.
-- Added dedicated Starter Blade and Stone Cleaver icons, world sprites, and equipped visual sprites.
-- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons and separated shield/cape world/equipped sprites.
+- Reworked material icons for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore to better match the player/creature painterly side-scroller style.
+- Removed the redundant `Art/Drops` direction; active item data now reuses the inventory icon as the ground sprite for normal drops.
+- Added dedicated Starter Blade and Stone Cleaver inventory icons plus held/equipped visual sprites.
+- Reworked Stone Cleaver as a fantasy stone blade: it uses the same cool-gray stone language as the Stone item while reading as an actual weapon silhouette.
+- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons and held/equipped sprites where needed.
+- Rebuilt player and creature sprite sheets with clearer staged idle/move/attack/hurt/death poses to reduce the copy-pasted-still feeling.
 - Reworked Forest, Stone, Coal, and Copper platform/backdrop art so the top surfaces are clearer and more area-specific.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 
 Assets that still need visual review in Unity:
 
-- Player and creature sprite sheets were audited and preserved as the current style anchor; animation frame quality still needs Unity review before calling it final.
+- Player and creature sprite sheets were audited and adjusted, but animation frame quality still needs Unity review and a future hand-authored animator pass before calling it final.
 - Equipment visual offsets, rotations, sorting layers, and hand/back/offhand anchors need Unity inspection.
 - Platform scale, repetition, and collider readability need scene inspection.
-- Item icons and world drops need inspection at actual inventory slot size and in-world drop scale.
+- Item icons need inspection at actual inventory slot size and in-world drop scale, since normal item drops now reuse the icon sprite.
 - The old world furnace sprite remains for MVP scene compatibility and should receive a future dedicated world-prop pass if the world station stays.
 
 Future professional/manual art pass candidates:
