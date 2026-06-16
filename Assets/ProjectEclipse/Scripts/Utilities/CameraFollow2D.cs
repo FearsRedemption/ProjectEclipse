@@ -13,6 +13,12 @@ namespace ProjectEclipse.Utilities
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+            SnapToTarget();
+        }
+
+        private void Start()
+        {
+            SnapToTarget();
         }
 
         private void LateUpdate()
@@ -25,6 +31,16 @@ namespace ProjectEclipse.Utilities
             Vector3 desired = target.position + offset;
             transform.position = Vector3.SmoothDamp(transform.position, desired, ref velocity, smoothTime);
         }
+
+        private void SnapToTarget()
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            transform.position = target.position + offset;
+            velocity = Vector3.zero;
+        }
     }
 }
-

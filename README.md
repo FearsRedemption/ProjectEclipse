@@ -13,17 +13,18 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 ## Current MVP Scope
 
 - Normal Unity scene at `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity` with serialized scene objects.
-- Prefabs for the player, current enemies, world item drops, platforms, and furnace station.
+- Handcrafted visible Player, terrain, creature areas, furnace station, enemies, and HUD objects placed directly in the scene.
+- Homemade prefab copies exist only as reusable references; the MVP scene does not depend on invisible runtime level generation.
 - ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
 - Stone Cleaver craftable from Stone drops.
-- Tree, Stone, Coal, and Copper creatures with distinct original sprite sheets, sizes, animations, combat stats, and drops.
+- Tree, Stone, Coal, and Copper creatures with distinct original chibi side-scroller sprite sheets, sizes, animations, combat stats, and drops.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
-- Wood, stone, coal, and copper drops have distinct generated icons.
+- Wood, stone, coal, and copper drops have distinct homemade icons.
 - Infinite-style storage foundation with stack sizes up to 999.
-- Basic crafting panel and furnace panel through IMGUI.
+- Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
 - Data structures for Earth/Forest, Stone, Coal, and Copper progression tiers.
 
@@ -32,6 +33,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Move: A/D or Left/Right arrows
 - Jump: Space, W, or Up arrow
 - Attack: J, Left Ctrl, or left mouse button
+- Inventory/storage: Tab
 - Shift-click storage item buttons:
   - Weapons attempt to equip.
   - Coal and copper-related materials attempt to move into the furnace model.
@@ -45,7 +47,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 
 ## Current Crafting Recipes
 
-- Stone Cleaver: Stone x10.
+- Stone Cleaver: Stone x4.
 - Basic Furnace: Stone x12, Coal x3.
 - Copper Whetstone Placeholder: Copper Fragments x8, Coal x2.
 
@@ -64,7 +66,7 @@ The intended long-term structure expands from Earth into Moon, Mars, and deeper 
 
 The project includes `Assets/ProjectEclipse/Scripts/Editor/AnimationAssetGenerator.cs`. When the project opens in Unity, it creates placeholder Player and Enemy Animator Controllers under `Assets/ProjectEclipse/Animations` if they do not already exist.
 
-Creature visuals now use original generated sprite sheets under `Assets/ProjectEclipse/Art/Creatures/`:
+Creature visuals use original chibi fantasy sprite sheets under `Assets/ProjectEclipse/Art/Creatures/`:
 
 - `tree_creature_sheet.png`
 - `stone_creature_sheet.png`
@@ -79,7 +81,7 @@ Each creature sheet has five animation rows:
 - Hurt
 - Die
 
-`SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the enemies visibly transition between idle, moving, attacking, hurt, and dying states during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
+The player also has an original polished chibi sheet under `Assets/ProjectEclipse/Art/Player/` with Idle, Run, Jump, Attack, Hurt, and Die rows. `SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the player and enemies visibly transition during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
 
 ## Scene And Data Workflow
 
@@ -88,10 +90,11 @@ The MVP no longer relies on `PrototypeBootstrapper` creating the entire world in
 - Main Camera
 - GameManager with `MvpGameManager` and `DropSpawner`
 - Player
-- Ground and platform blocks
+- Ground and custom platform objects
+- Tree Creature Area, Stone Creature Area, Coal Creature Area, and Copper Creature Area backdrop objects
 - Furnace station
 - Placed Tree, Stone, Coal, and Copper creatures
-- MVP HUD object
+- UI HUD object
 
 `MvpGameManager` only wires serialized references at play time: player systems, crafting recipes, furnace storage, HUD, enemy targets, and drop spawning.
 
@@ -103,7 +106,7 @@ Data assets live under:
 - `Assets/ProjectEclipse/Data/Recipes`
 - `Assets/ProjectEclipse/Data/Progression`
 
-Prefabs live under:
+Prefab copies live under these folders for later reuse, but current MVP iteration should prioritize placing and tuning visible homemade scene objects first:
 
 - `Assets/ProjectEclipse/Prefabs/Player`
 - `Assets/ProjectEclipse/Prefabs/Enemies`
@@ -114,7 +117,7 @@ Prefabs live under:
 
 - Open the project in Unity 6000.4.5f1.
 - Let Unity regenerate `Packages/packages-lock.json` and any local Library data.
-- Replace generated placeholder sheets with final production sprite sheets.
+- Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.
 - Add proper respawn, save/load, stations, armor, upgrades, boss gates, and projectile weapon variants.

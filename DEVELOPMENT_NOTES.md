@@ -2,14 +2,16 @@
 
 ## Architecture Overview
 
-The MVP scene now uses normal Unity scene composition. `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity` contains serialized GameObjects for the camera, GameManager, player, platforms, furnace station, HUD, and placed enemies.
+The MVP scene now uses normal Unity scene composition. `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity` contains serialized GameObjects for the camera, GameManager, custom player, custom platforms, creature areas, furnace station, HUD, and placed enemies.
+
+For the MVP, the visible scene is the source of truth. Build and tune homemade objects directly in the scene first. Save a prefab only after that object already works and feels right in the handcrafted scene.
 
 `MvpGameManager` is intentionally small. It wires serialized references at play time:
 
 - equips the starter weapon
 - initializes crafting with recipe assets
 - connects furnace storage to the player inventory
-- connects the HUD to player/storage/furnace systems
+- connects the Tab-toggled HUD to player/storage/furnace systems
 - gives placed enemies their player target and drop spawner
 
 `PrototypeBootstrapper` is deprecated and no longer creates the world. It remains only as a compatibility stub so old scene references do not break compilation.
@@ -25,13 +27,15 @@ The MVP scene now uses normal Unity scene composition. `Assets/ProjectEclipse/Sc
 - `Assets/ProjectEclipse/Scripts/Equipment`: equipped weapon and armor placeholders.
 - `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
 - `Assets/ProjectEclipse/Scripts/Progression`: resource tiers and dimension/boss-lock definitions.
-- `Assets/ProjectEclipse/Scripts/UI`: test HUD, storage, crafting, and furnace panels.
+- `Assets/ProjectEclipse/Scripts/UI`: small HUD plus Tab-toggled storage, crafting, and furnace panels.
 - `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, sprite-sheet animation, camera follow, and runtime animation feedback.
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
-- `Assets/ProjectEclipse/Art/Creatures`: original generated creature sprite sheets.
-- `Assets/ProjectEclipse/Art/Items`: original generated drop icons.
+- `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet and edit-time idle sprite.
+- `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
+- `Assets/ProjectEclipse/Art/Items`: homemade drop icons.
+- `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
 - `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for items, weapons, enemies, recipes, and progression.
-- `Assets/ProjectEclipse/Prefabs`: committed prefabs for player, enemies, drops, platforms, and furnace station.
+- `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
 
 ## Adding Items
 
@@ -125,19 +129,21 @@ Current seed tiers are Earth / Forest, Stone, Coal, and Copper. Future dimension
 
 Runtime code drives Animator parameters named `IsMoving`, `IsGrounded`, `Attack`, `Hurt`, and `Die`. Final art can replace the generated clips without changing gameplay code.
 
-Creature sheets use a reusable code-driven setup:
+Player and creature sheets use a reusable code-driven setup:
 
 - `SpriteSheetAnimator` slices 96x96 frames from each sheet.
-- Rows are ordered Idle, Move, Attack, Hurt, Die.
-- Frame counts are Idle 4, Move 6, Attack 6, Hurt 2, Die 6.
+- Creature rows are ordered Idle, Move, Attack, Hurt, Die.
+- Player rows are ordered Idle, Run, Jump, Attack, Hurt, Die.
+- Creature frame counts are Idle 4, Move 6, Attack 6, Hurt 2, Die 6.
+- Player frame counts are Idle 4, Run 6, Jump 2, Attack 6, Hurt 2, Die 6.
 - `VisualStateAnimator` forwards movement and trigger state changes to the sheet animator.
 - Enemy definition assets assign sprite sheet references, visual scale, collider size, and behavior tuning.
 
-The current sheets are original generated placeholder art. They are meant to establish readable silhouettes and animation timing, not final production art.
+The current sheets are original homemade-style game art. They are meant to establish readable silhouettes, animation timing, and charm before final production polish.
 
 ## Known TODOs
 
-- Replace runtime-created ScriptableObjects with committed data assets after initial tuning.
+- Keep important MVP objects visible and editable in `ProjectEclipse_MVP.unity`; avoid returning to invisible runtime world generation.
 - Add true weapon behavior modules for ranged, magic, summon, and fast melee styles.
 - Add armor and upgrade stat effects.
 - Add proper UI Toolkit or UGUI UI after gameplay loops settle.

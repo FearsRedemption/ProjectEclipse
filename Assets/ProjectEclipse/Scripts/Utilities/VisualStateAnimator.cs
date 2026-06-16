@@ -85,6 +85,11 @@ namespace ProjectEclipse.Utilities
             {
                 animator.SetBool(IsGroundedHash, value);
             }
+
+            if (spriteSheetAnimator != null)
+            {
+                spriteSheetAnimator.SetGrounded(value);
+            }
         }
 
         public void TriggerAttack()

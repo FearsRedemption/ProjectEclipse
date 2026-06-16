@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Craft Stone Cleaver
   ingredients:
   - item: {fileID: 11400000, guid: 126f97ad60c4264bc8fa015d86aa4020, type: 2}
-    quantity: 10
+    quantity: 4
   outputItem: {fileID: 11400000, guid: 8347749b678e9b653e0a8325bf53eea7, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 1

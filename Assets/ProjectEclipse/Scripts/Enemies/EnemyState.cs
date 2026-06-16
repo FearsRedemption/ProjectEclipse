@@ -4,9 +4,9 @@ namespace ProjectEclipse.Enemies
     {
         Idle,
         Moving,
+        Airborne,
         Attacking,
         Hurt,
         Dying
     }
 }
-

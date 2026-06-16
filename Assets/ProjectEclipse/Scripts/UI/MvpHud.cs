@@ -17,6 +17,7 @@ namespace ProjectEclipse.UI
         private CraftingSystem crafting;
         private FurnaceSystem furnace;
         private Vector2 inventoryScroll;
+        private bool inventoryOpen;
 
         public void Initialize(
             Health health,
@@ -32,6 +33,14 @@ namespace ProjectEclipse.UI
             furnace = furnaceSystem;
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                inventoryOpen = !inventoryOpen;
+            }
+        }
+
         private void OnGUI()
         {
             GUI.skin.window.fontSize = 14;
@@ -39,6 +48,11 @@ namespace ProjectEclipse.UI
             GUI.skin.button.fontSize = 13;
 
             GUILayout.Window(1, new Rect(12f, 12f, 280f, 120f), DrawStatusWindow, "Status");
+            if (!inventoryOpen)
+            {
+                return;
+            }
+
             GUILayout.Window(2, new Rect(12f, 140f, 300f, 300f), DrawStorageWindow, "Storage");
             GUILayout.Window(3, new Rect(Screen.width - 328f, 12f, 316f, 240f), DrawCraftingWindow, "Crafting");
             GUILayout.Window(4, new Rect(Screen.width - 328f, 260f, 316f, 170f), DrawFurnaceWindow, "Furnace");
@@ -182,4 +196,3 @@ namespace ProjectEclipse.UI
         }
     }
 }
-

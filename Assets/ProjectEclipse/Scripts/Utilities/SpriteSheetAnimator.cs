@@ -6,16 +6,35 @@ namespace ProjectEclipse.Utilities
 {
     public class SpriteSheetAnimator : MonoBehaviour
     {
-        private const int IdleRow = 0;
-        private const int MoveRow = 1;
-        private const int AttackRow = 2;
-        private const int HurtRow = 3;
-        private const int DieRow = 4;
+        [Header("Sheet")]
+        [SerializeField] private Texture2D spriteSheet;
+        [SerializeField] private int frameWidth = 96;
+        [SerializeField] private int frameHeight = 96;
+        [SerializeField] private float pixelsPerUnit = 96f;
+#pragma warning disable CS0649
+        [SerializeField] private bool configureOnAwake;
+#pragma warning restore CS0649
 
-        private static readonly int[] DefaultFrameCounts = { 4, 6, 6, 2, 6 };
+        [Header("Rows")]
+        [SerializeField] private int idleRow = 0;
+        [SerializeField] private int moveRow = 1;
+        [SerializeField] private int airborneRow = -1;
+        [SerializeField] private int attackRow = 2;
+        [SerializeField] private int hurtRow = 3;
+        [SerializeField] private int dieRow = 4;
 
+        [Header("Frame Counts")]
+        [SerializeField] private int idleFrameCount = 4;
+        [SerializeField] private int moveFrameCount = 6;
+        [SerializeField] private int airborneFrameCount = 2;
+        [SerializeField] private int attackFrameCount = 6;
+        [SerializeField] private int hurtFrameCount = 2;
+        [SerializeField] private int dieFrameCount = 6;
+
+        [Header("Timing")]
         [SerializeField] private float idleFps = 6f;
         [SerializeField] private float moveFps = 10f;
+        [SerializeField] private float airborneFps = 8f;
         [SerializeField] private float attackFps = 14f;
         [SerializeField] private float hurtFps = 12f;
         [SerializeField] private float dieFps = 9f;
@@ -24,6 +43,7 @@ namespace ProjectEclipse.Utilities
         private SpriteRenderer spriteRenderer;
         private EnemyState state = EnemyState.Idle;
         private bool moving;
+        private bool grounded = true;
         private bool oneShot;
         private bool dead;
         private float timer;
@@ -32,6 +52,10 @@ namespace ProjectEclipse.Utilities
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            if (configureOnAwake && spriteSheet != null)
+            {
+                RebuildClips();
+            }
         }
 
         private void Update()
@@ -61,7 +85,7 @@ namespace ProjectEclipse.Utilities
                 else if (oneShot)
                 {
                     oneShot = false;
-                    SetLoopingState(moving ? EnemyState.Moving : EnemyState.Idle);
+                    SetLoopingState(GetDefaultLoopingState());
                     return;
                 }
                 else
@@ -75,23 +99,11 @@ namespace ProjectEclipse.Utilities
 
         public void Configure(Texture2D sheet, int frameWidth, int frameHeight, float pixelsPerUnit)
         {
-            if (spriteRenderer == null)
-            {
-                spriteRenderer = GetComponent<SpriteRenderer>();
-            }
-
-            clips.Clear();
-            if (sheet == null)
-            {
-                return;
-            }
-
-            clips[EnemyState.Idle] = SliceRow(sheet, IdleRow, DefaultFrameCounts[IdleRow], frameWidth, frameHeight, pixelsPerUnit);
-            clips[EnemyState.Moving] = SliceRow(sheet, MoveRow, DefaultFrameCounts[MoveRow], frameWidth, frameHeight, pixelsPerUnit);
-            clips[EnemyState.Attacking] = SliceRow(sheet, AttackRow, DefaultFrameCounts[AttackRow], frameWidth, frameHeight, pixelsPerUnit);
-            clips[EnemyState.Hurt] = SliceRow(sheet, HurtRow, DefaultFrameCounts[HurtRow], frameWidth, frameHeight, pixelsPerUnit);
-            clips[EnemyState.Dying] = SliceRow(sheet, DieRow, DefaultFrameCounts[DieRow], frameWidth, frameHeight, pixelsPerUnit);
-            SetLoopingState(EnemyState.Idle);
+            spriteSheet = sheet;
+            this.frameWidth = frameWidth;
+            this.frameHeight = frameHeight;
+            this.pixelsPerUnit = pixelsPerUnit;
+            RebuildClips();
         }
 
         public void SetMoving(bool value)
@@ -102,7 +114,18 @@ namespace ProjectEclipse.Utilities
                 return;
             }
 
-            SetLoopingState(value ? EnemyState.Moving : EnemyState.Idle);
+            SetLoopingState(GetDefaultLoopingState());
+        }
+
+        public void SetGrounded(bool value)
+        {
+            grounded = value;
+            if (dead || oneShot)
+            {
+                return;
+            }
+
+            SetLoopingState(GetDefaultLoopingState());
         }
 
         public void TriggerAttack()
@@ -125,15 +148,52 @@ namespace ProjectEclipse.Utilities
             SetLoopingState(EnemyState.Dying);
         }
 
-        private Sprite[] SliceRow(Texture2D sheet, int row, int count, int frameWidth, int frameHeight, float pixelsPerUnit)
+        private void RebuildClips()
+        {
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+
+            clips.Clear();
+            if (spriteSheet == null)
+            {
+                return;
+            }
+
+            AddClip(EnemyState.Idle, idleRow, idleFrameCount);
+            AddClip(EnemyState.Moving, moveRow, moveFrameCount);
+            AddClip(EnemyState.Airborne, airborneRow, airborneFrameCount);
+            AddClip(EnemyState.Attacking, attackRow, attackFrameCount);
+            AddClip(EnemyState.Hurt, hurtRow, hurtFrameCount);
+            AddClip(EnemyState.Dying, dieRow, dieFrameCount);
+            SetLoopingState(EnemyState.Idle);
+        }
+
+        private void AddClip(EnemyState clipState, int row, int count)
+        {
+            if (row < 0 || count <= 0 || spriteSheet == null)
+            {
+                return;
+            }
+
+            if ((row + 1) * frameHeight > spriteSheet.height)
+            {
+                return;
+            }
+
+            clips[clipState] = SliceRow(row, count);
+        }
+
+        private Sprite[] SliceRow(int row, int count)
         {
             Sprite[] frames = new Sprite[count];
-            int y = sheet.height - ((row + 1) * frameHeight);
+            int y = spriteSheet.height - ((row + 1) * frameHeight);
             for (int i = 0; i < count; i++)
             {
                 Rect rect = new Rect(i * frameWidth, y, frameWidth, frameHeight);
-                frames[i] = Sprite.Create(sheet, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
-                frames[i].name = sheet.name + "_" + row + "_" + i;
+                frames[i] = Sprite.Create(spriteSheet, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
+                frames[i].name = spriteSheet.name + "_" + row + "_" + i;
             }
 
             return frames;
@@ -141,6 +201,11 @@ namespace ProjectEclipse.Utilities
 
         private void SetLoopingState(EnemyState nextState)
         {
+            if (!clips.ContainsKey(nextState))
+            {
+                nextState = moving && clips.ContainsKey(EnemyState.Moving) ? EnemyState.Moving : EnemyState.Idle;
+            }
+
             if (state == nextState && !oneShot)
             {
                 return;
@@ -155,7 +220,7 @@ namespace ProjectEclipse.Utilities
 
         private void SetOneShotState(EnemyState nextState)
         {
-            if (dead)
+            if (dead || !clips.ContainsKey(nextState))
             {
                 return;
             }
@@ -165,6 +230,16 @@ namespace ProjectEclipse.Utilities
             frameIndex = 0;
             timer = 0f;
             ApplyFrame();
+        }
+
+        private EnemyState GetDefaultLoopingState()
+        {
+            if (!grounded && clips.ContainsKey(EnemyState.Airborne))
+            {
+                return EnemyState.Airborne;
+            }
+
+            return moving ? EnemyState.Moving : EnemyState.Idle;
         }
 
         private void ApplyFrame()
@@ -184,6 +259,8 @@ namespace ProjectEclipse.Utilities
             {
                 case EnemyState.Moving:
                     return moveFps;
+                case EnemyState.Airborne:
+                    return airborneFps;
                 case EnemyState.Attacking:
                     return attackFps;
                 case EnemyState.Hurt:
