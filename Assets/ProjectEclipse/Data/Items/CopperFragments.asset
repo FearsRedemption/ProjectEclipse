@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a59ec39a59eedf41b74af43d91dd9ac, type: 3}
+  m_Name: Copper Fragments
+  m_EditorClassIdentifier:
+  itemId: copper_fragments
+  displayName: Copper Fragments
+  category: 0
+  stackLimit: 999
+  placeholderColor: {r: 0.78, g: 0.35, b: 0.12, a: 1}
+  icon: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}

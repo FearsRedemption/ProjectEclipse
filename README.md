@@ -6,13 +6,15 @@ This is not a Terraria mod, not a tModLoader project, and does not depend on any
 
 ## Unity Version
 
-The project targets Unity 6.4.11f1, recorded in `ProjectSettings/ProjectVersion.txt`.
+The project targets Unity 6000.4.5f1, recorded in `ProjectSettings/ProjectVersion.txt`.
 
-This target was chosen because Unity's current Unity 6 documentation identifies Unity 6.4 as the latest Unity 6 release family, and Unity's official release archive lists 6000.4.11f1 as released on June 10, 2026. The local machine used for this scaffold did not have Unity Hub or the Unity Editor installed, so the first validation pass is source and repository validation only.
+The package manifest includes the built-in Unity modules needed for 2D sprites, 2D physics, animation, audio, legacy input, IMGUI, and UI. Unity will regenerate `Packages/packages-lock.json` locally when the project opens.
 
 ## Current MVP Scope
 
-- Runtime-built playable Unity 2D scene at `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity`.
+- Normal Unity scene at `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity` with serialized scene objects.
+- Prefabs for the player, current enemies, world item drops, platforms, and furnace station.
+- ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
@@ -79,11 +81,40 @@ Each creature sheet has five animation rows:
 
 `SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the enemies visibly transition between idle, moving, attacking, hurt, and dying states during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
 
+## Scene And Data Workflow
+
+The MVP no longer relies on `PrototypeBootstrapper` creating the entire world in `Awake`. The scene contains real editable objects:
+
+- Main Camera
+- GameManager with `MvpGameManager` and `DropSpawner`
+- Player
+- Ground and platform blocks
+- Furnace station
+- Placed Tree, Stone, Coal, and Copper creatures
+- MVP HUD object
+
+`MvpGameManager` only wires serialized references at play time: player systems, crafting recipes, furnace storage, HUD, enemy targets, and drop spawning.
+
+Data assets live under:
+
+- `Assets/ProjectEclipse/Data/Items`
+- `Assets/ProjectEclipse/Data/Weapons`
+- `Assets/ProjectEclipse/Data/Enemies`
+- `Assets/ProjectEclipse/Data/Recipes`
+- `Assets/ProjectEclipse/Data/Progression`
+
+Prefabs live under:
+
+- `Assets/ProjectEclipse/Prefabs/Player`
+- `Assets/ProjectEclipse/Prefabs/Enemies`
+- `Assets/ProjectEclipse/Prefabs/Items`
+- `Assets/ProjectEclipse/Prefabs/World`
+
 ## Next Work
 
-- Open the project in Unity 6.4.11f1 or newer Unity 6.4 patch release.
-- Let Unity generate missing `.meta` files and placeholder animation assets.
+- Open the project in Unity 6000.4.5f1.
+- Let Unity regenerate `Packages/packages-lock.json` and any local Library data.
 - Replace generated placeholder sheets with final production sprite sheets.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
-- Convert runtime catalog data into committed ScriptableObject assets once the gameplay direction settles.
+- Expand the committed ScriptableObject assets instead of adding runtime-created data.
 - Add proper respawn, save/load, stations, armor, upgrades, boss gates, and projectile weapon variants.

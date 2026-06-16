@@ -16,6 +16,7 @@ namespace ProjectEclipse.Enemies
         private Rigidbody2D body;
         private SpriteRenderer spriteRenderer;
         private VisualStateAnimator visualState;
+        private SpriteSheetAnimator spriteSheetAnimator;
         private DropSpawner dropSpawner;
         private int currentHealth;
         private float nextAttackTime;
@@ -30,17 +31,41 @@ namespace ProjectEclipse.Enemies
             body = GetComponent<Rigidbody2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             visualState = GetComponent<VisualStateAnimator>();
+            spriteSheetAnimator = GetComponent<SpriteSheetAnimator>();
         }
 
         public void Initialize(EnemyDefinition enemyDefinition, Transform playerTarget, DropSpawner spawner)
         {
-            definition = enemyDefinition;
+            definition = enemyDefinition != null ? enemyDefinition : definition;
             target = playerTarget;
             dropSpawner = spawner;
             currentHealth = definition != null ? definition.MaxHealth : 1;
-            if (spriteRenderer != null && definition != null && string.IsNullOrEmpty(definition.SpriteSheetPath))
+            ApplyDefinitionVisuals();
+        }
+
+        private void ApplyDefinitionVisuals()
+        {
+            if (definition == null || spriteRenderer == null)
+            {
+                return;
+            }
+
+            if (definition.SpriteSheet != null && spriteSheetAnimator != null)
+            {
+                spriteRenderer.color = Color.white;
+                spriteSheetAnimator.Configure(definition.SpriteSheet, 96, 96, 96f);
+                if (visualState != null)
+                {
+                    visualState.SetBaseColor(Color.white);
+                }
+            }
+            else
             {
                 spriteRenderer.color = definition.PlaceholderColor;
+                if (visualState != null)
+                {
+                    visualState.SetBaseColor(definition.PlaceholderColor);
+                }
             }
         }
 

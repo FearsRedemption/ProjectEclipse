@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: Stone Creature
+  m_EditorClassIdentifier:
+  enemyId: stone_creature
+  displayName: Stone Creature
+  resourceTier: 1
+  maxHealth: 12
+  contactDamage: 2
+  moveSpeed: 0.75
+  chaseRange: 5.8
+  attackRange: 0.9
+  attackCooldown: 1.35
+  attackLungeForce: 0.8
+  attackKnockback: 4.2
+  visualScale: {x: 1.05, y: 1.05}
+  colliderSize: {x: 0.9, y: 0.82}
+  spriteSheet: {fileID: 2800000, guid: 849cdb47d1ad3fd44bfc06f93bc91f50, type: 3}
+  placeholderColor: {r: 0.5, g: 0.52, b: 0.55, a: 1}
+  drops:
+  - item: {fileID: 11400000, guid: 126f97ad60c4264bc8fa015d86aa4020, type: 2}
+    minQuantity: 2
+    maxQuantity: 4
+    chance: 1

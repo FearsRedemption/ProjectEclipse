@@ -19,7 +19,7 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private float attackKnockback = 2.4f;
         [SerializeField] private Vector2 visualScale = Vector2.one;
         [SerializeField] private Vector2 colliderSize = Vector2.one;
-        [SerializeField] private string spriteSheetPath;
+        [SerializeField] private Texture2D spriteSheet;
         [SerializeField] private Color placeholderColor = Color.green;
         [SerializeField] private List<DropTableEntry> drops = new List<DropTableEntry>();
 
@@ -36,7 +36,7 @@ namespace ProjectEclipse.Enemies
         public float AttackKnockback { get { return Mathf.Max(0f, attackKnockback); } }
         public Vector2 VisualScale { get { return visualScale; } }
         public Vector2 ColliderSize { get { return colliderSize; } }
-        public string SpriteSheetPath { get { return spriteSheetPath; } }
+        public Texture2D SpriteSheet { get { return spriteSheet; } }
         public Color PlaceholderColor { get { return placeholderColor; } }
         public IReadOnlyList<DropTableEntry> Drops { get { return drops; } }
 
@@ -54,7 +54,7 @@ namespace ProjectEclipse.Enemies
             float knockback,
             Vector2 scale,
             Vector2 hitboxSize,
-            string sheetPath,
+            Texture2D sheet,
             Color debugColor,
             IEnumerable<DropTableEntry> dropEntries)
         {
@@ -71,7 +71,7 @@ namespace ProjectEclipse.Enemies
             attackKnockback = Mathf.Max(0f, knockback);
             visualScale = scale;
             colliderSize = hitboxSize;
-            spriteSheetPath = sheetPath;
+            spriteSheet = sheet;
             placeholderColor = debugColor;
             drops = new List<DropTableEntry>(dropEntries);
         }

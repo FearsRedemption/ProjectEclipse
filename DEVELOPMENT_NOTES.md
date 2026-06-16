@@ -2,9 +2,17 @@
 
 ## Architecture Overview
 
-The MVP scene is intentionally small and runtime-driven. `PrototypeBootstrapper` builds the test world, player, enemies, item definitions, recipes, furnace model, and HUD when the scene enters play mode.
+The MVP scene now uses normal Unity scene composition. `Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity` contains serialized GameObjects for the camera, GameManager, player, platforms, furnace station, HUD, and placed enemies.
 
-This keeps the first commit clean while still giving C# systems real Unity components to grow from.
+`MvpGameManager` is intentionally small. It wires serialized references at play time:
+
+- equips the starter weapon
+- initializes crafting with recipe assets
+- connects furnace storage to the player inventory
+- connects the HUD to player/storage/furnace systems
+- gives placed enemies their player target and drop spawner
+
+`PrototypeBootstrapper` is deprecated and no longer creates the world. It remains only as a compatibility stub so old scene references do not break compilation.
 
 ## Folder Map
 
@@ -22,12 +30,12 @@ This keeps the first commit clean while still giving C# systems real Unity compo
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
 - `Assets/ProjectEclipse/Art/Creatures`: original generated creature sprite sheets.
 - `Assets/ProjectEclipse/Art/Items`: original generated drop icons.
+- `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for items, weapons, enemies, recipes, and progression.
+- `Assets/ProjectEclipse/Prefabs`: committed prefabs for player, enemies, drops, platforms, and furnace station.
 
 ## Adding Items
 
-Short term: add item definitions in `PrototypeBootstrapper.BuildCatalog`.
-
-Long term: create committed `ItemDefinition` assets under `Assets/ProjectEclipse/Data/Items` and reference them from recipes, drops, enemies, and equipment.
+Add committed `ItemDefinition` assets under `Assets/ProjectEclipse/Data/Items` and reference them from recipes, drops, enemies, and equipment.
 
 ## Adding Weapons
 
@@ -52,7 +60,7 @@ Planned archetypes already exist:
 
 ## Adding Enemies
 
-Add a new `EnemyDefinition` with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet path, placeholder color, and drop entries.
+Add a new `EnemyDefinition` asset with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet reference, placeholder color, and drop entries.
 
 For a new behavior family, keep the definition data-focused and add specialized behavior through an enemy controller variant or behavior module.
 
@@ -68,6 +76,8 @@ Current enemy behavior tuning:
 Recipes are `CraftingRecipe` objects. Add required `CraftingIngredient` entries and an output item. The crafting system already checks storage, consumes ingredients, and adds the result back to storage.
 
 Weapon recipe outputs can auto-equip when `equipOutputIfWeapon` is true.
+
+Recipe assets live under `Assets/ProjectEclipse/Data/Recipes` and are assigned to `MvpGameManager.availableRecipes`.
 
 ## Expanding Furnace Logic
 
@@ -121,14 +131,13 @@ Creature sheets use a reusable code-driven setup:
 - Rows are ordered Idle, Move, Attack, Hurt, Die.
 - Frame counts are Idle 4, Move 6, Attack 6, Hurt 2, Die 6.
 - `VisualStateAnimator` forwards movement and trigger state changes to the sheet animator.
-- Runtime catalog entries in `PrototypeBootstrapper.BuildCatalog` assign sprite sheet paths, visual scale, collider size, and behavior tuning.
+- Enemy definition assets assign sprite sheet references, visual scale, collider size, and behavior tuning.
 
 The current sheets are original generated placeholder art. They are meant to establish readable silhouettes and animation timing, not final production art.
 
 ## Known TODOs
 
 - Replace runtime-created ScriptableObjects with committed data assets after initial tuning.
-- Add Unity-authored import settings and `.meta` files for finalized sprite sheets after opening the project in the editor.
 - Add true weapon behavior modules for ranged, magic, summon, and fast melee styles.
 - Add armor and upgrade stat effects.
 - Add proper UI Toolkit or UGUI UI after gameplay loops settle.
