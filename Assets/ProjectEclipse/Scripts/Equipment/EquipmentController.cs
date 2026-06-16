@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectEclipse.Combat;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
@@ -7,8 +8,30 @@ namespace ProjectEclipse.Equipment
 {
     public class EquipmentController : MonoBehaviour
     {
+        [System.Serializable]
+        private class EquipmentSlotState
+        {
+            [SerializeField] private EquipmentSlot slot;
+            [SerializeField] private EquipmentDefinition item;
+
+            public EquipmentSlotState()
+            {
+            }
+
+            public EquipmentSlotState(EquipmentSlot slot, EquipmentDefinition item)
+            {
+                this.slot = slot;
+                this.item = item;
+            }
+
+            public EquipmentSlot Slot { get { return slot; } }
+            public EquipmentDefinition Item { get { return item; } set { item = value; } }
+        }
+
         [SerializeField] private WeaponDefinition equippedWeapon;
         [SerializeField] private WeaponVisualAnchor weaponVisualAnchor;
+        [SerializeField] private CharacterVisualController characterVisuals;
+        [SerializeField] private List<EquipmentSlotState> slots = new List<EquipmentSlotState>();
 #pragma warning disable CS0649
         [SerializeField] private ItemDefinition headArmorPlaceholder;
         [SerializeField] private ItemDefinition chestArmorPlaceholder;
@@ -19,6 +42,9 @@ namespace ProjectEclipse.Equipment
         private InventoryStore inventory;
 
         public WeaponDefinition EquippedWeapon { get { return equippedWeapon; } }
+        public WeaponDefinition Mainhand { get { return equippedWeapon; } }
+        public EquipmentDefinition Offhand { get { return GetEquippedEquipment(EquipmentSlot.Offhand); } }
+        public EquipmentDefinition Back { get { return GetEquippedEquipment(EquipmentSlot.Back); } }
         public ItemDefinition HeadArmorPlaceholder { get { return headArmorPlaceholder; } }
         public ItemDefinition ChestArmorPlaceholder { get { return chestArmorPlaceholder; } }
         public ItemDefinition LegsArmorPlaceholder { get { return legsArmorPlaceholder; } }
@@ -31,6 +57,10 @@ namespace ProjectEclipse.Equipment
             {
                 weaponVisualAnchor = GetComponentInChildren<WeaponVisualAnchor>();
             }
+            if (characterVisuals == null)
+            {
+                characterVisuals = GetComponentInChildren<CharacterVisualController>();
+            }
         }
 
         public void Initialize(CombatController combat, InventoryStore store)
@@ -40,6 +70,10 @@ namespace ProjectEclipse.Equipment
             if (weaponVisualAnchor == null)
             {
                 weaponVisualAnchor = GetComponentInChildren<WeaponVisualAnchor>();
+            }
+            if (characterVisuals == null)
+            {
+                characterVisuals = GetComponentInChildren<CharacterVisualController>();
             }
             ApplyWeaponVisual();
         }
@@ -52,6 +86,7 @@ namespace ProjectEclipse.Equipment
             }
 
             equippedWeapon = weapon;
+            SetSlot(EquipmentSlot.Mainhand, weapon);
             if (combatController != null)
             {
                 combatController.SetWeapon(weapon);
@@ -63,19 +98,56 @@ namespace ProjectEclipse.Equipment
 
         public ItemDefinition GetEquippedItem(EquipmentSlot slot)
         {
+            EquipmentDefinition equipmentItem = GetEquippedEquipment(slot);
+            if (equipmentItem != null)
+            {
+                return equipmentItem;
+            }
+
             switch (slot)
             {
-                case EquipmentSlot.Weapon:
+                case EquipmentSlot.Mainhand:
                     return equippedWeapon;
-                case EquipmentSlot.Head:
+                case EquipmentSlot.Helmet:
                     return headArmorPlaceholder;
                 case EquipmentSlot.Chest:
                     return chestArmorPlaceholder;
-                case EquipmentSlot.Legs:
+                case EquipmentSlot.Boots:
                     return legsArmorPlaceholder;
                 default:
                     return null;
             }
+        }
+
+        public EquipmentDefinition GetEquippedEquipment(EquipmentSlot slot)
+        {
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null && slots[i].Slot == slot)
+                {
+                    return slots[i].Item;
+                }
+            }
+
+            return null;
+        }
+
+        public bool TryEquipEquipment(EquipmentDefinition equipmentItem)
+        {
+            if (equipmentItem == null)
+            {
+                return false;
+            }
+
+            WeaponDefinition weapon = equipmentItem as WeaponDefinition;
+            if (weapon != null && equipmentItem.Slot == EquipmentSlot.Mainhand)
+            {
+                return TryEquipWeapon(weapon);
+            }
+
+            SetSlot(equipmentItem.Slot, equipmentItem);
+            ApplyEquipmentVisual(equipmentItem.Slot, equipmentItem);
+            return true;
         }
 
         public void SetFacingDirection(int direction)
@@ -83,6 +155,10 @@ namespace ProjectEclipse.Equipment
             if (weaponVisualAnchor != null)
             {
                 weaponVisualAnchor.SetFacingDirection(direction);
+            }
+            if (characterVisuals != null)
+            {
+                characterVisuals.SetFacingDirection(direction);
             }
         }
 
@@ -92,17 +168,40 @@ namespace ProjectEclipse.Equipment
             {
                 weaponVisualAnchor.ApplyWeapon(equippedWeapon);
             }
+            ApplyEquipmentVisual(EquipmentSlot.Mainhand, equippedWeapon);
         }
 
         public bool TryEquipFromStorage(ItemDefinition item)
         {
-            WeaponDefinition weapon = item as WeaponDefinition;
-            if (weapon == null || inventory == null || !inventory.HasItem(weapon, 1))
+            EquipmentDefinition equipmentItem = item as EquipmentDefinition;
+            if (equipmentItem == null || inventory == null || !inventory.HasItem(equipmentItem, 1))
             {
                 return false;
             }
 
-            return TryEquipWeapon(weapon);
+            return TryEquipEquipment(equipmentItem);
+        }
+
+        private void SetSlot(EquipmentSlot slot, EquipmentDefinition item)
+        {
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null && slots[i].Slot == slot)
+                {
+                    slots[i].Item = item;
+                    return;
+                }
+            }
+
+            slots.Add(new EquipmentSlotState(slot, item));
+        }
+
+        private void ApplyEquipmentVisual(EquipmentSlot slot, EquipmentDefinition equipmentItem)
+        {
+            if (characterVisuals != null)
+            {
+                characterVisuals.ApplyEquipment(slot, equipmentItem);
+            }
         }
     }
 }

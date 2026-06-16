@@ -12,6 +12,7 @@ namespace ProjectEclipse.Crafting
         [SerializeField] private ItemDefinition outputItem;
         [SerializeField] private int outputQuantity = 1;
         [SerializeField] private bool equipOutputIfWeapon;
+        [SerializeField] private CraftingStationType stationType = CraftingStationType.Inventory;
 
         public string RecipeId { get { return recipeId; } }
         public string DisplayName { get { return displayName; } }
@@ -19,6 +20,7 @@ namespace ProjectEclipse.Crafting
         public ItemDefinition OutputItem { get { return outputItem; } }
         public int OutputQuantity { get { return Mathf.Max(1, outputQuantity); } }
         public bool EquipOutputIfWeapon { get { return equipOutputIfWeapon; } }
+        public CraftingStationType StationType { get { return stationType; } }
 
         public void Configure(
             string id,
@@ -37,4 +39,3 @@ namespace ProjectEclipse.Crafting
         }
     }
 }
-

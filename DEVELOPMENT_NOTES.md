@@ -21,11 +21,12 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 
 - `Assets/ProjectEclipse/Scripts/Player`: movement, jumping, facing, input, and ground checks.
 - `Assets/ProjectEclipse/Scripts/Combat`: health, damage, damageable interface, and weapon hit detection.
+- `Assets/ProjectEclipse/Scripts/Combat`: also contains action/input routing foundations for mainhand, offhand, Q/E/R/F, and Shift modifiers.
 - `Assets/ProjectEclipse/Scripts/Enemies`: enemy definitions, AI controller, states, and drop table definitions.
 - `Assets/ProjectEclipse/Scripts/Items`: item definitions, weapon definitions, drops, and drop spawning.
-- `Assets/ProjectEclipse/Scripts/Inventory`: storage stacks and slot category enums.
+- `Assets/ProjectEclipse/Scripts/Inventory`: storage stacks, inventory tabs, and slot category enums.
 - `Assets/ProjectEclipse/Scripts/Crafting`: recipe definitions and crafting execution.
-- `Assets/ProjectEclipse/Scripts/Equipment`: equipped weapon and armor placeholders.
+- `Assets/ProjectEclipse/Scripts/Equipment`: equipment slots, stats, rarity, restrictions, layered visual anchors, and equipped item state.
 - `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
 - `Assets/ProjectEclipse/Scripts/Progression`: resource tiers, crafting tiers, stages, world tiers, boss definitions, and unlock requirement models.
 - `Assets/ProjectEclipse/Scripts/UI`: small HUD plus Tab-toggled storage, crafting, and furnace panels.
@@ -35,7 +36,20 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
 - `Assets/ProjectEclipse/Art/Items`: homemade drop icons.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
-- `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, drop tables, items, weapons, enemies, recipes, and progression.
+- `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, crafting ports, drop tables, items, weapons, enemies, recipes, and progression.
+
+## Inventory Direction
+
+Inventory tabs are:
+
+- Equipment
+- Materials
+- Consumables
+- Key Items / Special Items
+
+Monster drops are crafting materials and belong in Materials. Current material drops are `Sticks`, `Stone`, `Coal`, `Copper Ore`, future `Iron Ore`, and future `Gold Ore`.
+
+The MVP HUD is still IMGUI and still needs Unity inspection, but it now follows the intended tab structure and exposes tooltip data hooks.
 - `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
 
 ## Adding Items
@@ -49,6 +63,9 @@ Item definitions support:
 - Resource tier
 - Stack size
 - Item category
+- Tooltip description
+- Dropped-by text
+- Crafting usage text
 
 Current material names:
 
@@ -70,8 +87,42 @@ Weapons are `WeaponDefinition` objects and are also items. Add new weapon data w
 - Cooldown
 - Knockback
 - Equipped visual sprite, offset, rotation, and scale
+- Equipment slot, rarity, stats, class restriction, level requirement, and visual layer
 
 The current combat code supports horizontal melee. Future weapon behaviors should branch from weapon archetype or a dedicated weapon behavior strategy. The player base sprite should remain weapon-free long term; equipped weapons should be rendered through a separate `WeaponVisualAnchor` layer/anchor.
+
+Equipment slots now include:
+
+- Mainhand
+- Offhand
+- Helmet
+- Chest
+- Boots
+- Gloves
+- Necklace
+- Ring 1
+- Ring 2
+- Earring 1
+- Earring 2
+- Belt
+- Back
+
+The Back slot is reserved for capes, cloaks, wings, gliders, jetpacks, or other movement gear. Early game can use simple cape-style bonuses; later tiers can introduce flight or air-control mechanics.
+
+Character visual layering model:
+
+- Base body
+- Hair/face
+- Helmet
+- Chest
+- Gloves
+- Boots
+- Mainhand
+- Offhand
+- Back
+- Accessories when visually relevant
+
+This pass only adds model/controller support. Actual anchors, sorting, offsets, and art still need Unity setup.
 
 Planned archetypes already exist:
 
@@ -84,6 +135,14 @@ Planned archetypes already exist:
 ## Adding Enemies
 
 Add a new `EnemyDefinition` asset with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet reference, placeholder color, and a `DropTableDefinition`.
+
+Enemy ranks are modeled as:
+
+- Normal
+- Enhanced
+- Elite
+- MiniBoss
+- Boss
 
 For a new behavior family, keep the definition data-focused and add specialized behavior through an enemy controller variant or behavior module.
 
@@ -120,6 +179,27 @@ TODO:
 - Add upgrade slots and furnace upgrades.
 - Add station interaction rules instead of always showing the furnace panel.
 
+## Inventory Crafting Ports
+
+Crafting should move toward inventory-equipped ports instead of requiring world-placed stations. Current seed models:
+
+- `CraftingPortDefinition`
+- `CraftingPortSlot`
+- `CraftingStationType`
+- `InventoryCraftingController`
+- Furnace Port data asset
+- Cauldron Port data asset
+- Training Shield offhand seed asset
+- Traveler Cape back-slot seed asset
+
+Examples:
+
+- Furnace Port: future Copper Ore smelting from inventory.
+- Cauldron Port: future potion crafting from inventory.
+- Forge/Anvil Port: future weapon crafting and upgrades.
+
+The old world furnace stays for MVP compatibility until the inventory-port flow is tested.
+
 ## Expanding Progression
 
 Progression tiers are represented by `DimensionTierDefinition`.
@@ -148,16 +228,35 @@ Newer full-game progression skeleton assets live alongside the original MVP tier
 
 Keep boss implementations lightweight until the stage loop, equipment, and drops are tested in Unity.
 
+Boss direction: use original planet/celestial/godlike themes later, but avoid copying existing boss names, patterns, sprites, music, or effects from other games. The eventual endgame can be chaotic, high-energy, pattern-heavy, and cosmic, with final stages around escaping the solar system and later universal escape.
+
+## Combat Input Direction
+
+Current action model foundations:
+
+- LMB / J: mainhand attack
+- RMB: offhand action placeholder
+- Q / E / R / F: class or weapon actions
+- Shift: sprint and attack modifier
+
+Warrior remains the only implemented starting class. Future class models can include Rogue, Mage/Wizard, Archer, and Gunslinger, but do not implement those until Warrior and equipment loops work.
+
 ## Unity Testing Required
 
 This pass was made without opening Unity. Do not treat these items as visually or behaviorally validated until tested on a Unity machine:
 
 - Unity compile/import of the new ScriptableObject types and `.asset` files.
 - Play Mode movement, jump buffering, attack input timing, and enemy pursuit.
+- Mainhand/offhand action routing, Shift sprint, and Q/E/R/F input hooks.
+- IMGUI inventory tabs and tooltip placement.
+- Equipment slot display and shift-click equip behavior.
+- Inventory crafting port equip behavior and port-gated recipe rules.
 - Enemy ledge/platform awareness probe distances on each current creature.
 - Drop spawning/collection using the new `DropTableDefinition` references.
 - Warrior class assignment on the player/GameManager, if wired in the scene.
 - Separate weapon visual layer setup, sprite sorting, hand offset, and whether the player base sprite still appears to include a weapon.
+- Offhand and back/cape visual anchor setup.
+- Armor visual layers and original wearable art.
 - Animation readability and combat feel.
 
 ## Animation Setup

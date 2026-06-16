@@ -66,6 +66,47 @@ namespace ProjectEclipse.Combat
             return hitSomething;
         }
 
+        public bool TryOffhandAction(int facingDirection, bool modified)
+        {
+            if (equippedWeapon == null || Time.time < nextAttackTime)
+            {
+                return false;
+            }
+
+            nextAttackTime = Time.time + equippedWeapon.Cooldown * 0.85f;
+            if (visualState != null)
+            {
+                visualState.TriggerAttack();
+            }
+
+            float direction = facingDirection >= 0 ? 1f : -1f;
+            Vector2 center = (Vector2)transform.position + new Vector2(direction * 0.65f, attackOriginOffset.y);
+            Collider2D[] hits = Physics2D.OverlapBoxAll(center, new Vector2(0.9f, 0.9f), 0f, targetMask);
+            bool hitSomething = false;
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Collider2D hit = hits[i];
+                if (hit == null || hit.transform == transform || hit.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                IDamageable damageable = hit.GetComponentInParent<IDamageable>();
+                if (damageable == null || !damageable.IsAlive)
+                {
+                    continue;
+                }
+
+                int damage = modified ? Mathf.Max(1, equippedWeapon.Damage / 2) : 1;
+                Vector2 knockback = new Vector2(direction * (modified ? equippedWeapon.Knockback : 2f), 1.1f);
+                damageable.TakeDamage(new DamageInfo(damage, gameObject, center, knockback));
+                hitSomething = true;
+            }
+
+            return hitSomething;
+        }
+
         public bool CanAttack()
         {
             return equippedWeapon != null && Time.time >= nextAttackTime;

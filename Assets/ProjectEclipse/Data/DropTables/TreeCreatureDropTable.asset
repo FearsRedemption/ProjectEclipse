@@ -18,3 +18,4 @@ MonoBehaviour:
     minQuantity: 2
     maxQuantity: 5
     chance: 1
+  rareEntries: []

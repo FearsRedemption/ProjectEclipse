@@ -224,15 +224,29 @@ namespace ProjectEclipse.Enemies
 
             for (int i = 0; i < definition.Drops.Count; i++)
             {
-                DropTableEntry drop = definition.Drops[i];
-                if (drop.Item == null || UnityEngine.Random.value > drop.Chance)
-                {
-                    continue;
-                }
-
-                int quantity = UnityEngine.Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
-                dropSpawner.SpawnDrop(drop.Item, quantity, transform.position + Vector3.up * 0.35f);
+                TrySpawnDrop(definition.Drops[i]);
             }
+
+            if (definition.DropTable == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < definition.DropTable.RareEntries.Count; i++)
+            {
+                TrySpawnDrop(definition.DropTable.RareEntries[i]);
+            }
+        }
+
+        private void TrySpawnDrop(DropTableEntry drop)
+        {
+            if (drop == null || drop.Item == null || UnityEngine.Random.value > drop.Chance)
+            {
+                return;
+            }
+
+            int quantity = UnityEngine.Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
+            dropSpawner.SpawnDrop(drop.Item, quantity, transform.position + Vector3.up * 0.35f);
         }
 
         private IEnumerator DestroyAfterDeath()

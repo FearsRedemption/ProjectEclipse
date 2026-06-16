@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   enemyId: stone_creature
   displayName: Stone Creature
+  rank: 0
   resourceTier: 1
   maxHealth: 12
   contactDamage: 2

@@ -15,6 +15,9 @@ namespace ProjectEclipse.Progression
         [SerializeField] private int recommendedLevel = 1;
         [SerializeField] private StageUnlockRequirement unlockRequirement = new StageUnlockRequirement();
         [SerializeField] private List<EnemyDefinition> enemies = new List<EnemyDefinition>();
+        [SerializeField] private List<EnemyDefinition> enhancedEnemies = new List<EnemyDefinition>();
+        [SerializeField] private List<EnemyDefinition> eliteEnemies = new List<EnemyDefinition>();
+        [SerializeField] private List<BossDefinition> miniBosses = new List<BossDefinition>();
         [SerializeField] private BossDefinition boss;
 
         public string StageId { get { return stageId; } }
@@ -25,6 +28,9 @@ namespace ProjectEclipse.Progression
         public int RecommendedLevel { get { return Mathf.Max(1, recommendedLevel); } }
         public StageUnlockRequirement UnlockRequirement { get { return unlockRequirement; } }
         public IReadOnlyList<EnemyDefinition> Enemies { get { return enemies; } }
+        public IReadOnlyList<EnemyDefinition> EnhancedEnemies { get { return enhancedEnemies; } }
+        public IReadOnlyList<EnemyDefinition> EliteEnemies { get { return eliteEnemies; } }
+        public IReadOnlyList<BossDefinition> MiniBosses { get { return miniBosses; } }
         public BossDefinition Boss { get { return boss; } }
     }
 }

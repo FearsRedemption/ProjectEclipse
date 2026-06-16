@@ -11,6 +11,8 @@ namespace ProjectEclipse.Progression
         [SerializeField] private CraftingTier expectedCraftingTier = CraftingTier.Camp;
         [SerializeField] private int recommendedLevel = 1;
         [SerializeField] private bool unlocksNextStage = true;
+        [SerializeField] private bool unlocksEnhancedMobs;
+        [SerializeField] [TextArea] private string designDirection;
 
         public string BossId { get { return bossId; } }
         public string DisplayName { get { return displayName; } }
@@ -18,5 +20,7 @@ namespace ProjectEclipse.Progression
         public CraftingTier ExpectedCraftingTier { get { return expectedCraftingTier; } }
         public int RecommendedLevel { get { return Mathf.Max(1, recommendedLevel); } }
         public bool UnlocksNextStage { get { return unlocksNextStage; } }
+        public bool UnlocksEnhancedMobs { get { return unlocksEnhancedMobs; } }
+        public string DesignDirection { get { return designDirection; } }
     }
 }

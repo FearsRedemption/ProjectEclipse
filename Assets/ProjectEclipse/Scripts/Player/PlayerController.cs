@@ -17,13 +17,13 @@ namespace ProjectEclipse.Player
         private Rigidbody2D body;
         private Collider2D bodyCollider;
         private CombatController combat;
+        private CombatInputRouter combatInput;
         private EquipmentController equipment;
         private VisualStateAnimator visualState;
         private int facingDirection = 1;
         private bool grounded;
         private float horizontalInput;
         private bool jumpRequested;
-        private bool attackRequested;
 
         public int FacingDirection { get { return facingDirection; } }
         public bool IsGrounded { get { return grounded; } }
@@ -33,6 +33,7 @@ namespace ProjectEclipse.Player
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
             combat = GetComponent<CombatController>();
+            combatInput = GetComponent<CombatInputRouter>();
             equipment = GetComponent<EquipmentController>();
             visualState = GetComponent<VisualStateAnimator>();
             ApplyClassMovementDefaults();
@@ -43,14 +44,16 @@ namespace ProjectEclipse.Player
             grounded = CheckGrounded();
             horizontalInput = ReadHorizontalInput();
             jumpRequested = jumpRequested || WantsJump();
-            attackRequested = attackRequested || WantsAttack();
 
             UpdateFacing(horizontalInput);
 
-            if (attackRequested && combat != null)
+            if (combatInput != null)
+            {
+                combatInput.PollActions(facingDirection);
+            }
+            else if (WantsAttack() && combat != null)
             {
                 combat.TryAttack(facingDirection);
-                attackRequested = false;
             }
 
             if (visualState != null)
@@ -63,7 +66,8 @@ namespace ProjectEclipse.Player
         private void FixedUpdate()
         {
             Vector2 velocity = body.linearVelocity;
-            velocity.x = horizontalInput * moveSpeed;
+            float speedMultiplier = combatInput != null && combatInput.SprintHeld ? combatInput.SprintSpeedMultiplier : 1f;
+            velocity.x = horizontalInput * moveSpeed * speedMultiplier;
             body.linearVelocity = velocity;
 
             if (grounded && jumpRequested)

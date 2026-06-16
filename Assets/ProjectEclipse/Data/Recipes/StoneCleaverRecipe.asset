@@ -20,3 +20,4 @@ MonoBehaviour:
   outputItem: {fileID: 11400000, guid: 8347749b678e9b653e0a8325bf53eea7, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 1
+  stationType: 0

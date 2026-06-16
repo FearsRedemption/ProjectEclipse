@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   enemyId: coal_creature
   displayName: Coal Creature
+  rank: 0
   resourceTier: 2
   maxHealth: 11
   contactDamage: 2

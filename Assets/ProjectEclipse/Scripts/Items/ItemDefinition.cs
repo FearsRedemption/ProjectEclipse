@@ -14,6 +14,9 @@ namespace ProjectEclipse.Items
         [SerializeField] private Color placeholderColor = Color.white;
         [SerializeField] private Sprite icon;
         [SerializeField] private Sprite worldDropSprite;
+        [SerializeField] [TextArea] private string description;
+        [SerializeField] private string droppedBy;
+        [SerializeField] private string craftingUsage;
 
         public string ItemId { get { return itemId; } }
         public string DisplayName { get { return displayName; } }
@@ -23,6 +26,9 @@ namespace ProjectEclipse.Items
         public Color PlaceholderColor { get { return placeholderColor; } }
         public Sprite Icon { get { return icon; } }
         public Sprite WorldDropSprite { get { return worldDropSprite != null ? worldDropSprite : icon; } }
+        public string Description { get { return description; } }
+        public string DroppedBy { get { return droppedBy; } }
+        public string CraftingUsage { get { return craftingUsage; } }
 
         public void Configure(
             string id,

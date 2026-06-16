@@ -12,6 +12,7 @@ namespace ProjectEclipse.Crafting
 
         private InventoryStore inventory;
         private EquipmentController equipment;
+        private InventoryCraftingController inventoryCrafting;
 
         public IReadOnlyList<CraftingRecipe> Recipes { get { return recipes; } }
 
@@ -20,11 +21,22 @@ namespace ProjectEclipse.Crafting
             inventory = store;
             equipment = playerEquipment;
             recipes = new List<CraftingRecipe>(availableRecipes);
+            inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
+            if (inventoryCrafting != null)
+            {
+                inventoryCrafting.Initialize(store);
+            }
         }
 
         public bool CanCraft(CraftingRecipe recipe)
         {
-            return recipe != null && inventory != null && inventory.HasIngredients(recipe.Ingredients);
+            if (recipe == null || inventory == null || !inventory.HasIngredients(recipe.Ingredients))
+            {
+                return false;
+            }
+
+            return recipe.StationType == CraftingStationType.Inventory
+                || (inventoryCrafting != null && inventoryCrafting.HasPort(recipe.StationType));
         }
 
         public bool TryCraft(CraftingRecipe recipe)
@@ -49,4 +61,3 @@ namespace ProjectEclipse.Crafting
         }
     }
 }
-

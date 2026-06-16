@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   enemyId: copper_creature
   displayName: Copper Creature
+  rank: 0
   resourceTier: 3
   maxHealth: 20
   contactDamage: 4

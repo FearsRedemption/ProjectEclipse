@@ -8,7 +8,9 @@ namespace ProjectEclipse.Items
         Furnace,
         Upgrade,
         Quest,
-        Placeholder
+        Placeholder,
+        Consumable,
+        KeyItem,
+        CraftingPort
     }
 }
-

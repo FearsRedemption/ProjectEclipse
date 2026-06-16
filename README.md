@@ -17,6 +17,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Homemade prefab copies exist only as reusable references; the MVP scene does not depend on invisible runtime level generation.
 - ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
 - Warrior class foundation asset under `Assets/ProjectEclipse/Data/Classes`.
+- Inventory foundation now separates Equipment, Materials, Consumables, and Key Items / Special Items.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
@@ -30,6 +31,8 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Data structures for Earth/Forest, Stone, Coal, and Copper progression tiers.
 - Progression skeleton models for stages, world tiers, bosses, unlock requirements, resource tiers, crafting tiers, and recommended levels.
 - Weapon data now supports separate inventory icons, world drop sprites, and equipped in-hand visual sprites.
+- Equipment data models support mainhand, offhand, helmet, chest, boots, gloves, accessories, belt, and back/cape slots.
+- Inventory crafting port data seeds support furnace and cauldron ports for future inventory-based crafting.
 
 ## Controls
 
@@ -106,7 +109,9 @@ The MVP no longer relies on `PrototypeBootstrapper` creating the entire world in
 Data assets live under:
 
 - `Assets/ProjectEclipse/Data/Classes`
+- `Assets/ProjectEclipse/Data/CraftingPorts`
 - `Assets/ProjectEclipse/Data/DropTables`
+- `Assets/ProjectEclipse/Data/Equipment`
 - `Assets/ProjectEclipse/Data/Items`
 - `Assets/ProjectEclipse/Data/Weapons`
 - `Assets/ProjectEclipse/Data/Enemies`
@@ -126,8 +131,11 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Let Unity regenerate `Packages/packages-lock.json` and any local Library data.
 - Needs Unity machine testing: confirm C# compilation, inspect new serialized fields, and run Play Mode.
 - Needs Unity machine testing: tune enemy ledge/platform probe distances per creature size.
+- Needs Unity machine testing: inspect the IMGUI inventory tabs, item tooltip placement, and shift-click equip/port actions.
+- Needs Unity machine testing: add/assign `CombatInputRouter`, `InventoryCraftingController`, and layered visual anchors where appropriate.
 - Needs visual inspection in Unity: confirm player base sprite no longer appears to permanently include the weapon once a separate weapon anchor/renderer is added to the player prefab or scene object.
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
+- Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.

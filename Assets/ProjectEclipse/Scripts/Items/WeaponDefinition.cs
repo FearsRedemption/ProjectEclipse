@@ -1,9 +1,11 @@
 using UnityEngine;
 
+using ProjectEclipse.Equipment;
+
 namespace ProjectEclipse.Items
 {
     [CreateAssetMenu(menuName = "Project Eclipse/Items/Weapon Definition")]
-    public class WeaponDefinition : ItemDefinition
+    public class WeaponDefinition : EquipmentDefinition
     {
         [SerializeField] private WeaponArchetype archetype = WeaponArchetype.StarterMelee;
         [SerializeField] private int damage = 1;

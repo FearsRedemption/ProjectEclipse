@@ -20,6 +20,26 @@ MonoBehaviour:
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   icon: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  description: A heavy early-game stone blade crafted from monster material.
+  droppedBy:
+  craftingUsage: First stronger Warrior mainhand weapon.
+  slot: 0
+  rarity: 1
+  stats:
+    attack: 5
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 0
+  levelRequirement: 1
+  visualSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  visualLayer: 6
+  equipmentType: Heavy Blade
+  specialEffectsPlaceholder: Slower Warrior strike with stronger knockback.
   archetype: 2
   damage: 5
   attackRange: 1.55

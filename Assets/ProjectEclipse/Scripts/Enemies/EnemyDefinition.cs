@@ -8,6 +8,7 @@ namespace ProjectEclipse.Enemies
     {
         [SerializeField] private string enemyId = "enemy";
         [SerializeField] private string displayName = "Enemy";
+        [SerializeField] private EnemyRank rank = EnemyRank.Normal;
         [SerializeField] private ResourceTier resourceTier = ResourceTier.Wood;
         [SerializeField] private int maxHealth = 4;
         [SerializeField] private int contactDamage = 1;
@@ -26,6 +27,7 @@ namespace ProjectEclipse.Enemies
 
         public string EnemyId { get { return enemyId; } }
         public string DisplayName { get { return displayName; } }
+        public EnemyRank Rank { get { return rank; } }
         public ResourceTier ResourceTier { get { return resourceTier; } }
         public int MaxHealth { get { return Mathf.Max(1, maxHealth); } }
         public int ContactDamage { get { return Mathf.Max(0, contactDamage); } }

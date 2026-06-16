@@ -20,6 +20,26 @@ MonoBehaviour:
   placeholderColor: {r: 0.35, g: 0.72, b: 1, a: 1}
   icon: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
+  description: A simple starter blade for the first Warrior path.
+  droppedBy:
+  craftingUsage: Baseline mainhand weapon.
+  slot: 0
+  rarity: 0
+  stats:
+    attack: 2
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 0
+  levelRequirement: 1
+  visualSprite: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
+  visualLayer: 6
+  equipmentType: Blade
+  specialEffectsPlaceholder: Basic Warrior mainhand attack.
   archetype: 0
   damage: 2
   attackRange: 1.35
