@@ -38,7 +38,7 @@ namespace ProjectEclipse.Enemies
             target = playerTarget;
             dropSpawner = spawner;
             currentHealth = definition != null ? definition.MaxHealth : 1;
-            if (spriteRenderer != null && definition != null)
+            if (spriteRenderer != null && definition != null && string.IsNullOrEmpty(definition.SpriteSheetPath))
             {
                 spriteRenderer.color = definition.PlaceholderColor;
             }
@@ -112,6 +112,11 @@ namespace ProjectEclipse.Enemies
             }
 
             nextAttackTime = Time.time + definition.AttackCooldown;
+            if (definition.AttackLungeForce > 0f)
+            {
+                body.AddForce(new Vector2(facingDirection * definition.AttackLungeForce, 0.45f), ForceMode2D.Impulse);
+            }
+
             if (visualState != null)
             {
                 visualState.TriggerAttack();
@@ -120,7 +125,7 @@ namespace ProjectEclipse.Enemies
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && damageable.IsAlive)
             {
-                Vector2 knockback = new Vector2(facingDirection * 2.4f, 1.2f);
+                Vector2 knockback = new Vector2(facingDirection * definition.AttackKnockback, 1.2f);
                 damageable.TakeDamage(new DamageInfo(definition.ContactDamage, gameObject, (Vector2)transform.position, knockback));
             }
         }

@@ -18,8 +18,10 @@ This keeps the first commit clean while still giving C# systems real Unity compo
 - `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
 - `Assets/ProjectEclipse/Scripts/Progression`: resource tiers and dimension/boss-lock definitions.
 - `Assets/ProjectEclipse/Scripts/UI`: test HUD, storage, crafting, and furnace panels.
-- `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, camera follow, and runtime animation feedback.
+- `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, sprite-sheet animation, camera follow, and runtime animation feedback.
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
+- `Assets/ProjectEclipse/Art/Creatures`: original generated creature sprite sheets.
+- `Assets/ProjectEclipse/Art/Items`: original generated drop icons.
 
 ## Adding Items
 
@@ -50,9 +52,16 @@ Planned archetypes already exist:
 
 ## Adding Enemies
 
-Add a new `EnemyDefinition` with health, damage, speed, chase range, attack range, cooldown, placeholder color, and drop entries.
+Add a new `EnemyDefinition` with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet path, placeholder color, and drop entries.
 
 For a new behavior family, keep the definition data-focused and add specialized behavior through an enemy controller variant or behavior module.
+
+Current enemy behavior tuning:
+
+- Tree Creature: smallest and slowest, with a short branch/root lunge.
+- Stone Creature: slower and tankier, with stronger knockback.
+- Coal Creature: fast, aggressive, and attacks more frequently.
+- Copper Creature: largest current basic enemy, with stronger damage and a charge-like lunge.
 
 ## Adding Recipes
 
@@ -106,13 +115,23 @@ Current seed tiers are Earth / Forest, Stone, Coal, and Copper. Future dimension
 
 Runtime code drives Animator parameters named `IsMoving`, `IsGrounded`, `Attack`, `Hurt`, and `Die`. Final art can replace the generated clips without changing gameplay code.
 
+Creature sheets use a reusable code-driven setup:
+
+- `SpriteSheetAnimator` slices 96x96 frames from each sheet.
+- Rows are ordered Idle, Move, Attack, Hurt, Die.
+- Frame counts are Idle 4, Move 6, Attack 6, Hurt 2, Die 6.
+- `VisualStateAnimator` forwards movement and trigger state changes to the sheet animator.
+- Runtime catalog entries in `PrototypeBootstrapper.BuildCatalog` assign sprite sheet paths, visual scale, collider size, and behavior tuning.
+
+The current sheets are original generated placeholder art. They are meant to establish readable silhouettes and animation timing, not final production art.
+
 ## Known TODOs
 
 - Replace runtime-created ScriptableObjects with committed data assets after initial tuning.
+- Add Unity-authored import settings and `.meta` files for finalized sprite sheets after opening the project in the editor.
 - Add true weapon behavior modules for ranged, magic, summon, and fast melee styles.
 - Add armor and upgrade stat effects.
 - Add proper UI Toolkit or UGUI UI after gameplay loops settle.
 - Add respawn and checkpoint handling.
 - Add boss gates and tier unlock persistence.
 - Add automated play-mode tests once Unity is installed in the development environment.
-

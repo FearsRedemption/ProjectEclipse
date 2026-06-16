@@ -20,6 +20,10 @@ namespace ProjectEclipse.Items
 
             CircleCollider2D collider = drop.AddComponent<CircleCollider2D>();
             collider.radius = 0.18f;
+            PhysicsMaterial2D bounceMaterial = new PhysicsMaterial2D("Drop Bounce");
+            bounceMaterial.bounciness = 0.35f;
+            bounceMaterial.friction = 0.2f;
+            collider.sharedMaterial = bounceMaterial;
 
             WorldItemDrop worldDrop = drop.AddComponent<WorldItemDrop>();
             worldDrop.Initialize(item, quantity);

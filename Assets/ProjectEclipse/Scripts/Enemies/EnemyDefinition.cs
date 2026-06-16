@@ -15,6 +15,11 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private float chaseRange = 5f;
         [SerializeField] private float attackRange = 0.8f;
         [SerializeField] private float attackCooldown = 1.2f;
+        [SerializeField] private float attackLungeForce = 0.5f;
+        [SerializeField] private float attackKnockback = 2.4f;
+        [SerializeField] private Vector2 visualScale = Vector2.one;
+        [SerializeField] private Vector2 colliderSize = Vector2.one;
+        [SerializeField] private string spriteSheetPath;
         [SerializeField] private Color placeholderColor = Color.green;
         [SerializeField] private List<DropTableEntry> drops = new List<DropTableEntry>();
 
@@ -27,6 +32,11 @@ namespace ProjectEclipse.Enemies
         public float ChaseRange { get { return Mathf.Max(0.1f, chaseRange); } }
         public float AttackRange { get { return Mathf.Max(0.1f, attackRange); } }
         public float AttackCooldown { get { return Mathf.Max(0.1f, attackCooldown); } }
+        public float AttackLungeForce { get { return Mathf.Max(0f, attackLungeForce); } }
+        public float AttackKnockback { get { return Mathf.Max(0f, attackKnockback); } }
+        public Vector2 VisualScale { get { return visualScale; } }
+        public Vector2 ColliderSize { get { return colliderSize; } }
+        public string SpriteSheetPath { get { return spriteSheetPath; } }
         public Color PlaceholderColor { get { return placeholderColor; } }
         public IReadOnlyList<DropTableEntry> Drops { get { return drops; } }
 
@@ -40,6 +50,11 @@ namespace ProjectEclipse.Enemies
             float detectionRange,
             float meleeRange,
             float cooldown,
+            float lungeForce,
+            float knockback,
+            Vector2 scale,
+            Vector2 hitboxSize,
+            string sheetPath,
             Color debugColor,
             IEnumerable<DropTableEntry> dropEntries)
         {
@@ -52,9 +67,13 @@ namespace ProjectEclipse.Enemies
             chaseRange = Mathf.Max(0.1f, detectionRange);
             attackRange = Mathf.Max(0.1f, meleeRange);
             attackCooldown = Mathf.Max(0.1f, cooldown);
+            attackLungeForce = Mathf.Max(0f, lungeForce);
+            attackKnockback = Mathf.Max(0f, knockback);
+            visualScale = scale;
+            colliderSize = hitboxSize;
+            spriteSheetPath = sheetPath;
             placeholderColor = debugColor;
             drops = new List<DropTableEntry>(dropEntries);
         }
     }
 }
-

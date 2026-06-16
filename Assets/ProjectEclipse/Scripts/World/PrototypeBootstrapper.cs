@@ -127,7 +127,7 @@ namespace ProjectEclipse.World
 
         private void CreateEnemy(EnemyDefinition definition, Vector3 position)
         {
-            GameObject enemy = CreateActor(definition.DisplayName, position, new Vector2(0.9f, 0.95f), definition.PlaceholderColor, 8);
+            GameObject enemy = CreateActor(definition.DisplayName, position, definition.VisualScale, definition.PlaceholderColor, 8);
             TryAttachAnimator(enemy, "Enemy");
 
             Rigidbody2D body = enemy.AddComponent<Rigidbody2D>();
@@ -135,10 +135,26 @@ namespace ProjectEclipse.World
             body.freezeRotation = true;
 
             BoxCollider2D collider = enemy.AddComponent<BoxCollider2D>();
-            collider.size = Vector2.one;
+            collider.size = definition.ColliderSize;
 
+            SpriteSheetAnimator sheetAnimator = enemy.AddComponent<SpriteSheetAnimator>();
             VisualStateAnimator visual = enemy.AddComponent<VisualStateAnimator>();
-            visual.SetBaseColor(definition.PlaceholderColor);
+            Texture2D sheet = LoadTextureAtPath(definition.SpriteSheetPath);
+            SpriteRenderer renderer = enemy.GetComponent<SpriteRenderer>();
+            if (sheet != null)
+            {
+                if (renderer != null)
+                {
+                    renderer.color = Color.white;
+                }
+
+                sheetAnimator.Configure(sheet, 96, 96, 96f);
+                visual.SetBaseColor(Color.white);
+            }
+            else
+            {
+                visual.SetBaseColor(definition.PlaceholderColor);
+            }
 
             EnemyController controller = enemy.AddComponent<EnemyController>();
             controller.Initialize(definition, playerTransform, dropSpawner);
@@ -191,10 +207,10 @@ namespace ProjectEclipse.World
         {
             RuntimeCatalog result = new RuntimeCatalog();
 
-            result.Wood = CreateItem("wood", "Tree Material", ItemCategory.Material, new Color(0.38f, 0.24f, 0.12f));
-            result.Stone = CreateItem("stone", "Stone", ItemCategory.Material, new Color(0.55f, 0.57f, 0.58f));
-            result.Coal = CreateItem("coal", "Coal", ItemCategory.Material, new Color(0.08f, 0.08f, 0.09f));
-            result.Copper = CreateItem("copper_fragments", "Copper Fragments", ItemCategory.Material, new Color(0.78f, 0.35f, 0.12f));
+            result.Wood = CreateItem("wood", "Tree Material", ItemCategory.Material, new Color(0.38f, 0.24f, 0.12f), "Assets/ProjectEclipse/Art/Items/wood_icon.png");
+            result.Stone = CreateItem("stone", "Stone", ItemCategory.Material, new Color(0.55f, 0.57f, 0.58f), "Assets/ProjectEclipse/Art/Items/stone_icon.png");
+            result.Coal = CreateItem("coal", "Coal", ItemCategory.Material, new Color(0.08f, 0.08f, 0.09f), "Assets/ProjectEclipse/Art/Items/coal_icon.png");
+            result.Copper = CreateItem("copper_fragments", "Copper Fragments", ItemCategory.Material, new Color(0.78f, 0.35f, 0.12f), "Assets/ProjectEclipse/Art/Items/copper_icon.png");
             result.BasicFurnace = CreateItem("basic_furnace", "Basic Furnace", ItemCategory.Furnace, new Color(0.66f, 0.28f, 0.16f));
             result.CopperWhetstone = CreateItem("copper_whetstone", "Copper Whetstone Placeholder", ItemCategory.Upgrade, new Color(0.95f, 0.45f, 0.18f));
 
@@ -207,10 +223,15 @@ namespace ProjectEclipse.World
                 ResourceTier.Wood,
                 5,
                 1,
-                1.15f,
+                0.95f,
                 5.2f,
                 0.85f,
-                1.25f,
+                1.35f,
+                0.45f,
+                2.2f,
+                new Vector2(0.82f, 0.82f),
+                new Vector2(0.72f, 0.72f),
+                "Assets/ProjectEclipse/Art/Creatures/tree_creature_sheet.png",
                 new Color(0.24f, 0.62f, 0.24f),
                 new DropTableEntry(result.Wood, 2, 5, 1f));
 
@@ -218,12 +239,17 @@ namespace ProjectEclipse.World
                 "stone_creature",
                 "Stone Creature",
                 ResourceTier.Stone,
-                9,
+                12,
                 2,
-                0.95f,
+                0.75f,
                 5.8f,
                 0.9f,
-                1.2f,
+                1.35f,
+                0.8f,
+                4.2f,
+                new Vector2(1.05f, 1.05f),
+                new Vector2(0.9f, 0.82f),
+                "Assets/ProjectEclipse/Art/Creatures/stone_creature_sheet.png",
                 new Color(0.5f, 0.52f, 0.55f),
                 new DropTableEntry(result.Stone, 2, 4, 1f));
 
@@ -231,12 +257,17 @@ namespace ProjectEclipse.World
                 "coal_creature",
                 "Coal Creature",
                 ResourceTier.Coal,
-                12,
+                11,
                 2,
-                1.45f,
+                2.05f,
                 6.2f,
                 0.9f,
-                1.05f,
+                0.65f,
+                2.25f,
+                2.8f,
+                new Vector2(0.9f, 0.9f),
+                new Vector2(0.72f, 0.78f),
+                "Assets/ProjectEclipse/Art/Creatures/coal_creature_sheet.png",
                 new Color(0.1f, 0.11f, 0.13f),
                 new DropTableEntry(result.Coal, 1, 3, 1f),
                 new DropTableEntry(result.Stone, 1, 2, 0.35f));
@@ -245,12 +276,17 @@ namespace ProjectEclipse.World
                 "copper_creature",
                 "Copper Creature",
                 ResourceTier.Copper,
-                16,
-                3,
-                1.7f,
+                20,
+                4,
+                1.35f,
                 6.6f,
-                0.95f,
-                0.95f,
+                1.15f,
+                0.9f,
+                4.2f,
+                5.2f,
+                new Vector2(1.22f, 1.22f),
+                new Vector2(1.02f, 0.9f),
+                "Assets/ProjectEclipse/Art/Creatures/copper_creature_sheet.png",
                 new Color(0.76f, 0.32f, 0.12f),
                 new DropTableEntry(result.Copper, 1, 3, 1f),
                 new DropTableEntry(result.Coal, 1, 1, 0.45f));
@@ -289,10 +325,11 @@ namespace ProjectEclipse.World
             return result;
         }
 
-        private static ItemDefinition CreateItem(string id, string displayName, ItemCategory category, Color color)
+        private static ItemDefinition CreateItem(string id, string displayName, ItemCategory category, Color color, string iconPath = null)
         {
             ItemDefinition item = ScriptableObject.CreateInstance<ItemDefinition>();
-            item.Configure(id, displayName, category, color, 999, SpriteFactory.GetSquareSprite(color));
+            Sprite icon = LoadSpriteAtPath(iconPath, 64f);
+            item.Configure(id, displayName, category, color, 999, icon != null ? icon : SpriteFactory.GetSquareSprite(color));
             return item;
         }
 
@@ -322,11 +359,16 @@ namespace ProjectEclipse.World
             float detectionRange,
             float attackRange,
             float cooldown,
+            float lungeForce,
+            float knockback,
+            Vector2 scale,
+            Vector2 colliderSize,
+            string spriteSheetPath,
             Color color,
             params DropTableEntry[] drops)
         {
             EnemyDefinition enemy = ScriptableObject.CreateInstance<EnemyDefinition>();
-            enemy.Configure(id, displayName, tier, health, damage, speed, detectionRange, attackRange, cooldown, color, drops);
+            enemy.Configure(id, displayName, tier, health, damage, speed, detectionRange, attackRange, cooldown, lungeForce, knockback, scale, colliderSize, spriteSheetPath, color, drops);
             return enemy;
         }
 
@@ -367,6 +409,31 @@ namespace ProjectEclipse.World
                 animator.runtimeAnimatorController = controller;
             }
 #endif
+        }
+
+        private static Texture2D LoadTextureAtPath(string assetPath)
+        {
+#if UNITY_EDITOR
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                return null;
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+#else
+            return null;
+#endif
+        }
+
+        private static Sprite LoadSpriteAtPath(string assetPath, float pixelsPerUnit)
+        {
+            Texture2D texture = LoadTextureAtPath(assetPath);
+            if (texture == null)
+            {
+                return null;
+            }
+
+            return Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
         }
 
         private sealed class PlayerRuntime
@@ -414,4 +481,3 @@ namespace ProjectEclipse.World
         }
     }
 }
-

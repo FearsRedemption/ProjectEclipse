@@ -15,6 +15,7 @@ namespace ProjectEclipse.Utilities
 
         private Animator animator;
         private SpriteRenderer spriteRenderer;
+        private SpriteSheetAnimator spriteSheetAnimator;
         private Vector3 baseScale;
         private Color baseColor;
         private bool moving;
@@ -26,6 +27,7 @@ namespace ProjectEclipse.Utilities
         {
             animator = GetComponent<Animator>();
             spriteRenderer = GetComponent<SpriteRenderer>();
+            spriteSheetAnimator = GetComponent<SpriteSheetAnimator>();
             baseScale = transform.localScale;
             baseColor = spriteRenderer != null ? spriteRenderer.color : Color.white;
         }
@@ -70,6 +72,11 @@ namespace ProjectEclipse.Utilities
             {
                 animator.SetBool(IsMovingHash, value);
             }
+
+            if (spriteSheetAnimator != null)
+            {
+                spriteSheetAnimator.SetMoving(value);
+            }
         }
 
         public void SetGrounded(bool value)
@@ -87,6 +94,11 @@ namespace ProjectEclipse.Utilities
             {
                 animator.SetTrigger(AttackHash);
             }
+
+            if (spriteSheetAnimator != null)
+            {
+                spriteSheetAnimator.TriggerAttack();
+            }
         }
 
         public void TriggerHurt()
@@ -95,6 +107,11 @@ namespace ProjectEclipse.Utilities
             if (animator != null)
             {
                 animator.SetTrigger(HurtHash);
+            }
+
+            if (spriteSheetAnimator != null)
+            {
+                spriteSheetAnimator.TriggerHurt();
             }
         }
 
@@ -105,7 +122,11 @@ namespace ProjectEclipse.Utilities
             {
                 animator.SetTrigger(DieHash);
             }
+
+            if (spriteSheetAnimator != null)
+            {
+                spriteSheetAnimator.TriggerDie();
+            }
         }
     }
 }
-
