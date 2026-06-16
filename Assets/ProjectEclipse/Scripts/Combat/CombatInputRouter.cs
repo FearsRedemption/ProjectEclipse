@@ -1,11 +1,55 @@
 using UnityEngine;
+using ProjectEclipse.Equipment;
 
 namespace ProjectEclipse.Combat
 {
     public class CombatInputRouter : MonoBehaviour
     {
+        [System.Serializable]
+        private class ActionBinding
+        {
+            [SerializeField] private KeyCode key = KeyCode.Q;
+            [SerializeField] private CombatAction action = CombatAction.SkillQ;
+            [SerializeField] private float cooldown = 1f;
+
+            private float nextUseTime;
+
+            public ActionBinding()
+            {
+            }
+
+            public ActionBinding(KeyCode key, CombatAction action, float cooldown)
+            {
+                this.key = key;
+                this.action = action;
+                this.cooldown = cooldown;
+            }
+
+            public KeyCode Key { get { return key; } }
+            public CombatAction Action { get { return action; } }
+
+            public bool TryUse()
+            {
+                if (!Input.GetKeyDown(key) || Time.time < nextUseTime)
+                {
+                    return false;
+                }
+
+                nextUseTime = Time.time + Mathf.Max(0.05f, cooldown);
+                return true;
+            }
+        }
+
         [SerializeField] private CombatController combatController;
+        [SerializeField] private EquipmentController equipmentController;
         [SerializeField] private float sprintSpeedMultiplier = 1.35f;
+        [SerializeField] private ActionBinding[] actionBindings =
+        {
+            new ActionBinding(KeyCode.Q, CombatAction.SkillQ, 1f),
+            new ActionBinding(KeyCode.E, CombatAction.SkillE, 1f),
+            new ActionBinding(KeyCode.R, CombatAction.SkillR, 1.25f),
+            new ActionBinding(KeyCode.F, CombatAction.SkillF, 1.25f),
+        };
 
         public bool SprintHeld { get; private set; }
         public float SprintSpeedMultiplier { get { return Mathf.Max(1f, sprintSpeedMultiplier); } }
@@ -16,6 +60,10 @@ namespace ProjectEclipse.Combat
             if (combatController == null)
             {
                 combatController = GetComponent<CombatController>();
+            }
+            if (equipmentController == null)
+            {
+                equipmentController = GetComponent<EquipmentController>();
             }
         }
 
@@ -37,14 +85,17 @@ namespace ProjectEclipse.Combat
                 LastAction = SprintHeld ? CombatAction.ShiftOffhandModifier : CombatAction.OffhandAction;
                 if (combatController != null)
                 {
-                    combatController.TryOffhandAction(facingDirection, SprintHeld);
+                    combatController.TryOffhandAction(equipmentController != null ? equipmentController.Offhand : null, facingDirection, SprintHeld);
                 }
             }
 
-            if (Input.GetKeyDown(KeyCode.Q)) { LastAction = CombatAction.SkillQ; }
-            if (Input.GetKeyDown(KeyCode.E)) { LastAction = CombatAction.SkillE; }
-            if (Input.GetKeyDown(KeyCode.R)) { LastAction = CombatAction.SkillR; }
-            if (Input.GetKeyDown(KeyCode.F)) { LastAction = CombatAction.SkillF; }
+            for (int i = 0; i < actionBindings.Length; i++)
+            {
+                if (actionBindings[i] != null && actionBindings[i].TryUse())
+                {
+                    LastAction = actionBindings[i].Action;
+                }
+            }
         }
 
         private static bool PressedMainhand()

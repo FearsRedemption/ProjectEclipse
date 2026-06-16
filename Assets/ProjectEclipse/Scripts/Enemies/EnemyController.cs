@@ -14,6 +14,8 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private LayerMask platformMask = ~0;
         [SerializeField] private float groundAheadProbeDistance = 0.65f;
         [SerializeField] private float wallProbeDistance = 0.18f;
+        [SerializeField] private float patrolRadius = 4f;
+        [SerializeField] private float returnHomeDistance = 6f;
 
         private Transform target;
         private Rigidbody2D body;
@@ -25,6 +27,7 @@ namespace ProjectEclipse.Enemies
         private int currentHealth;
         private float nextAttackTime;
         private int facingDirection = -1;
+        private Vector2 homePosition;
         private bool dead;
 
         public bool IsAlive { get { return !dead; } }
@@ -37,6 +40,7 @@ namespace ProjectEclipse.Enemies
             spriteRenderer = GetComponent<SpriteRenderer>();
             visualState = GetComponent<VisualStateAnimator>();
             spriteSheetAnimator = GetComponent<SpriteSheetAnimator>();
+            homePosition = transform.position;
         }
 
         public void Initialize(EnemyDefinition enemyDefinition, Transform playerTarget, DropSpawner spawner)
@@ -45,6 +49,7 @@ namespace ProjectEclipse.Enemies
             target = playerTarget;
             dropSpawner = spawner;
             currentHealth = definition != null ? definition.MaxHealth : 1;
+            homePosition = transform.position;
             ApplyDefinitionVisuals();
         }
 
@@ -95,23 +100,33 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
-            if (distance <= definition.ChaseRange)
+            bool shouldReturnHome = Mathf.Abs(transform.position.x - homePosition.x) > returnHomeDistance;
+            if (shouldReturnHome)
             {
-                facingDirection = toTarget.x >= 0f ? 1 : -1;
-                float horizontalSpeed = CanMoveInDirection(facingDirection) ? facingDirection * definition.MoveSpeed : 0f;
-                body.linearVelocity = new Vector2(horizontalSpeed, body.linearVelocity.y);
-                Vector3 scale = transform.localScale;
-                scale.x = Mathf.Abs(scale.x) * facingDirection;
-                transform.localScale = scale;
-                if (visualState != null)
-                {
-                    visualState.SetMoving(Mathf.Abs(horizontalSpeed) > 0.01f);
-                }
+                MoveToward(homePosition.x);
+            }
+            else if (distance <= definition.ChaseRange && Mathf.Abs(transform.position.x - homePosition.x) <= patrolRadius)
+            {
+                MoveToward(target.position.x);
             }
             else if (visualState != null)
             {
                 body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
                 visualState.SetMoving(false);
+            }
+        }
+
+        private void MoveToward(float targetX)
+        {
+            facingDirection = targetX >= transform.position.x ? 1 : -1;
+            float horizontalSpeed = CanMoveInDirection(facingDirection) ? facingDirection * definition.MoveSpeed : 0f;
+            body.linearVelocity = new Vector2(horizontalSpeed, body.linearVelocity.y);
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facingDirection;
+            transform.localScale = scale;
+            if (visualState != null)
+            {
+                visualState.SetMoving(Mathf.Abs(horizontalSpeed) > 0.01f);
             }
         }
 

@@ -50,6 +50,16 @@ Inventory tabs are:
 Monster drops are crafting materials and belong in Materials. Current material drops are `Sticks`, `Stone`, `Coal`, `Copper Ore`, future `Iron Ore`, and future `Gold Ore`.
 
 The MVP HUD is still IMGUI and still needs Unity inspection, but it now follows the intended tab structure and exposes tooltip data hooks.
+
+The HUD code is split into focused IMGUI helper classes so it can later move to UGUI/UI Toolkit without growing `MvpHud` into a catch-all:
+
+- `InventoryPanel`
+- `EquipmentPanel`
+- `ItemGridView`
+- `ItemSlotView`
+- `ItemTooltipView`
+- `CraftingPanel`
+- `CraftingPortPanel`
 - `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
 
 ## Adding Items
@@ -200,6 +210,50 @@ Examples:
 
 The old world furnace stays for MVP compatibility until the inventory-port flow is tested.
 
+## Art Style Guide
+
+Project Eclipse should converge around one original, readable side-scroller fantasy style. Keep the newer player and creature direction as the quality target, without copying MapleStory or any other game assets.
+
+Target proportions:
+
+- Chibi-readable bodies with clear silhouettes.
+- Slightly oversized heads/hands/weapons only where it improves readability.
+- Materials and equipment should read clearly at inventory-slot size and on the ground.
+
+Outline and shading:
+
+- Soft dark outlines, not harsh programmer-art blocks.
+- Simple directional highlights and shaded undersides.
+- Avoid flat single-color squares, gradients-only blobs, and generic placeholder rectangles.
+
+Palette consistency:
+
+- Forest materials use warm bark and leaf-adjacent browns/greens.
+- Stone and iron use cool grays with distinct highlight ranges.
+- Coal uses charcoal blacks with ember accents.
+- Copper uses orange ore with a teal oxidation accent.
+- Gold uses warm yellow highlights without becoming neon.
+
+Icon/drop readability:
+
+- Each material needs a matching inventory icon and world drop sprite.
+- Missing icon/drop art should be treated as a development warning, not acceptable MVP presentation.
+- Icons should remain legible at small UI slot sizes.
+
+Animation expectations:
+
+- No duplicate fake animation frames.
+- Player run needs distinct leg/body motion.
+- Attacks need anticipation, swing, and follow-through.
+- Creature idle/move/attack/hurt/death rows need visibly different silhouettes.
+- Animation quality requires Unity/visual review before claiming it is fixed.
+
+Art cleanup performed:
+
+- Replaced the old tiny material icons with larger stylized material sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
+- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons.
+- Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
+
 ## Expanding Progression
 
 Progression tiers are represented by `DimensionTierDefinition`.
@@ -251,12 +305,14 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - IMGUI inventory tabs and tooltip placement.
 - Equipment slot display and shift-click equip behavior.
 - Inventory crafting port equip behavior and port-gated recipe rules.
+- Magnet pickup radius/speed, item landing behavior, and collection timing.
 - Enemy ledge/platform awareness probe distances on each current creature.
 - Drop spawning/collection using the new `DropTableDefinition` references.
 - Warrior class assignment on the player/GameManager, if wired in the scene.
 - Separate weapon visual layer setup, sprite sorting, hand offset, and whether the player base sprite still appears to include a weapon.
 - Offhand and back/cape visual anchor setup.
 - Armor visual layers and original wearable art.
+- New item/equipment/crafting-port icons at actual UI size and in-world scale.
 - Animation readability and combat feel.
 
 ## Animation Setup

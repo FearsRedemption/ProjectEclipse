@@ -1,4 +1,5 @@
 using ProjectEclipse.Items;
+using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace ProjectEclipse.Combat
         [SerializeField] private Vector2 attackOriginOffset = new Vector2(0f, 0.1f);
 
         private float nextAttackTime;
+        private float nextOffhandTime;
         private VisualStateAnimator visualState;
 
         public WeaponDefinition EquippedWeapon { get { return equippedWeapon; } }
@@ -66,22 +68,23 @@ namespace ProjectEclipse.Combat
             return hitSomething;
         }
 
-        public bool TryOffhandAction(int facingDirection, bool modified)
+        public bool TryOffhandAction(EquipmentDefinition offhand, int facingDirection, bool modified)
         {
-            if (equippedWeapon == null || Time.time < nextAttackTime)
+            if (offhand == null || Time.time < nextOffhandTime)
             {
                 return false;
             }
 
-            nextAttackTime = Time.time + equippedWeapon.Cooldown * 0.85f;
+            nextOffhandTime = Time.time + (modified ? 0.65f : 0.45f);
             if (visualState != null)
             {
                 visualState.TriggerAttack();
             }
 
             float direction = facingDirection >= 0 ? 1f : -1f;
-            Vector2 center = (Vector2)transform.position + new Vector2(direction * 0.65f, attackOriginOffset.y);
-            Collider2D[] hits = Physics2D.OverlapBoxAll(center, new Vector2(0.9f, 0.9f), 0f, targetMask);
+            float shoveRange = modified ? 1.1f : 0.85f;
+            Vector2 center = (Vector2)transform.position + new Vector2(direction * shoveRange * 0.5f, attackOriginOffset.y);
+            Collider2D[] hits = Physics2D.OverlapBoxAll(center, new Vector2(shoveRange, 0.95f), 0f, targetMask);
             bool hitSomething = false;
 
             for (int i = 0; i < hits.Length; i++)
@@ -98,8 +101,9 @@ namespace ProjectEclipse.Combat
                     continue;
                 }
 
-                int damage = modified ? Mathf.Max(1, equippedWeapon.Damage / 2) : 1;
-                Vector2 knockback = new Vector2(direction * (modified ? equippedWeapon.Knockback : 2f), 1.1f);
+                int damage = Mathf.Max(1, offhand.Stats.Attack + (modified ? 1 : 0));
+                float shoveForce = 2.6f + offhand.Stats.Defense + (modified ? 1.6f : 0f);
+                Vector2 knockback = new Vector2(direction * shoveForce, 1.05f);
                 damageable.TakeDamage(new DamageInfo(damage, gameObject, center, knockback));
                 hitSomething = true;
             }

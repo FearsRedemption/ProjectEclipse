@@ -18,6 +18,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
 - Warrior class foundation asset under `Assets/ProjectEclipse/Data/Classes`.
 - Inventory foundation now separates Equipment, Materials, Consumables, and Key Items / Special Items.
+- Inventory UI is split into focused IMGUI helper classes with icon slots and icon-backed tooltips.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
@@ -33,6 +34,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Weapon data now supports separate inventory icons, world drop sprites, and equipped in-hand visual sprites.
 - Equipment data models support mainhand, offhand, helmet, chest, boots, gloves, accessories, belt, and back/cape slots.
 - Inventory crafting port data seeds support furnace and cauldron ports for future inventory-based crafting.
+- World drops now have magnet pickup behavior after a short delay and warn when art is missing.
 
 ## Controls
 
@@ -133,6 +135,7 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs Unity machine testing: tune enemy ledge/platform probe distances per creature size.
 - Needs Unity machine testing: inspect the IMGUI inventory tabs, item tooltip placement, and shift-click equip/port actions.
 - Needs Unity machine testing: add/assign `CombatInputRouter`, `InventoryCraftingController`, and layered visual anchors where appropriate.
+- Needs Unity machine testing: tune acceleration, deceleration, coyote time, jump buffering, fall gravity, sprint, and magnet pickup feel.
 - Needs visual inspection in Unity: confirm player base sprite no longer appears to permanently include the weapon once a separate weapon anchor/renderer is added to the player prefab or scene object.
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.

@@ -22,7 +22,15 @@ namespace ProjectEclipse.Items
                 renderer = drop.AddComponent<SpriteRenderer>();
             }
 
-            renderer.sprite = item != null && item.WorldDropSprite != null ? item.WorldDropSprite : SpriteFactory.GetSquareSprite(item != null ? item.PlaceholderColor : Color.white);
+            if (item != null && item.WorldDropSprite != null)
+            {
+                renderer.sprite = item.WorldDropSprite;
+            }
+            else
+            {
+                Debug.LogWarning("World drop is missing art for " + (item != null ? item.DisplayName : "Unknown Item") + ". Assign a real WorldDropSprite before accepting the asset.");
+                renderer.sprite = SpriteFactory.GetSquareSprite(Color.magenta);
+            }
             renderer.color = Color.white;
             renderer.sortingOrder = 6;
 

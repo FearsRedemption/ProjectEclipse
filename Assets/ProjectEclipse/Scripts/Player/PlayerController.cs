@@ -11,6 +11,13 @@ namespace ProjectEclipse.Player
     {
         [SerializeField] private float moveSpeed = 7f;
         [SerializeField] private float jumpForce = 13f;
+        [SerializeField] private float acceleration = 58f;
+        [SerializeField] private float deceleration = 72f;
+        [SerializeField] private float airControl = 0.62f;
+        [SerializeField] private float coyoteTime = 0.1f;
+        [SerializeField] private float jumpBufferTime = 0.12f;
+        [SerializeField] private float lowJumpGravityMultiplier = 2.1f;
+        [SerializeField] private float fallGravityMultiplier = 2.4f;
         [SerializeField] private LayerMask groundMask = ~0;
         [SerializeField] private PlayerClassDefinition classDefinition;
 
@@ -23,7 +30,9 @@ namespace ProjectEclipse.Player
         private int facingDirection = 1;
         private bool grounded;
         private float horizontalInput;
-        private bool jumpRequested;
+        private float lastGroundedTime;
+        private float jumpBufferExpiresAt;
+        private bool jumpHeld;
 
         public int FacingDirection { get { return facingDirection; } }
         public bool IsGrounded { get { return grounded; } }
@@ -42,8 +51,16 @@ namespace ProjectEclipse.Player
         private void Update()
         {
             grounded = CheckGrounded();
+            if (grounded)
+            {
+                lastGroundedTime = Time.time;
+            }
             horizontalInput = ReadHorizontalInput();
-            jumpRequested = jumpRequested || WantsJump();
+            if (WantsJump())
+            {
+                jumpBufferExpiresAt = Time.time + jumpBufferTime;
+            }
+            jumpHeld = WantsJumpHeld();
 
             UpdateFacing(horizontalInput);
 
@@ -67,15 +84,20 @@ namespace ProjectEclipse.Player
         {
             Vector2 velocity = body.linearVelocity;
             float speedMultiplier = combatInput != null && combatInput.SprintHeld ? combatInput.SprintSpeedMultiplier : 1f;
-            velocity.x = horizontalInput * moveSpeed * speedMultiplier;
+            float targetSpeed = horizontalInput * moveSpeed * speedMultiplier;
+            float control = grounded ? 1f : airControl;
+            float rate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
+            velocity.x = Mathf.MoveTowards(velocity.x, targetSpeed, rate * control * Time.fixedDeltaTime);
             body.linearVelocity = velocity;
 
-            if (grounded && jumpRequested)
+            if (CanConsumeJump())
             {
-                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpForce);
+                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpForce + GetBackJumpBonus());
+                jumpBufferExpiresAt = 0f;
+                lastGroundedTime = 0f;
             }
 
-            jumpRequested = false;
+            ApplyBetterGravity();
         }
 
         private void UpdateFacing(float horizontal)
@@ -123,6 +145,38 @@ namespace ProjectEclipse.Player
         private bool WantsJump()
         {
             return Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow);
+        }
+
+        private bool WantsJumpHeld()
+        {
+            return Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+        }
+
+        private bool CanConsumeJump()
+        {
+            return Time.time <= jumpBufferExpiresAt && Time.time - lastGroundedTime <= coyoteTime;
+        }
+
+        private void ApplyBetterGravity()
+        {
+            if (body.linearVelocity.y < -0.01f)
+            {
+                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * (fallGravityMultiplier - 1f) * Time.fixedDeltaTime);
+            }
+            else if (body.linearVelocity.y > 0.01f && !jumpHeld)
+            {
+                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * (lowJumpGravityMultiplier - 1f) * Time.fixedDeltaTime);
+            }
+        }
+
+        private float GetBackJumpBonus()
+        {
+            if (equipment == null || equipment.Back == null)
+            {
+                return 0f;
+            }
+
+            return equipment.Back.Stats.JumpForceBonus;
         }
 
         private bool WantsAttack()

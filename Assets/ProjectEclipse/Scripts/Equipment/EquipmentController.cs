@@ -32,6 +32,8 @@ namespace ProjectEclipse.Equipment
         [SerializeField] private WeaponVisualAnchor weaponVisualAnchor;
         [SerializeField] private CharacterVisualController characterVisuals;
         [SerializeField] private List<EquipmentSlotState> slots = new List<EquipmentSlotState>();
+        [SerializeField] private ProjectEclipse.Player.PlayerClassDefinition playerClass;
+        [SerializeField] private int playerLevel = 1;
 #pragma warning disable CS0649
         [SerializeField] private ItemDefinition headArmorPlaceholder;
         [SerializeField] private ItemDefinition chestArmorPlaceholder;
@@ -134,7 +136,7 @@ namespace ProjectEclipse.Equipment
 
         public bool TryEquipEquipment(EquipmentDefinition equipmentItem)
         {
-            if (equipmentItem == null)
+            if (!CanEquip(equipmentItem))
             {
                 return false;
             }
@@ -148,6 +150,11 @@ namespace ProjectEclipse.Equipment
             SetSlot(equipmentItem.Slot, equipmentItem);
             ApplyEquipmentVisual(equipmentItem.Slot, equipmentItem);
             return true;
+        }
+
+        public bool CanEquip(EquipmentDefinition equipmentItem)
+        {
+            return equipmentItem != null && equipmentItem.CanEquip(playerClass, playerLevel);
         }
 
         public void SetFacingDirection(int direction)
@@ -174,12 +181,29 @@ namespace ProjectEclipse.Equipment
         public bool TryEquipFromStorage(ItemDefinition item)
         {
             EquipmentDefinition equipmentItem = item as EquipmentDefinition;
-            if (equipmentItem == null || inventory == null || !inventory.HasItem(equipmentItem, 1))
+            if (equipmentItem == null || inventory == null || !inventory.HasItem(equipmentItem, 1) || !CanEquip(equipmentItem))
             {
                 return false;
             }
 
-            return TryEquipEquipment(equipmentItem);
+            EquipmentDefinition previous = equipmentItem.Slot == EquipmentSlot.Mainhand ? equippedWeapon : GetEquippedEquipment(equipmentItem.Slot);
+            if (!inventory.RemoveItem(equipmentItem, 1))
+            {
+                return false;
+            }
+
+            if (!TryEquipEquipment(equipmentItem))
+            {
+                inventory.AddItem(equipmentItem, 1);
+                return false;
+            }
+
+            if (previous != null && previous != equipmentItem)
+            {
+                inventory.AddItem(previous, 1);
+            }
+
+            return true;
         }
 
         private void SetSlot(EquipmentSlot slot, EquipmentDefinition item)
