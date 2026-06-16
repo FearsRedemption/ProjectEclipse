@@ -8,6 +8,7 @@ namespace ProjectEclipse.Equipment
     public class EquipmentController : MonoBehaviour
     {
         [SerializeField] private WeaponDefinition equippedWeapon;
+        [SerializeField] private WeaponVisualAnchor weaponVisualAnchor;
 #pragma warning disable CS0649
         [SerializeField] private ItemDefinition headArmorPlaceholder;
         [SerializeField] private ItemDefinition chestArmorPlaceholder;
@@ -26,12 +27,21 @@ namespace ProjectEclipse.Equipment
         {
             combatController = GetComponent<CombatController>();
             inventory = GetComponent<InventoryStore>();
+            if (weaponVisualAnchor == null)
+            {
+                weaponVisualAnchor = GetComponentInChildren<WeaponVisualAnchor>();
+            }
         }
 
         public void Initialize(CombatController combat, InventoryStore store)
         {
             combatController = combat;
             inventory = store;
+            if (weaponVisualAnchor == null)
+            {
+                weaponVisualAnchor = GetComponentInChildren<WeaponVisualAnchor>();
+            }
+            ApplyWeaponVisual();
         }
 
         public bool TryEquipWeapon(WeaponDefinition weapon)
@@ -47,7 +57,41 @@ namespace ProjectEclipse.Equipment
                 combatController.SetWeapon(weapon);
             }
 
+            ApplyWeaponVisual();
             return true;
+        }
+
+        public ItemDefinition GetEquippedItem(EquipmentSlot slot)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.Weapon:
+                    return equippedWeapon;
+                case EquipmentSlot.Head:
+                    return headArmorPlaceholder;
+                case EquipmentSlot.Chest:
+                    return chestArmorPlaceholder;
+                case EquipmentSlot.Legs:
+                    return legsArmorPlaceholder;
+                default:
+                    return null;
+            }
+        }
+
+        public void SetFacingDirection(int direction)
+        {
+            if (weaponVisualAnchor != null)
+            {
+                weaponVisualAnchor.SetFacingDirection(direction);
+            }
+        }
+
+        private void ApplyWeaponVisual()
+        {
+            if (weaponVisualAnchor != null)
+            {
+                weaponVisualAnchor.ApplyWeapon(equippedWeapon);
+            }
         }
 
         public bool TryEquipFromStorage(ItemDefinition item)

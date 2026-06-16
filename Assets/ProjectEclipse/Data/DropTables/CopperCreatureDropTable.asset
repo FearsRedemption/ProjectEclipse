@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce794da494d04da4ad32a6731f1cc114, type: 3}
+  m_Name: Copper Creature Drop Table
+  m_EditorClassIdentifier:
+  tableId: copper_creature_drops
+  entries:
+  - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
+    minQuantity: 1
+    maxQuantity: 3
+    chance: 1
+  - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
+    minQuantity: 1
+    maxQuantity: 1
+    chance: 0.45

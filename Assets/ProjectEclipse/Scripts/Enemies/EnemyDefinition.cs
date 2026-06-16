@@ -21,6 +21,7 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private Vector2 colliderSize = Vector2.one;
         [SerializeField] private Texture2D spriteSheet;
         [SerializeField] private Color placeholderColor = Color.green;
+        [SerializeField] private DropTableDefinition dropTable;
         [SerializeField] private List<DropTableEntry> drops = new List<DropTableEntry>();
 
         public string EnemyId { get { return enemyId; } }
@@ -38,7 +39,8 @@ namespace ProjectEclipse.Enemies
         public Vector2 ColliderSize { get { return colliderSize; } }
         public Texture2D SpriteSheet { get { return spriteSheet; } }
         public Color PlaceholderColor { get { return placeholderColor; } }
-        public IReadOnlyList<DropTableEntry> Drops { get { return drops; } }
+        public DropTableDefinition DropTable { get { return dropTable; } }
+        public IReadOnlyList<DropTableEntry> Drops { get { return dropTable != null ? dropTable.Entries : drops; } }
 
         public void Configure(
             string id,
@@ -56,7 +58,8 @@ namespace ProjectEclipse.Enemies
             Vector2 hitboxSize,
             Texture2D sheet,
             Color debugColor,
-            IEnumerable<DropTableEntry> dropEntries)
+            IEnumerable<DropTableEntry> dropEntries,
+            DropTableDefinition table = null)
         {
             enemyId = id;
             displayName = name;
@@ -73,6 +76,7 @@ namespace ProjectEclipse.Enemies
             colliderSize = hitboxSize;
             spriteSheet = sheet;
             placeholderColor = debugColor;
+            dropTable = table;
             drops = new List<DropTableEntry>(dropEntries);
         }
     }

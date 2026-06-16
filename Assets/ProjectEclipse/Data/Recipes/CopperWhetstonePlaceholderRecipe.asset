@@ -15,9 +15,9 @@ MonoBehaviour:
   recipeId: copper_whetstone_placeholder
   displayName: Craft Copper Whetstone Placeholder
   ingredients:
-  - item: {fileID: 11400000, guid: 769e23b0095ae4c3cba0795587f27d66, type: 2}
+  - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
     quantity: 8
-  - item: {fileID: 11400000, guid: 34f4050f456cc6a1bfb05153bca658b3, type: 2}
+  - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     quantity: 2
   outputItem: {fileID: 11400000, guid: 0be75e162d80b9e21fbde403e8ddb086, type: 2}
   outputQuantity: 1

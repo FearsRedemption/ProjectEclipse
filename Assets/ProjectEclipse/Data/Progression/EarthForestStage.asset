@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42b3d03322c6420985246f70807e8192, type: 3}
+  m_Name: Earth Forest Stage
+  m_EditorClassIdentifier:
+  stageId: earth_forest
+  displayName: Earth / Forest
+  worldTier: {fileID: 11400000, guid: b2c6ab347f0243278f59f4cc230a26d4, type: 2}
+  resourceTier: 0
+  craftingTier: 0
+  recommendedLevel: 1
+  unlockRequirement:
+    recommendedLevel: 1
+    requiredResourceTier: 0
+    requiredCraftingTier: 0
+    requiredBoss: {fileID: 0}
+    requiredFlag:
+  enemies:
+  - {fileID: 11400000, guid: 20c9c759fa2ac83879db290055303bbb, type: 2}
+  - {fileID: 11400000, guid: 126f97ad60c4264bc8fa015d86aa4020, type: 2}
+  - {fileID: 11400000, guid: 34f4050f456cc6a1bfb05153bca658b3, type: 2}
+  - {fileID: 11400000, guid: 769e23b0095ae4c3cba0795587f27d66, type: 2}
+  boss: {fileID: 11400000, guid: 2693e6bf83ff45cf9814b835c629c448, type: 2}

@@ -6,10 +6,11 @@ namespace ProjectEclipse.Progression
         Stone,
         Coal,
         Copper,
+        Iron,
+        Gold,
         Moon,
         Mars,
         Cosmic,
         Elemental
     }
 }
-

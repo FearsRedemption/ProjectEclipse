@@ -22,7 +22,7 @@ namespace ProjectEclipse.Items
                 renderer = drop.AddComponent<SpriteRenderer>();
             }
 
-            renderer.sprite = item != null && item.Icon != null ? item.Icon : SpriteFactory.GetSquareSprite(item != null ? item.PlaceholderColor : Color.white);
+            renderer.sprite = item != null && item.WorldDropSprite != null ? item.WorldDropSprite : SpriteFactory.GetSquareSprite(item != null ? item.PlaceholderColor : Color.white);
             renderer.color = Color.white;
             renderer.sortingOrder = 6;
 

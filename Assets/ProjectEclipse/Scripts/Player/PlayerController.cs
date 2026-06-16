@@ -1,4 +1,5 @@
 using ProjectEclipse.Combat;
+using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
 using UnityEngine;
 
@@ -11,13 +12,18 @@ namespace ProjectEclipse.Player
         [SerializeField] private float moveSpeed = 7f;
         [SerializeField] private float jumpForce = 13f;
         [SerializeField] private LayerMask groundMask = ~0;
+        [SerializeField] private PlayerClassDefinition classDefinition;
 
         private Rigidbody2D body;
         private Collider2D bodyCollider;
         private CombatController combat;
+        private EquipmentController equipment;
         private VisualStateAnimator visualState;
         private int facingDirection = 1;
         private bool grounded;
+        private float horizontalInput;
+        private bool jumpRequested;
+        private bool attackRequested;
 
         public int FacingDirection { get { return facingDirection; } }
         public bool IsGrounded { get { return grounded; } }
@@ -27,40 +33,71 @@ namespace ProjectEclipse.Player
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
             combat = GetComponent<CombatController>();
+            equipment = GetComponent<EquipmentController>();
             visualState = GetComponent<VisualStateAnimator>();
+            ApplyClassMovementDefaults();
         }
 
         private void Update()
         {
             grounded = CheckGrounded();
-            float horizontal = ReadHorizontalInput();
+            horizontalInput = ReadHorizontalInput();
+            jumpRequested = jumpRequested || WantsJump();
+            attackRequested = attackRequested || WantsAttack();
+
+            UpdateFacing(horizontalInput);
+
+            if (attackRequested && combat != null)
+            {
+                combat.TryAttack(facingDirection);
+                attackRequested = false;
+            }
+
+            if (visualState != null)
+            {
+                visualState.SetMoving(Mathf.Abs(horizontalInput) > 0.01f);
+                visualState.SetGrounded(grounded);
+            }
+        }
+
+        private void FixedUpdate()
+        {
             Vector2 velocity = body.linearVelocity;
-            velocity.x = horizontal * moveSpeed;
+            velocity.x = horizontalInput * moveSpeed;
             body.linearVelocity = velocity;
 
+            if (grounded && jumpRequested)
+            {
+                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpForce);
+            }
+
+            jumpRequested = false;
+        }
+
+        private void UpdateFacing(float horizontal)
+        {
             if (Mathf.Abs(horizontal) > 0.01f)
             {
                 facingDirection = horizontal > 0f ? 1 : -1;
                 Vector3 scale = transform.localScale;
                 scale.x = Mathf.Abs(scale.x) * facingDirection;
                 transform.localScale = scale;
+                if (equipment != null)
+                {
+                    equipment.SetFacingDirection(facingDirection);
+                }
+            }
+        }
+
+        private void ApplyClassMovementDefaults()
+        {
+            if (classDefinition == null)
+            {
+                return;
             }
 
-            if (grounded && WantsJump())
-            {
-                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpForce);
-            }
-
-            if (WantsAttack() && combat != null)
-            {
-                combat.TryAttack(facingDirection);
-            }
-
-            if (visualState != null)
-            {
-                visualState.SetMoving(Mathf.Abs(horizontal) > 0.01f);
-                visualState.SetGrounded(grounded);
-            }
+            moveSpeed = classDefinition.MoveSpeed;
+            jumpForce = classDefinition.JumpForce;
         }
 
         private float ReadHorizontalInput()
@@ -108,4 +145,3 @@ namespace ProjectEclipse.Player
         }
     }
 }
-

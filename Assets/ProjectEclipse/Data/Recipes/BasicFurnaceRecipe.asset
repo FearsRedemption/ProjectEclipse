@@ -15,9 +15,9 @@ MonoBehaviour:
   recipeId: basic_furnace
   displayName: Craft Basic Furnace
   ingredients:
-  - item: {fileID: 11400000, guid: 126f97ad60c4264bc8fa015d86aa4020, type: 2}
+  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 12
-  - item: {fileID: 11400000, guid: 34f4050f456cc6a1bfb05153bca658b3, type: 2}
+  - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     quantity: 3
   outputItem: {fileID: 11400000, guid: 8a8c5ed33602a62df7c3683152a47727, type: 2}
   outputQuantity: 1

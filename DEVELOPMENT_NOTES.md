@@ -9,6 +9,7 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 `MvpGameManager` is intentionally small. It wires serialized references at play time:
 
 - equips the starter weapon
+- can use the Warrior class asset as the default class foundation when assigned
 - initializes crafting with recipe assets
 - connects furnace storage to the player inventory
 - connects the Tab-toggled HUD to player/storage/furnace systems
@@ -20,13 +21,13 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 
 - `Assets/ProjectEclipse/Scripts/Player`: movement, jumping, facing, input, and ground checks.
 - `Assets/ProjectEclipse/Scripts/Combat`: health, damage, damageable interface, and weapon hit detection.
-- `Assets/ProjectEclipse/Scripts/Enemies`: enemy definitions, AI controller, states, and drop tables.
+- `Assets/ProjectEclipse/Scripts/Enemies`: enemy definitions, AI controller, states, and drop table definitions.
 - `Assets/ProjectEclipse/Scripts/Items`: item definitions, weapon definitions, drops, and drop spawning.
 - `Assets/ProjectEclipse/Scripts/Inventory`: storage stacks and slot category enums.
 - `Assets/ProjectEclipse/Scripts/Crafting`: recipe definitions and crafting execution.
 - `Assets/ProjectEclipse/Scripts/Equipment`: equipped weapon and armor placeholders.
 - `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
-- `Assets/ProjectEclipse/Scripts/Progression`: resource tiers and dimension/boss-lock definitions.
+- `Assets/ProjectEclipse/Scripts/Progression`: resource tiers, crafting tiers, stages, world tiers, boss definitions, and unlock requirement models.
 - `Assets/ProjectEclipse/Scripts/UI`: small HUD plus Tab-toggled storage, crafting, and furnace panels.
 - `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, sprite-sheet animation, camera follow, and runtime animation feedback.
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
@@ -34,12 +35,29 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
 - `Assets/ProjectEclipse/Art/Items`: homemade drop icons.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
-- `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for items, weapons, enemies, recipes, and progression.
+- `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, drop tables, items, weapons, enemies, recipes, and progression.
 - `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
 
 ## Adding Items
 
-Add committed `ItemDefinition` assets under `Assets/ProjectEclipse/Data/Items` and reference them from recipes, drops, enemies, and equipment.
+Add committed `ItemDefinition` assets under `Assets/ProjectEclipse/Data/Items` and reference them from recipes, drop tables, enemies, and equipment.
+
+Item definitions support:
+
+- Item icon
+- World drop sprite
+- Resource tier
+- Stack size
+- Item category
+
+Current material names:
+
+- Tree Creature drops `Sticks`.
+- Stone/Rock Creature drops `Stone`.
+- Coal Creature drops `Coal`.
+- Copper Creature drops `Copper Ore`.
+- Future Iron Creature drops `Iron Ore`.
+- Future Gold Creature drops `Gold Ore`.
 
 ## Adding Weapons
 
@@ -51,8 +69,9 @@ Weapons are `WeaponDefinition` objects and are also items. Add new weapon data w
 - Attack height
 - Cooldown
 - Knockback
+- Equipped visual sprite, offset, rotation, and scale
 
-The current combat code supports horizontal melee. Future weapon behaviors should branch from weapon archetype or a dedicated weapon behavior strategy.
+The current combat code supports horizontal melee. Future weapon behaviors should branch from weapon archetype or a dedicated weapon behavior strategy. The player base sprite should remain weapon-free long term; equipped weapons should be rendered through a separate `WeaponVisualAnchor` layer/anchor.
 
 Planned archetypes already exist:
 
@@ -64,7 +83,7 @@ Planned archetypes already exist:
 
 ## Adding Enemies
 
-Add a new `EnemyDefinition` asset with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet reference, placeholder color, and drop entries.
+Add a new `EnemyDefinition` asset with health, damage, speed, chase range, attack range, cooldown, lunge force, attack knockback, visual scale, collider size, sprite sheet reference, placeholder color, and a `DropTableDefinition`.
 
 For a new behavior family, keep the definition data-focused and add specialized behavior through an enemy controller variant or behavior module.
 
@@ -117,6 +136,30 @@ Each tier can define:
 
 Current seed tiers are Earth / Forest, Stone, Coal, and Copper. Future dimensions should add Moon, Mars, cosmic tiers, elemental tiers, and god bosses.
 
+Newer full-game progression skeleton assets live alongside the original MVP tiers:
+
+- `ProgressionStageDefinition`
+- `WorldTierDefinition`
+- `BossDefinition`
+- `StageUnlockRequirement`
+- `ResourceTier`
+- `CraftingTier`
+- `RecommendedLevel` fields on stage, world tier, boss, and unlock requirement data
+
+Keep boss implementations lightweight until the stage loop, equipment, and drops are tested in Unity.
+
+## Unity Testing Required
+
+This pass was made without opening Unity. Do not treat these items as visually or behaviorally validated until tested on a Unity machine:
+
+- Unity compile/import of the new ScriptableObject types and `.asset` files.
+- Play Mode movement, jump buffering, attack input timing, and enemy pursuit.
+- Enemy ledge/platform awareness probe distances on each current creature.
+- Drop spawning/collection using the new `DropTableDefinition` references.
+- Warrior class assignment on the player/GameManager, if wired in the scene.
+- Separate weapon visual layer setup, sprite sorting, hand offset, and whether the player base sprite still appears to include a weapon.
+- Animation readability and combat feel.
+
 ## Animation Setup
 
 `AnimationAssetGenerator` creates placeholder Unity Animator Controllers and AnimationClips for Player and Enemy objects. The generated state names are intentionally stable:
@@ -144,6 +187,8 @@ The current sheets are original homemade-style game art. They are meant to estab
 ## Known TODOs
 
 - Keep important MVP objects visible and editable in `ProjectEclipse_MVP.unity`; avoid returning to invisible runtime world generation.
+- Add a child weapon anchor/renderer to the player prefab or scene object and assign it to `EquipmentController`.
+- Replace placeholder weapon visual sprites with original in-hand weapon art.
 - Add true weapon behavior modules for ranged, magic, summon, and fast melee styles.
 - Add armor and upgrade stat effects.
 - Add proper UI Toolkit or UGUI UI after gameplay loops settle.

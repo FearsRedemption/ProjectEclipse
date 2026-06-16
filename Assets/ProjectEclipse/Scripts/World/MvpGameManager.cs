@@ -17,6 +17,7 @@ namespace ProjectEclipse.World
 #pragma warning disable CS0649
         [Header("Player")]
         [SerializeField] private PlayerController player;
+        [SerializeField] private PlayerClassDefinition playerClass;
         [SerializeField] private Health playerHealth;
         [SerializeField] private InventoryStore playerInventory;
         [SerializeField] private CombatController playerCombat;
@@ -97,19 +98,30 @@ namespace ProjectEclipse.World
 
         private void WirePlayer()
         {
+            if (playerClass != null && playerHealth != null)
+            {
+                playerHealth.SetMaxHealth(playerClass.StartingMaxHealth, true);
+            }
+
+            WeaponDefinition weaponToEquip = starterWeapon;
+            if (weaponToEquip == null && playerClass != null)
+            {
+                weaponToEquip = playerClass.StartingWeapon;
+            }
+
             if (playerEquipment != null)
             {
                 playerEquipment.Initialize(playerCombat, playerInventory);
             }
 
-            if (playerInventory != null && starterWeapon != null && !playerInventory.HasItem(starterWeapon, 1))
+            if (playerInventory != null && weaponToEquip != null && !playerInventory.HasItem(weaponToEquip, 1))
             {
-                playerInventory.AddItem(starterWeapon, 1);
+                playerInventory.AddItem(weaponToEquip, 1);
             }
 
-            if (playerEquipment != null && starterWeapon != null)
+            if (playerEquipment != null && weaponToEquip != null)
             {
-                playerEquipment.TryEquipWeapon(starterWeapon);
+                playerEquipment.TryEquipWeapon(weaponToEquip);
             }
         }
 

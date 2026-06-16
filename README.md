@@ -16,17 +16,20 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Handcrafted visible Player, terrain, creature areas, furnace station, enemies, and HUD objects placed directly in the scene.
 - Homemade prefab copies exist only as reusable references; the MVP scene does not depend on invisible runtime level generation.
 - ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
+- Warrior class foundation asset under `Assets/ProjectEclipse/Data/Classes`.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
 - Stone Cleaver craftable from Stone drops.
-- Tree, Stone, Coal, and Copper creatures with distinct original chibi side-scroller sprite sheets, sizes, animations, combat stats, and drops.
+- Tree, Stone, Coal, and Copper creatures with distinct original chibi side-scroller sprite sheets, sizes, animations, combat stats, and reusable drop table assets.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
-- Wood, stone, coal, and copper drops have distinct homemade icons.
+- Sticks, Stone, Coal, and Copper Ore drops have distinct homemade icons.
 - Infinite-style storage foundation with stack sizes up to 999.
 - Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
 - Data structures for Earth/Forest, Stone, Coal, and Copper progression tiers.
+- Progression skeleton models for stages, world tiers, bosses, unlock requirements, resource tiers, crafting tiers, and recommended levels.
+- Weapon data now supports separate inventory icons, world drop sprites, and equipped in-hand visual sprites.
 
 ## Controls
 
@@ -40,16 +43,18 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 
 ## Current Enemies And Drops
 
-- Tree Creature: small animated stump/sapling monster. Slowest basic enemy, simple root/branch lunge, drops Tree Material.
+- Tree Creature: small animated stump/sapling monster. Slowest basic enemy, simple root/branch lunge, drops Sticks.
 - Stone Creature: bulkier rock golem. Slower, higher health, heavier knockback, drops Stone.
 - Coal Creature: fast charcoal imp. Quicker chase and shorter attack cooldown, drops Coal with a chance for extra Stone.
-- Copper Creature: largest current basic enemy. Tougher mineral beast with stronger damage, charge-like lunge, drops Copper Fragments with a chance for Coal.
+- Copper Creature: largest current basic enemy. Tougher mineral beast with stronger damage, charge-like lunge, drops Copper Ore with a chance for Coal.
+- Future Iron Creature drop table seed: Iron Ore.
+- Future Gold Creature drop table seed: Gold Ore.
 
 ## Current Crafting Recipes
 
 - Stone Cleaver: Stone x4.
 - Basic Furnace: Stone x12, Coal x3.
-- Copper Whetstone Placeholder: Copper Fragments x8, Coal x2.
+- Copper Whetstone Placeholder: Copper Ore x8, Coal x2.
 
 ## Progression Direction
 
@@ -100,6 +105,8 @@ The MVP no longer relies on `PrototypeBootstrapper` creating the entire world in
 
 Data assets live under:
 
+- `Assets/ProjectEclipse/Data/Classes`
+- `Assets/ProjectEclipse/Data/DropTables`
 - `Assets/ProjectEclipse/Data/Items`
 - `Assets/ProjectEclipse/Data/Weapons`
 - `Assets/ProjectEclipse/Data/Enemies`
@@ -117,6 +124,10 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 
 - Open the project in Unity 6000.4.5f1.
 - Let Unity regenerate `Packages/packages-lock.json` and any local Library data.
+- Needs Unity machine testing: confirm C# compilation, inspect new serialized fields, and run Play Mode.
+- Needs Unity machine testing: tune enemy ledge/platform probe distances per creature size.
+- Needs visual inspection in Unity: confirm player base sprite no longer appears to permanently include the weapon once a separate weapon anchor/renderer is added to the player prefab or scene object.
+- Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.

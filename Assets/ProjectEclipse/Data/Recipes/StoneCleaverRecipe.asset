@@ -15,7 +15,7 @@ MonoBehaviour:
   recipeId: stone_weapon
   displayName: Craft Stone Cleaver
   ingredients:
-  - item: {fileID: 11400000, guid: 126f97ad60c4264bc8fa015d86aa4020, type: 2}
+  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 4
   outputItem: {fileID: 11400000, guid: 8347749b678e9b653e0a8325bf53eea7, type: 2}
   outputQuantity: 1

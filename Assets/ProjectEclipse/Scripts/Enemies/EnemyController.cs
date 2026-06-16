@@ -11,9 +11,13 @@ namespace ProjectEclipse.Enemies
     public class EnemyController : MonoBehaviour, IDamageable
     {
         [SerializeField] private EnemyDefinition definition;
+        [SerializeField] private LayerMask platformMask = ~0;
+        [SerializeField] private float groundAheadProbeDistance = 0.65f;
+        [SerializeField] private float wallProbeDistance = 0.18f;
 
         private Transform target;
         private Rigidbody2D body;
+        private Collider2D bodyCollider;
         private SpriteRenderer spriteRenderer;
         private VisualStateAnimator visualState;
         private SpriteSheetAnimator spriteSheetAnimator;
@@ -29,6 +33,7 @@ namespace ProjectEclipse.Enemies
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
+            bodyCollider = GetComponent<Collider2D>();
             spriteRenderer = GetComponent<SpriteRenderer>();
             visualState = GetComponent<VisualStateAnimator>();
             spriteSheetAnimator = GetComponent<SpriteSheetAnimator>();
@@ -93,13 +98,14 @@ namespace ProjectEclipse.Enemies
             if (distance <= definition.ChaseRange)
             {
                 facingDirection = toTarget.x >= 0f ? 1 : -1;
-                body.linearVelocity = new Vector2(facingDirection * definition.MoveSpeed, body.linearVelocity.y);
+                float horizontalSpeed = CanMoveInDirection(facingDirection) ? facingDirection * definition.MoveSpeed : 0f;
+                body.linearVelocity = new Vector2(horizontalSpeed, body.linearVelocity.y);
                 Vector3 scale = transform.localScale;
                 scale.x = Mathf.Abs(scale.x) * facingDirection;
                 transform.localScale = scale;
                 if (visualState != null)
                 {
-                    visualState.SetMoving(true);
+                    visualState.SetMoving(Mathf.Abs(horizontalSpeed) > 0.01f);
                 }
             }
             else if (visualState != null)
@@ -172,6 +178,41 @@ namespace ProjectEclipse.Enemies
 
             SpawnDrops();
             StartCoroutine(DestroyAfterDeath());
+        }
+
+        private bool CanMoveInDirection(int direction)
+        {
+            // TODO: Validate probe distances per creature size in Unity Play Mode.
+            if (bodyCollider == null)
+            {
+                return true;
+            }
+
+            Bounds bounds = bodyCollider.bounds;
+            Vector2 footOrigin = new Vector2(
+                bounds.center.x + direction * (bounds.extents.x + groundAheadProbeDistance),
+                bounds.min.y + 0.08f);
+            if (!HasBlockingHit(Physics2D.RaycastAll(footOrigin, Vector2.down, 0.35f, platformMask)))
+            {
+                return false;
+            }
+
+            Vector2 wallOrigin = new Vector2(bounds.center.x, bounds.center.y);
+            return !HasBlockingHit(Physics2D.RaycastAll(wallOrigin, Vector2.right * direction, bounds.extents.x + wallProbeDistance, platformMask));
+        }
+
+        private bool HasBlockingHit(RaycastHit2D[] hits)
+        {
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Collider2D hitCollider = hits[i].collider;
+                if (hitCollider != null && hitCollider != bodyCollider && !hitCollider.isTrigger)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void SpawnDrops()

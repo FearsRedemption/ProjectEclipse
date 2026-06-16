@@ -27,6 +27,7 @@ MonoBehaviour:
   colliderSize: {x: 0.72, y: 0.72}
   spriteSheet: {fileID: 2800000, guid: df425af303adb864f98c98a72abe402e, type: 3}
   placeholderColor: {r: 0.24, g: 0.62, b: 0.24, a: 1}
+  dropTable: {fileID: 11400000, guid: 67eeb763cb764db5b0f6fd61de3ffeb2, type: 2}
   drops:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
     minQuantity: 2

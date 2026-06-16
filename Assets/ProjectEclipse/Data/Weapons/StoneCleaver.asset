@@ -15,12 +15,18 @@ MonoBehaviour:
   itemId: stone_cleaver
   displayName: Stone Cleaver
   category: 1
-  stackLimit: 999
+  resourceTier: 1
+  stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   icon: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
   archetype: 2
   damage: 5
   attackRange: 1.55
   attackHeight: 1.15
   cooldown: 0.55
   knockback: 4.5
+  equippedVisualSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  equippedVisualOffset: {x: 0.32, y: -0.02}
+  equippedVisualRotation: -18
+  equippedVisualScale: {x: 0.62, y: 0.62}
