@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 1
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
-  icon: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  icon: {fileID: 21300000, guid: aa74bf472aad47bea3a000143d9c77f0, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 8208a379b7d44dbab632376c55b16bd1, type: 3}
   description: A heavy early-game stone blade crafted from monster material.
   droppedBy:
   craftingUsage: First stronger Warrior mainhand weapon.
@@ -36,7 +36,7 @@ MonoBehaviour:
     unrestricted: 0
     requiredClass: 0
   levelRequirement: 1
-  visualSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  visualSprite: {fileID: 21300000, guid: 22d7c12b24114b7a9e35115fdf893cdb, type: 3}
   visualLayer: 6
   equipmentType: Heavy Blade
   specialEffectsPlaceholder: Slower Warrior strike with stronger knockback.
@@ -46,7 +46,7 @@ MonoBehaviour:
   attackHeight: 1.15
   cooldown: 0.55
   knockback: 4.5
-  equippedVisualSprite: {fileID: 21300000, guid: 9ce4143b48bd60d49aa3d3ecd3b5f01f, type: 3}
+  equippedVisualSprite: {fileID: 21300000, guid: 22d7c12b24114b7a9e35115fdf893cdb, type: 3}
   equippedVisualOffset: {x: 0.32, y: -0.02}
   equippedVisualRotation: -18
   equippedVisualScale: {x: 0.62, y: 0.62}

@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 999
   placeholderColor: {r: 0.78, g: 0.35, b: 0.12, a: 1}
   icon: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 45fdcd60ba2a419599f7552f34f442b2, type: 3}
   description: Raw copper-bearing ore from tougher mineral creatures.
   droppedBy: Copper Creature
   craftingUsage: Copper smelting, weapon upgrades, and copper-tier gear.
