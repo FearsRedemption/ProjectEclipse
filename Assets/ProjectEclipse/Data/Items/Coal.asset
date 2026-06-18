@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 999
   placeholderColor: {r: 0.08, g: 0.08, b: 0.09, a: 1}
   icon: {fileID: 21300000, guid: 9998aaded6c5dbe459cfde715a91b208, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: ef68f4cb1ea94d91b47e7ed064385a88, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 9998aaded6c5dbe459cfde715a91b208, type: 3}
   description: Hot black fuel dropped by aggressive coal creatures.
   droppedBy: Coal Creature
   craftingUsage: Furnace fuel, smelting, and heat-based crafting.

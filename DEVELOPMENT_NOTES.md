@@ -34,9 +34,7 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
 - `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet and edit-time idle sprite.
 - `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
-- `Assets/ProjectEclipse/Art/Items`: homemade inventory icons for materials, equipment seeds, and crafting ports.
-- `Assets/ProjectEclipse/Art/Drops`: dedicated world drop sprites for materials and inventory-port items.
-- `Assets/ProjectEclipse/Art/Equipment`: dedicated equipment icons, world sprites, and equipped visual sprites.
+- `Assets/ProjectEclipse/Art/Items`: homemade drop icons.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
 - `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, crafting ports, drop tables, items, weapons, enemies, recipes, and progression.
 
@@ -214,7 +212,7 @@ The old world furnace stays for MVP compatibility until the inventory-port flow 
 
 ## Art Style Guide
 
-Project Eclipse should converge around one original, readable side-scroller fantasy style. The current player, Tree Creature, Stone Creature, Coal Creature, and Copper Creature sheets are the style anchor and should not be downgraded to match rougher older assets. The broad target is charming, readable, MapleStory-esque fantasy side-scroller art, but all assets must remain original and must not copy MapleStory, Nexon, Terraria, Re-Logic, Black Desert, Pearl Abyss, Calamity, or any other copyrighted game.
+Project Eclipse should converge around one original, readable side-scroller fantasy style. Keep the newer player and creature direction as the quality target, without copying MapleStory or any other game assets.
 
 Target proportions:
 
@@ -225,8 +223,7 @@ Target proportions:
 Outline and shading:
 
 - Soft dark outlines, not harsh programmer-art blocks.
-- Simple directional highlights, shaded undersides, and readable cast shadows where they help inventory/drop readability.
-- Clean silhouettes first; small internal detail should support the shape instead of making the asset noisy.
+- Simple directional highlights and shaded undersides.
 - Avoid flat single-color squares, gradients-only blobs, and generic placeholder rectangles.
 
 Palette consistency:
@@ -239,18 +236,9 @@ Palette consistency:
 
 Icon/drop readability:
 
-- Each material needs a matching inventory icon and a separate world drop sprite.
-- Equipment that can appear in inventory, on the ground, or on the player should have separate art where scale or silhouette differs.
-- Crafting ports are compact magical/tool-port items, not full world stations, unless a separate world prop asset is explicitly being authored.
+- Each material needs a matching inventory icon and world drop sprite.
 - Missing icon/drop art should be treated as a development warning, not acceptable MVP presentation.
 - Icons should remain legible at small UI slot sizes.
-
-Platform/world rules:
-
-- Platforms need a clean readable top edge because that edge communicates the collider.
-- Forest, Stone, Coal, and Copper platforms should use palettes tied to their local creature/resource tier.
-- Tiling/repeating surfaces should avoid loud detail that fights player, enemy, or drop readability.
-- World art may be simple, but it should not read as crude rectangles or debug blocks.
 
 Animation expectations:
 
@@ -262,27 +250,9 @@ Animation expectations:
 
 Art cleanup performed:
 
-- Replaced the material icons with larger stylized sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
-- Added separate world drop sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, Gold Ore, Furnace Port, and Cauldron Port.
-- Added dedicated Starter Blade and Stone Cleaver icons, world sprites, and equipped visual sprites.
-- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons and separated shield/cape world/equipped sprites.
-- Reworked Forest, Stone, Coal, and Copper platform/backdrop art so the top surfaces are clearer and more area-specific.
+- Replaced the old tiny material icons with larger stylized material sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
+- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
-
-Assets that still need visual review in Unity:
-
-- Player and creature sprite sheets were audited and preserved as the current style anchor; animation frame quality still needs Unity review before calling it final.
-- Equipment visual offsets, rotations, sorting layers, and hand/back/offhand anchors need Unity inspection.
-- Platform scale, repetition, and collider readability need scene inspection.
-- Item icons and world drops need inspection at actual inventory slot size and in-world drop scale.
-- The old world furnace sprite remains for MVP scene compatibility and should receive a future dedicated world-prop pass if the world station stays.
-
-Future professional/manual art pass candidates:
-
-- Player wearables and armor layers.
-- Final authored attack/hurt/death animation polish.
-- Boss, mini-boss, and progression gate art.
-- Full biome background sets beyond compact platform/backdrop MVP assets.
 
 ## Expanding Progression
 
@@ -343,7 +313,6 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - Offhand and back/cape visual anchor setup.
 - Armor visual layers and original wearable art.
 - New item/equipment/crafting-port icons at actual UI size and in-world scale.
-- New material drop sprites, platform art, and equipment visual sprites at actual camera zoom.
 - Animation readability and combat feel.
 
 ## Animation Setup
