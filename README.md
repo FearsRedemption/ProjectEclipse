@@ -31,7 +31,6 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Forest, Stone, Coal, and Copper platform art has clearer area-specific surfaces and top edges.
 - Modular platform kits now live under `Assets/ProjectEclipse/Art/Platforms` for Forest, CaveStone, CaveCoal, and CaveCopper.
 - Foreground and background environment dressing kits now live under `Assets/ProjectEclipse/Art/Foreground` and `Assets/ProjectEclipse/Art/Backgrounds`.
-- Active item, equipment, and modular platform art should be checked against the current player and creature sprites before being considered final.
 - Infinite-style storage foundation with stack sizes up to 999.
 - Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
