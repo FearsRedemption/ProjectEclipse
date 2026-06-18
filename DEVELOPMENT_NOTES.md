@@ -263,6 +263,7 @@ Platform kit requirements:
 - The right edge of a left piece, both edges of a middle piece, and the left edge of a right piece should use clean sheer-cut connector seams so pieces can join as `(___|_____________|______________|___)`.
 - Left and right pieces must also connect cleanly without a middle tile between them.
 - Middle pieces must tile repeatedly without visible end caps, large height jumps, or mismatched underside chunks.
+- Middle pieces must be horizontally self-seamless: the left and right boundary columns should match so `middle + middle + middle` forms one continuous platform without a visible splice at the join.
 - Keep small standalone platforms separate from connector pieces so they can have both outside caps without breaking the modular kit.
 
 Animation expectations:
@@ -283,6 +284,7 @@ Art cleanup performed:
 - Refreshed the existing world platform sprites from the connector-safe pieces without hand-editing scene YAML.
 - Replaced the first connector-safe platform pass because it still read as sliced/programmer-style bars and simple shapes. The active platform kit now comes from a fresh original painted platform sheet, then is normalized into the existing left/middle/right/small/underside asset slots with chroma despill cleanup.
 - Rebuilt the connectable platform pieces again as vertical sheer-cut slices from one continuous painted master per theme, so left, middle, and right share the same top/underside height and middle tiles can repeat between caps.
+- Connector fixes should stay edge-only: do not paint broad vertical seam patches over the platform art. The join sides need exact one-column profiles while the surrounding platform art remains natural.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
