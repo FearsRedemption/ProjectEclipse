@@ -17,4 +17,4 @@ MonoBehaviour:
   category: 4
   stackLimit: 999
   placeholderColor: {r: 0.95, g: 0.45, b: 0.18, a: 1}
-  icon: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}
+  icon: {fileID: 21300000, guid: 4037607345a54da19aaa0422c9366e1a, type: 3}

@@ -36,6 +36,9 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
 - `Assets/ProjectEclipse/Art/Items`: homemade inventory/ground icons for materials, equipment seeds, and crafting ports.
 - `Assets/ProjectEclipse/Art/Equipment`: dedicated equipment inventory icons and held/equipped visual sprites.
+- `Assets/ProjectEclipse/Art/Platforms`: modular platform kits, split by Forest, CaveStone, CaveCoal, and CaveCopper.
+- `Assets/ProjectEclipse/Art/Foreground`: walk-behind decorative props, split by Forest, CaveStone, CaveCoal, and CaveCopper.
+- `Assets/ProjectEclipse/Art/Backgrounds`: distant silhouettes, cave wall patches, and area mood pieces.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
 - `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, crafting ports, drop tables, items, weapons, enemies, recipes, and progression.
 
@@ -213,7 +216,14 @@ The old world furnace stays for MVP compatibility until the inventory-port flow 
 
 ## Art Style Guide
 
-Project Eclipse should converge around one original, readable side-scroller fantasy style. The current player, Tree Creature, Stone Creature, Coal Creature, and Copper Creature sheets are the style anchor and should not be downgraded to match rougher older assets. The broad target is charming, readable, MapleStory-esque fantasy side-scroller art, but all assets must remain original and must not copy MapleStory, Nexon, Terraria, Re-Logic, Black Desert, Pearl Abyss, Calamity, or any other copyrighted game.
+Project Eclipse should converge around one original, readable side-scroller fantasy style. The current player, Tree Creature, Stone Creature, Coal Creature, and Copper Creature sheets are the style anchor and should not be downgraded to match rougher older assets. The broad target is charming, crisp, readable MapleStory-esque fantasy side-scroller art, but all assets must remain original and must not copy MapleStory, Nexon, Terraria, Re-Logic, Black Desert, Pearl Abyss, Calamity, or any other copyrighted game.
+
+Current art audit:
+
+- Keep: the player and creature designs as style anchors, with future polish focused on cleaner edges and stronger authored animation.
+- Clean Up: active item/equipment icons, player/creature animation sheets, and old one-off world platforms/backdrops.
+- Replace/Add: modular platform pieces, foreground props, background dressing, and any active item that borrowed unrelated material art.
+- Quarantine rule: debug-only art should live under a clearly named `DebugOnly` folder and must not be referenced by active MVP item/equipment/world data.
 
 Target proportions:
 
@@ -224,7 +234,9 @@ Target proportions:
 Outline and shading:
 
 - Soft dark outlines, not harsh programmer-art blocks.
-- Simple directional highlights, shaded undersides, and readable cast shadows where they help inventory/drop readability.
+- Controlled dark outlines with simple readable cel-shaded highlights.
+- Avoid blurry painterly smears, noisy texture, and generic AI-smudged shapes.
+- Use small cast shadows only where they help inventory/drop readability.
 - Clean silhouettes first; small internal detail should support the shape instead of making the asset noisy.
 - Avoid flat single-color squares, gradients-only blobs, and generic placeholder rectangles.
 
@@ -248,9 +260,22 @@ Icon/drop readability:
 Platform/world rules:
 
 - Platforms need a clean readable top edge because that edge communicates the collider.
-- Forest, Stone, Coal, and Copper platforms should use palettes tied to their local creature/resource tier.
+- Modular platform sets should include left, middle, right, small standalone, and underside pieces before making more one-off long platforms.
+- Forest platforms should read as grass/wood/earth with roots and undergrowth.
+- Cave Stone is the structural base for cave progression.
+- Coal platforms should remain cave stone with coal seams, dark deposits, soot, and occasional ember accents. Do not make the whole platform pure coal.
+- Copper platforms should remain cave stone with copper ore veins, deposits, and occasional teal oxidation accents. Do not make the whole platform pure copper.
+- Keep lava/magma styling reserved for a future fire or magma biome, not Coal or Copper.
 - Tiling/repeating surfaces should avoid loud detail that fights player, enemy, or drop readability.
 - World art may be simple, but it should not read as crude rectangles or debug blocks.
+
+Foreground/background rules:
+
+- Foreground props are non-blocking walk-behind visuals for depth and clutter.
+- Background props should stay lower contrast than gameplay objects and communicate wall detail, distant silhouettes, or mood.
+- Forest progression should feel denser as the player goes deeper: roots, vines, logs, undergrowth, trunks, and canopy silhouettes.
+- Cave progression should feel deeper underground: boulders, protrusions, stalactites, stalagmites, cracked stone, supports, and ore seams.
+- Coal, Copper, future Iron, and future Gold should feel like increasingly rich cave layers, not floors made entirely of the resource.
 
 Animation expectations:
 
@@ -262,11 +287,16 @@ Animation expectations:
 
 Art cleanup performed:
 
-- Reworked material icons for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore to better match the player/creature painterly side-scroller style.
+- Reworked material icons for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore to better match the player/creature crisp side-scroller style.
 - Removed the redundant `Art/Drops` direction; active item data now reuses the inventory icon as the ground sprite for normal drops.
 - Added dedicated Starter Blade and Stone Cleaver inventory icons plus held/equipped visual sprites.
 - Reworked Stone Cleaver as a fantasy stone blade: it uses the same cool-gray stone language as the Stone item while reading as an actual weapon silhouette.
 - Added matching Shield, Cape, Furnace Port, and Cauldron Port icons and held/equipped sprites where needed.
+- Added Basic Furnace and Copper Whetstone icons so active seed items no longer borrow Copper Ore art.
+- Added modular platform kits for Forest, CaveStone, CaveCoal, and CaveCopper.
+- Added foreground decorative kits for Forest, CaveStone, CaveCoal, and CaveCopper.
+- Added background dressing kits for Forest, CaveStone, CaveCoal, and CaveCopper.
+- Rebuilt active one-off `Art/World` platform/backdrop PNGs from the new platform/environment direction while preserving their asset paths for existing scene references.
 - Rebuilt player and creature sprite sheets with clearer staged idle/move/attack/hurt/death poses to reduce the copy-pasted-still feeling.
 - Reworked Forest, Stone, Coal, and Copper platform/backdrop art so the top surfaces are clearer and more area-specific.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
@@ -277,6 +307,8 @@ Assets that still need visual review in Unity:
 - Equipment visual offsets, rotations, sorting layers, and hand/back/offhand anchors need Unity inspection.
 - Platform scale, repetition, and collider readability need scene inspection.
 - Item icons need inspection at actual inventory slot size and in-world drop scale, since normal item drops now reuse the icon sprite.
+- Modular platform tiles need Unity scene assembly testing for seams, pivot expectations, sorting, and collider placement.
+- Foreground and background props need sorting-layer, parallax, and camera-scale inspection.
 - The old world furnace sprite remains for MVP scene compatibility and should receive a future dedicated world-prop pass if the world station stays.
 
 Future professional/manual art pass candidates:
