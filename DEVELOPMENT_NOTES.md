@@ -256,6 +256,14 @@ Icon/drop readability:
 - Missing icon/drop art should be treated as a development warning, not acceptable MVP presentation.
 - Icons should remain legible at small UI slot sizes.
 
+Platform kit requirements:
+
+- Platforms that are meant to extend horizontally must be built from separate left, middle, and right pieces.
+- Left pieces should only have the outside cap on their left edge; right pieces should only have the outside cap on their right edge.
+- The right edge of a left piece, both edges of a middle piece, and the left edge of a right piece should use flat connector seams so pieces can join as `(___|_____________|______________|___)`.
+- Middle pieces must tile repeatedly without visible end caps, large height jumps, or mismatched underside chunks.
+- Keep small standalone platforms separate from connector pieces so they can have both outside caps without breaking the modular kit.
+
 Animation expectations:
 
 - No duplicate fake animation frames.
@@ -268,8 +276,13 @@ Art cleanup performed:
 
 - Replaced the old tiny material icons with larger stylized material sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
 - Added matching Shield, Cape, Furnace Port, and Cauldron Port icons.
+- Added separate equipment art under `Assets/ProjectEclipse/Art/Equipment` for Starter Blade, Stone Cleaver, Training Shield, and Traveler Cape equipped visuals.
+- Updated Starter Blade and Stone Cleaver data to use separate inventory icon sprites and in-hand equipped sprites.
+- Added connector-safe platform tiles under `Assets/ProjectEclipse/Art/Platforms` for forest, stone cave, coal cave, and copper cave themes.
+- Refreshed the existing world platform sprites from the connector-safe pieces without hand-editing scene YAML.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
+- This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
 
 ## Expanding Progression
 
