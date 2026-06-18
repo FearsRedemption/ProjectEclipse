@@ -212,7 +212,23 @@ The old world furnace stays for MVP compatibility until the inventory-port flow 
 
 ## Art Style Guide
 
-Project Eclipse should converge around one original, readable side-scroller fantasy style. Keep the newer player and creature direction as the quality target, without copying MapleStory or any other game assets.
+Project Eclipse should converge around one original, readable side-scroller fantasy style. Keep the newer player and creature direction as the quality target, while using official MapleStory media only as a high-level reference for readability, charm, layered 2D environments, silhouette discipline, contrast hierarchy, and animation staging. Do not copy, trace, kitbash, recolor, or closely mimic MapleStory, Nexon, Terraria, Re-Logic, Black Desert, Pearl Abyss, Calamity, or any other copyrighted assets.
+
+Rejected art approaches:
+
+- Do not make art by combining old generated ProjectEclipse assets with pieces, colors, or texture artifacts from the approved character/monster sprites.
+- Do not keep malformed swords, props, or platforms because they are already committed. Bad active art should be fully replaced by clean original drawings.
+- Do not use simple triangle/pentagon programmer-art shapes as final item, equipment, platform, foreground, or background art.
+- Do not generate broad batches of filler props and call that an art pass. A smaller set of good, style-matched assets is better than a large folder of crude pieces.
+- Do not use texture sampling from character/monster faces or bodies as a substitute for drawing matching environment art.
+
+Required replacement process:
+
+- Build a visual reference board from official MapleStory screenshots/media and the current ProjectEclipse player/monster sheets.
+- Extract style rules from those references: clean contour language, readable clustered shapes, soft but crisp shading, prop density, foreground/background separation, tile seams, and animation pose staging.
+- Redraw ProjectEclipse assets from scratch in an original style following those rules.
+- Check every candidate asset beside the player and creature sprites at gameplay scale before it becomes active art.
+- For weapons, verify the silhouette reads as a real fantasy weapon: blade, guard, grip, pommel/handle, and attachment points must align and connect cleanly.
 
 Target proportions:
 
@@ -253,6 +269,7 @@ Art cleanup performed:
 - Replaced the old tiny material icons with larger stylized material sprites for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore.
 - Added matching Shield, Cape, Furnace Port, and Cauldron Port icons.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
+- Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 
 ## Expanding Progression
 
