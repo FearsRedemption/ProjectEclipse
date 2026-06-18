@@ -260,7 +260,8 @@ Platform kit requirements:
 
 - Platforms that are meant to extend horizontally must be built from separate left, middle, and right pieces.
 - Left pieces should only have the outside cap on their left edge; right pieces should only have the outside cap on their right edge.
-- The right edge of a left piece, both edges of a middle piece, and the left edge of a right piece should use flat connector seams so pieces can join as `(___|_____________|______________|___)`.
+- The right edge of a left piece, both edges of a middle piece, and the left edge of a right piece should use clean sheer-cut connector seams so pieces can join as `(___|_____________|______________|___)`.
+- Left and right pieces must also connect cleanly without a middle tile between them.
 - Middle pieces must tile repeatedly without visible end caps, large height jumps, or mismatched underside chunks.
 - Keep small standalone platforms separate from connector pieces so they can have both outside caps without breaking the modular kit.
 
@@ -281,6 +282,7 @@ Art cleanup performed:
 - Added connector-safe platform tiles under `Assets/ProjectEclipse/Art/Platforms` for forest, stone cave, coal cave, and copper cave themes.
 - Refreshed the existing world platform sprites from the connector-safe pieces without hand-editing scene YAML.
 - Replaced the first connector-safe platform pass because it still read as sliced/programmer-style bars and simple shapes. The active platform kit now comes from a fresh original painted platform sheet, then is normalized into the existing left/middle/right/small/underside asset slots with chroma despill cleanup.
+- Rebuilt the connectable platform pieces again as vertical sheer-cut slices from one continuous painted master per theme, so left, middle, and right share the same top/underside height and middle tiles can repeat between caps.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
