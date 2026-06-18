@@ -29,8 +29,6 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Starter Blade and Stone Cleaver now have dedicated original inventory art plus held/equipped art instead of borrowing material icons.
 - Training Shield, Traveler Cape, Furnace Port, and Cauldron Port now have dedicated original item art.
 - Forest, Stone, Coal, and Copper platform art has clearer area-specific surfaces and top edges.
-- Modular platform kits now live under `Assets/ProjectEclipse/Art/Platforms` for Forest, CaveStone, CaveCoal, and CaveCopper.
-- Foreground and background environment dressing kits now live under `Assets/ProjectEclipse/Art/Foreground` and `Assets/ProjectEclipse/Art/Backgrounds`.
 - Infinite-style storage foundation with stack sizes up to 999.
 - Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
@@ -145,7 +143,6 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
 - Needs visual inspection in Unity: check new item icons, reused ground drop sprites, equipment visuals, and platforms at gameplay zoom and actual UI size.
-- Needs visual inspection in Unity: assemble and inspect the new modular platform, foreground, and background kits for seams, sorting, parallax, and collider readability.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.
