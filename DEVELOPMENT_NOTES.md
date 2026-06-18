@@ -225,6 +225,14 @@ Current art audit:
 - Replace/Add: modular platform pieces, foreground props, background dressing, and any active item that borrowed unrelated material art.
 - Quarantine rule: debug-only art should live under a clearly named `DebugOnly` folder and must not be referenced by active MVP item/equipment/world data.
 
+Art production process:
+
+- New MVP art should be checked beside `player_adventurer_idle.png` and the current creature idle sprites before it is treated as active.
+- Material items and biome props should sample palette/texture language from their source creature line: Tree for Sticks/forest, Stone for cave stone, Coal for coal seams, Copper for copper ore.
+- Avoid broad procedural filler passes that create many assets without a style-anchor comparison sheet.
+- Do not sample creature face/eye regions for environmental rock or ore textures; props should not accidentally inherit creature facial details.
+- Contact sheets are useful for review, but they are temporary validation artifacts and should not be committed.
+
 Target proportions:
 
 - Chibi-readable bodies with clear silhouettes.
@@ -287,16 +295,14 @@ Animation expectations:
 
 Art cleanup performed:
 
-- Reworked material icons for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore to better match the player/creature crisp side-scroller style.
+- Reworked material icons for Sticks, Stone, Coal, Copper Ore, Iron Ore, and Gold Ore using palette and texture cues from the current creature art.
 - Removed the redundant `Art/Drops` direction; active item data now reuses the inventory icon as the ground sprite for normal drops.
-- Added dedicated Starter Blade and Stone Cleaver inventory icons plus held/equipped visual sprites.
-- Reworked Stone Cleaver as a fantasy stone blade: it uses the same cool-gray stone language as the Stone item while reading as an actual weapon silhouette.
-- Added matching Shield, Cape, Furnace Port, and Cauldron Port icons and held/equipped sprites where needed.
-- Added Basic Furnace and Copper Whetstone icons so active seed items no longer borrow Copper Ore art.
-- Added modular platform kits for Forest, CaveStone, CaveCoal, and CaveCopper.
-- Added foreground decorative kits for Forest, CaveStone, CaveCoal, and CaveCopper.
+- Reworked Starter Blade from the player's existing weapon language and Stone Cleaver from non-face stone texture regions so it reads as a fantasy stone weapon.
+- Reworked Shield, Cape, Furnace Port, Cauldron Port, Basic Furnace, and Copper Whetstone to reduce borrowed-material-icon presentation.
+- Rebuilt modular platform kits for Forest, CaveStone, CaveCoal, and CaveCopper with source-creature palette/texture cues.
+- Rebuilt foreground decorative kits for Forest, CaveStone, CaveCoal, and CaveCopper, removing accidental creature-eye artifacts from cave rock props.
 - Added background dressing kits for Forest, CaveStone, CaveCoal, and CaveCopper.
-- Rebuilt active one-off `Art/World` platform/backdrop PNGs from the new platform/environment direction while preserving their asset paths for existing scene references.
+- Rebuilt active one-off `Art/World` platform PNGs from the corrected modular platform pieces while preserving their asset paths for existing scene references.
 - Rebuilt player and creature sprite sheets with clearer staged idle/move/attack/hurt/death poses to reduce the copy-pasted-still feeling.
 - Reworked Forest, Stone, Coal, and Copper platform/backdrop art so the top surfaces are clearer and more area-specific.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
