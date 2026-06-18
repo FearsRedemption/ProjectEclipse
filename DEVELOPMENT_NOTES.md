@@ -280,6 +280,7 @@ Art cleanup performed:
 - Updated Starter Blade and Stone Cleaver data to use separate inventory icon sprites and in-hand equipped sprites.
 - Added connector-safe platform tiles under `Assets/ProjectEclipse/Art/Platforms` for forest, stone cave, coal cave, and copper cave themes.
 - Refreshed the existing world platform sprites from the connector-safe pieces without hand-editing scene YAML.
+- Replaced the first connector-safe platform pass because it still read as sliced/programmer-style bars and simple shapes. The active platform kit now comes from a fresh original painted platform sheet, then is normalized into the existing left/middle/right/small/underside asset slots with chroma despill cleanup.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
