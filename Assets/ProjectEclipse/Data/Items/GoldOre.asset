@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 999
   placeholderColor: {r: 0.96, g: 0.72, b: 0.18, a: 1}
   icon: {fileID: 21300000, guid: b6cf7971e62d4d8ab16ebcb282c7d09e, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: b6cf7971e62d4d8ab16ebcb282c7d09e, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: c47d9da67e9b4326b7e25d4bafb14ccf, type: 3}
   description: Future gold-tier monster material.
   droppedBy: Future Gold Creature
   craftingUsage: Gold crafting, special gear, and rare upgrades later.

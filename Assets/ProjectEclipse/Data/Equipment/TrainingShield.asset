@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 1
   placeholderColor: {r: 0.42, g: 0.5, b: 0.58, a: 1}
   icon: {fileID: 21300000, guid: 91f1eb84fbfd4bcc827d77ce48c406a0, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: 91f1eb84fbfd4bcc827d77ce48c406a0, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 141ce375d9cc4770812ad0c34da9eb05, type: 3}
   description: Simple offhand shield seed for Warrior shove and guard actions.
   droppedBy:
   craftingUsage: Offhand action testing and early shield path planning.

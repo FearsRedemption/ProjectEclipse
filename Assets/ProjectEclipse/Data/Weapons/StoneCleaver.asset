@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   icon: {fileID: 21300000, guid: aa74bf472aad47bea3a000143d9c77f0, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: aa74bf472aad47bea3a000143d9c77f0, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 8208a379b7d44dbab632376c55b16bd1, type: 3}
   description: A heavy early-game stone blade crafted from monster material.
   droppedBy:
   craftingUsage: First stronger Warrior mainhand weapon.

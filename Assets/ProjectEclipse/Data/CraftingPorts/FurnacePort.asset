@@ -19,7 +19,7 @@ MonoBehaviour:
   stackLimit: 1
   placeholderColor: {r: 0.45, g: 0.28, b: 0.18, a: 1}
   icon: {fileID: 21300000, guid: be9de336d4d2402097cb7c4ee0c118b0, type: 3}
-  worldDropSprite: {fileID: 21300000, guid: be9de336d4d2402097cb7c4ee0c118b0, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: c3d1c585cd984f56834d521f29ad7eba, type: 3}
   description: Inventory crafting port for smelting ore without placing a world station.
   droppedBy:
   craftingUsage: Smelting Copper Ore into ingots and future furnace recipes.
