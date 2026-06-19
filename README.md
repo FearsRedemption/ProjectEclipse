@@ -97,7 +97,9 @@ Each creature sheet has five animation rows:
 
 The player also has an original polished chibi sheet under `Assets/ProjectEclipse/Art/Player/` with Idle, Run, Jump, Attack, Hurt, and Die rows. The current active player base sheet is weapon-free so mainhand weapons can be rendered later as a separate equipped visual layer. `SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the player and enemies can transition during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
 
-The rejected pre-redo player and creature PNGs were archived under `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19` outside `Assets` so Unity does not import duplicate old art. The active replacements were locally checked as 96x96 sprite sheets for dimensions, magenta chroma residue, detached non-death fragments, and basic frame-to-frame motion/contact-sheet readability. This was not Unity Play Mode validation.
+Animation rows now use variable frame counts. The player sheet is `768x576` with 8 possible 96x96 cells per row. Creature sheets are `768x480`. Blank trailing cells are intentional, and `SpriteSheetAnimator` detects non-empty cells per row so animations can use the number of frames they need.
+
+The active art no longer keeps separate idle PNG files; idle lives in row 0 of each full sheet. Rejected player and creature PNGs were archived under `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19` and `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19_FixedFrameRedo` outside `Assets` so Unity does not import duplicate old art. The active replacements were locally checked as 96x96 sprite sheets for dimensions, frame counts, blank trailing cells, magenta chroma residue, and basic frame-to-frame motion/contact-sheet readability. This was not Unity Play Mode validation.
 
 ## Scene And Data Workflow
 

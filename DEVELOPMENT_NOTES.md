@@ -32,8 +32,8 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Scripts/UI`: small HUD plus Tab-toggled storage, crafting, and furnace panels.
 - `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, sprite-sheet animation, camera follow, and runtime animation feedback.
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
-- `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet and edit-time idle sprite.
-- `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets and edit-time idle sprites.
+- `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet.
+- `Assets/ProjectEclipse/Art/Creatures`: homemade creature sprite sheets.
 - `Assets/ProjectEclipse/Art/Items`: homemade drop icons.
 - `Assets/ProjectEclipse/Art/World`: homemade platform, area backdrop, and furnace sprites.
 - `Assets/ProjectEclipse/Data`: committed ScriptableObject assets for classes, crafting ports, drop tables, items, weapons, enemies, recipes, and progression.
@@ -298,6 +298,11 @@ Art cleanup performed:
 - Reworked the player base sheet to stay weapon-free; the attack row swings an empty hand for future weapon overlay following.
 - Reworked creature rows to avoid simple still-image duplication: player run and creature move rows have alternating steps, attacks have anticipation/extension/recovery, and stable idle/move rows were normalized to a consistent baseline and height.
 - Locally checked replacement sheets outside Unity for required dimensions, 96x96 frame slicing, magenta chroma residue, detached non-death sprite fragments, and contact-sheet motion readability. This is not Play Mode validation or final animation-quality approval.
+- Archived the fixed-frame replacement pass under `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19_FixedFrameRedo` after it was rejected for still being too tied to forced six-frame rows.
+- Removed the active standalone idle PNG assets and their initial `SpriteRenderer` references. Idle frames now live only in row 0 of each full animation sheet.
+- Rebuilt the active sheets as variable-frame sheets with 8 possible cells per row and blank trailing cells: player rows use Idle 4, Run 8, Jump 4, Attack 7, Hurt 3, Die 6; creature rows use Idle 4, Move 8, Attack 7, Hurt 3, Die 6.
+- Updated `SpriteSheetAnimator` to detect non-empty cells per row so future animations do not need to share one fixed frame count.
+- Locally checked the variable-frame sheets outside Unity for dimensions, expected non-empty frame counts, blank trailing cells, magenta chroma residue, stable idle/move/run heights, and duplicate-frame risk. This is still not Play Mode validation.
 
 ## Expanding Progression
 
@@ -361,6 +366,7 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - Rebuilt modular platform pieces in left/right, left/middle/right, repeated-middle, and long-platform arrangements at actual import pixels-per-unit, sorting, collision, and gameplay scale.
 - Expanded ore, forest, winter, elemental, and biome platform kits at actual import pixels-per-unit, sorting, collision, and gameplay scale.
 - Replaced player and creature sheets at actual import pixels-per-unit, sorting, alpha edges, runtime row slicing, and gameplay scale.
+- Variable frame-count detection from transparent trailing cells on the player and creature sheets.
 - Player run, jump, weaponless attack, hurt, and death timing in Play Mode.
 - Tree, Stone, Coal, and Copper idle/move/attack/hurt/death timing in Play Mode.
 - Animation readability and combat feel.
@@ -382,8 +388,9 @@ Player and creature sheets use a reusable code-driven setup:
 - `SpriteSheetAnimator` slices 96x96 frames from each sheet.
 - Creature rows are ordered Idle, Move, Attack, Hurt, Die.
 - Player rows are ordered Idle, Run, Jump, Attack, Hurt, Die.
-- Creature frame counts are Idle 4, Move 6, Attack 6, Hurt 2, Die 6.
-- Player frame counts are Idle 4, Run 6, Jump 2, Attack 6, Hurt 2, Die 6.
+- Creature frame counts currently resolve from non-empty sheet cells: Idle 4, Move 8, Attack 7, Hurt 3, Die 6.
+- Player frame counts currently resolve from non-empty sheet cells: Idle 4, Run 8, Jump 4, Attack 7, Hurt 3, Die 6.
+- Keep unused trailing cells transparent; `SpriteSheetAnimator` auto-detects the final non-empty 96x96 cell in each row.
 - `VisualStateAnimator` forwards movement and trigger state changes to the sheet animator.
 - Enemy definition assets assign sprite sheet references, visual scale, collider size, and behavior tuning.
 

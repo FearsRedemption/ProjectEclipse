@@ -24,6 +24,8 @@ namespace ProjectEclipse.Utilities
         [SerializeField] private int dieRow = 4;
 
         [Header("Frame Counts")]
+        [SerializeField] private bool detectFrameCountsFromSheet = true;
+        [SerializeField] private byte visibleAlphaThreshold = 8;
         [SerializeField] private int idleFrameCount = 4;
         [SerializeField] private int moveFrameCount = 6;
         [SerializeField] private int airborneFrameCount = 2;
@@ -182,7 +184,71 @@ namespace ProjectEclipse.Utilities
                 return;
             }
 
-            clips[clipState] = SliceRow(row, count);
+            int resolvedCount = ResolveFrameCount(row, count);
+            if (resolvedCount <= 0)
+            {
+                return;
+            }
+
+            clips[clipState] = SliceRow(row, resolvedCount);
+        }
+
+        private int ResolveFrameCount(int row, int configuredCount)
+        {
+            int cellsInRow = Mathf.FloorToInt(spriteSheet.width / (float)frameWidth);
+            int fallbackCount = Mathf.Clamp(configuredCount, 0, cellsInRow);
+            if (!detectFrameCountsFromSheet)
+            {
+                return fallbackCount;
+            }
+
+            int detectedCount = DetectNonEmptyFrameCount(row, cellsInRow);
+            return detectedCount > 0 ? detectedCount : fallbackCount;
+        }
+
+        private int DetectNonEmptyFrameCount(int row, int cellsInRow)
+        {
+            int y = spriteSheet.height - ((row + 1) * frameHeight);
+            int detectedCount = 0;
+
+            try
+            {
+                Color32[] pixels = spriteSheet.GetPixels32();
+                for (int frame = 0; frame < cellsInRow; frame++)
+                {
+                    if (FrameHasVisiblePixels(pixels, frame * frameWidth, y))
+                    {
+                        detectedCount = frame + 1;
+                    }
+                }
+            }
+            catch (UnityException)
+            {
+                return 0;
+            }
+
+            return detectedCount;
+        }
+
+        private bool FrameHasVisiblePixels(Color32[] pixels, int x, int y)
+        {
+            int textureWidth = spriteSheet.width;
+            int maxX = Mathf.Min(x + frameWidth, spriteSheet.width);
+            int maxY = Mathf.Min(y + frameHeight, spriteSheet.height);
+
+            for (int py = y; py < maxY; py++)
+            {
+                int rowOffset = py * textureWidth;
+                for (int px = x; px < maxX; px++)
+                {
+                    if (pixels[rowOffset + px].a > visibleAlphaThreshold)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private Sprite[] SliceRow(int row, int count)
