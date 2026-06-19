@@ -289,6 +289,7 @@ Art cleanup performed:
 - Kept the small standalone platform silhouettes in place for now, with only stray chroma residue pixels removed where the scan found them.
 - Added 28 additional art-only modular platform kits under `Assets/ProjectEclipse/Art/Platforms`: iron, gold, platinum, silver, tin, lead, cobalt, titanium, mithril, adamantite, obsidian, crystal geode, oak forest, birch forest, pine forest, fir forest, snowy grass, snowy stone, snow, snowy ice, ice, magma, cloud, desert sandstone, swamp moss, mushroom forest, ancient ruins, and cosmic stone.
 - These expanded platform kits are not wired into scenes or prefabs yet; treat them as candidate art assets until they are inspected in Unity at actual gameplay scale.
+- Normalized the oak, birch, pine, and fir forest kits back to the approved base forest platform shape with grass color changes only. Avoid adding tree/root clutter or bark chunks to the walkable top surface, since creatures need to read clearly while walking across it.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
