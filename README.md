@@ -36,6 +36,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Active item icons have been replaced with cleaner original side-scroller material art for Sticks, Stone, Coal, Copper Ore, Iron Ore, Gold Ore, shield, cape, furnace port, and cauldron port.
 - Starter Blade and Stone Cleaver now have separate inventory/equipped sprites, with shield and cape equipped visuals prepared for future layered anchors.
 - Connector-safe platform kits live under `Assets/ProjectEclipse/Art/Platforms`; left, middle, and right pieces share flat seam edges so they can assemble into longer platforms.
+- The platform kit library now includes additional art-only ore, forest, winter, elemental, and biome variants for future crafting-map stages.
 - Inventory crafting port data seeds support furnace and cauldron ports for future inventory-based crafting.
 - World drops now have magnet pickup behavior after a short delay and warn when art is missing.
 
@@ -143,7 +144,7 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
 - Needs visual inspection in Unity: verify replacement icons, equipped sprites, and connector-safe platform pieces import at the right pixels-per-unit, sorting, collision, and gameplay scale.
-- Needs visual inspection in Unity: check rebuilt forest, stone, coal, and copper platform kits in left/right, left/middle/right, and repeated-middle arrangements.
+- Needs visual inspection in Unity: check rebuilt and expanded platform kits in left/right, left/middle/right, and repeated-middle arrangements.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.

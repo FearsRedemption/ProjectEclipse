@@ -287,6 +287,8 @@ Art cleanup performed:
 - Connector fixes should stay edge-only: do not paint broad vertical seam patches over the platform art. The join sides need exact one-column profiles while the surrounding platform art remains natural.
 - Rebuilt the forest, stone, coal, and copper connector pieces from newly generated modular proof sheets using the approved forest direction as the style target. Coal now reads as dark charcoal rock instead of lava/magma, and copper reads as gray-brown stone with copper ore inclusions instead of solid copper.
 - Kept the small standalone platform silhouettes in place for now, with only stray chroma residue pixels removed where the scan found them.
+- Added 28 additional art-only modular platform kits under `Assets/ProjectEclipse/Art/Platforms`: iron, gold, platinum, silver, tin, lead, cobalt, titanium, mithril, adamantite, obsidian, crystal geode, oak forest, birch forest, pine forest, fir forest, snowy grass, snowy stone, snow, snowy ice, ice, magma, cloud, desert sandstone, swamp moss, mushroom forest, ancient ruins, and cosmic stone.
+- These expanded platform kits are not wired into scenes or prefabs yet; treat them as candidate art assets until they are inspected in Unity at actual gameplay scale.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
@@ -351,6 +353,7 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - Armor visual layers and original wearable art.
 - New item/equipment/crafting-port icons at actual UI size and in-world scale.
 - Rebuilt modular platform pieces in left/right, left/middle/right, repeated-middle, and long-platform arrangements at actual import pixels-per-unit, sorting, collision, and gameplay scale.
+- Expanded ore, forest, winter, elemental, and biome platform kits at actual import pixels-per-unit, sorting, collision, and gameplay scale.
 - Animation readability and combat feel.
 
 ## Animation Setup
