@@ -293,6 +293,11 @@ Art cleanup performed:
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
+- Archived the rejected pre-redo player and creature PNGs under `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19`, outside `Assets`, so Unity will not import duplicate stale sprites.
+- Replaced the active player sheet and Tree, Stone, Coal, and Copper creature sheets at their existing `Assets/ProjectEclipse/Art/Player` and `Assets/ProjectEclipse/Art/Creatures` paths.
+- Reworked the player base sheet to stay weapon-free; the attack row swings an empty hand for future weapon overlay following.
+- Reworked creature rows to avoid simple still-image duplication: player run and creature move rows have alternating steps, attacks have anticipation/extension/recovery, and stable idle/move rows were normalized to a consistent baseline and height.
+- Locally checked replacement sheets outside Unity for required dimensions, 96x96 frame slicing, magenta chroma residue, detached non-death sprite fragments, and contact-sheet motion readability. This is not Play Mode validation or final animation-quality approval.
 
 ## Expanding Progression
 
@@ -355,6 +360,9 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - New item/equipment/crafting-port icons at actual UI size and in-world scale.
 - Rebuilt modular platform pieces in left/right, left/middle/right, repeated-middle, and long-platform arrangements at actual import pixels-per-unit, sorting, collision, and gameplay scale.
 - Expanded ore, forest, winter, elemental, and biome platform kits at actual import pixels-per-unit, sorting, collision, and gameplay scale.
+- Replaced player and creature sheets at actual import pixels-per-unit, sorting, alpha edges, runtime row slicing, and gameplay scale.
+- Player run, jump, weaponless attack, hurt, and death timing in Play Mode.
+- Tree, Stone, Coal, and Copper idle/move/attack/hurt/death timing in Play Mode.
 - Animation readability and combat feel.
 
 ## Animation Setup
@@ -379,7 +387,7 @@ Player and creature sheets use a reusable code-driven setup:
 - `VisualStateAnimator` forwards movement and trigger state changes to the sheet animator.
 - Enemy definition assets assign sprite sheet references, visual scale, collider size, and behavior tuning.
 
-The current sheets are original homemade-style game art. They are meant to establish readable silhouettes, animation timing, and charm before final production polish.
+The current sheets are original homemade-style game art. They are meant to establish readable silhouettes, animation timing, and charm before final production polish. Local image QA checked dimensions, chroma cleanup, stable baselines, and obvious duplicate-frame problems, but Unity still needs to validate import settings, runtime timing, and visual scale.
 
 ## Known TODOs
 

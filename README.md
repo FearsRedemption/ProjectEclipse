@@ -23,7 +23,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Horizontal melee attack in front of the player.
 - Starter Blade equipped by default.
 - Stone Cleaver craftable from Stone drops.
-- Tree, Stone, Coal, and Copper creatures with distinct original chibi side-scroller sprite sheets, sizes, animations, combat stats, and reusable drop table assets.
+- Tree, Stone, Coal, and Copper creatures with replaced original chibi side-scroller sprite sheets, sizes, animation rows, combat stats, and reusable drop table assets.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
 - Sticks, Stone, Coal, and Copper Ore drops have distinct homemade icons.
 - Infinite-style storage foundation with stack sizes up to 999.
@@ -95,7 +95,9 @@ Each creature sheet has five animation rows:
 - Hurt
 - Die
 
-The player also has an original polished chibi sheet under `Assets/ProjectEclipse/Art/Player/` with Idle, Run, Jump, Attack, Hurt, and Die rows. `SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the player and enemies visibly transition during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
+The player also has an original polished chibi sheet under `Assets/ProjectEclipse/Art/Player/` with Idle, Run, Jump, Attack, Hurt, and Die rows. The current active player base sheet is weapon-free so mainhand weapons can be rendered later as a separate equipped visual layer. `SpriteSheetAnimator` slices these sheets at runtime and is driven by `VisualStateAnimator`, so the player and enemies can transition during the current MVP loop. The generated Animator Controllers remain as a Unity-native placeholder path for future hand-authored clips.
+
+The rejected pre-redo player and creature PNGs were archived under `ArtArchive/RejectedCharacterCreatureSprites_2026-06-19` outside `Assets` so Unity does not import duplicate old art. The active replacements were locally checked as 96x96 sprite sheets for dimensions, magenta chroma residue, detached non-death fragments, and basic frame-to-frame motion/contact-sheet readability. This was not Unity Play Mode validation.
 
 ## Scene And Data Workflow
 
@@ -145,6 +147,7 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
 - Needs visual inspection in Unity: verify replacement icons, equipped sprites, and connector-safe platform pieces import at the right pixels-per-unit, sorting, collision, and gameplay scale.
 - Needs visual inspection in Unity: check rebuilt and expanded platform kits in left/right, left/middle/right, and repeated-middle arrangements.
+- Needs visual inspection in Unity: review the replaced player and creature animation sheets at actual game scale, including player run/weaponless attack, creature walk/attack/hurt/death rows, import alpha, pixels-per-unit, sorting, and runtime slice timing.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.
