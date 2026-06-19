@@ -285,6 +285,8 @@ Art cleanup performed:
 - Replaced the first connector-safe platform pass because it still read as sliced/programmer-style bars and simple shapes. The active platform kit now comes from a fresh original painted platform sheet, then is normalized into the existing left/middle/right/small/underside asset slots with chroma despill cleanup.
 - Rebuilt the connectable platform pieces again as vertical sheer-cut slices from one continuous painted master per theme, so left, middle, and right share the same top/underside height and middle tiles can repeat between caps.
 - Connector fixes should stay edge-only: do not paint broad vertical seam patches over the platform art. The join sides need exact one-column profiles while the surrounding platform art remains natural.
+- Rebuilt the forest, stone, coal, and copper connector pieces from newly generated modular proof sheets using the approved forest direction as the style target. Coal now reads as dark charcoal rock instead of lava/magma, and copper reads as gray-brown stone with copper ore inclusions instead of solid copper.
+- Kept the small standalone platform silhouettes in place for now, with only stray chroma residue pixels removed where the scan found them.
 - Removed the unreferenced `Art/Placeholders/solid_square.png` programmer-art placeholder.
 - Reverted the later generated/collage art passes that produced janky swords, muddy texture artifacts, placeholder-like modular kits, and malformed props.
 - This replacement pass used official MapleStory imagery only as high-level style direction and used the approved ProjectEclipse player/creature sprites as the in-project style anchor. Assets should remain original ProjectEclipse art, not copied, traced, recolored, kitbashed, or texture-sampled from copyrighted sources.
@@ -348,6 +350,7 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - Offhand and back/cape visual anchor setup.
 - Armor visual layers and original wearable art.
 - New item/equipment/crafting-port icons at actual UI size and in-world scale.
+- Rebuilt modular platform pieces in left/right, left/middle/right, repeated-middle, and long-platform arrangements at actual import pixels-per-unit, sorting, collision, and gameplay scale.
 - Animation readability and combat feel.
 
 ## Animation Setup

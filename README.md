@@ -143,6 +143,7 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.
 - Needs visual inspection in Unity: player body, armor, offhand, and back/cape layers are only model-supported right now; they need actual anchor setup and original art.
 - Needs visual inspection in Unity: verify replacement icons, equipped sprites, and connector-safe platform pieces import at the right pixels-per-unit, sorting, collision, and gameplay scale.
+- Needs visual inspection in Unity: check rebuilt forest, stone, coal, and copper platform kits in left/right, left/middle/right, and repeated-middle arrangements.
 - Continue improving the homemade sheets and world sprites in-place.
 - Convert code-driven sprite clips into authored Animator clips if the project moves away from runtime slicing.
 - Expand the committed ScriptableObject assets instead of adding runtime-created data.
