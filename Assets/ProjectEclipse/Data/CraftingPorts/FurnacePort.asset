@@ -27,6 +27,7 @@ MonoBehaviour:
   stationType: 1
   allowedRecipes: []
   portLevel: 1
+  laneCount: 1
   speedMultiplier: 1
   fuelEfficiency: 1
   fuelRules: Uses fuel materials such as Coal. Fuel values still need balancing.

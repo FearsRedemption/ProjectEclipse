@@ -11,6 +11,7 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - equips the Starter Blade / beginner sword without seeding extra starting inventory
 - can use the Warrior class asset as the default class foundation when assigned
 - initializes crafting with recipe assets and ensures an `InventoryCraftingController` exists for crafting-port loadouts
+- ticks the active crafting Work Order queue from `CraftingSystem.Update`
 - connects furnace storage to the player inventory
 - connects the Tab-toggled unified inventory/equipment/crafting HUD to player/storage/furnace systems
 - gives placed enemies their player target and drop spawner
@@ -59,6 +60,17 @@ The MVP HUD is still IMGUI and still needs Unity inspection, but Tab now opens o
 - Lower center/left: filterable inventory crafting list with category filters, Available Only, and text search.
 - Right side: inventory grid with Equipment, Usable, Materials, Misc, and Key Items tabs.
 
+The integrated crafting panel now has a craft amount selector:
+
+- Presets: 1, 5, 10, 50, 100
+- Custom whole-number input
+- Minimum 1
+- Safe cap 9999
+- Resets to 1 after Craft
+- Resets to 1 when the selected recipe changes
+- Resets to 1 when crafting filters change
+- Resets to 1 when the inventory screen closes
+
 Primary item interaction is right-click:
 
 - Right-click inventory equipment to equip/swap into its matching combat slot.
@@ -73,6 +85,22 @@ Tooltip direction:
 - Crafting ports append comparison against the currently equipped port in the same crafting-port slot.
 - Empty equipment and port slots identify what can go there.
 
+Crafting feedback banner states:
+
+- Queue Started
+- Insufficient Materials
+- Missing Crafting Port
+- Insufficient Crafting Port Tier
+- Recipe Locked
+- Work Order Complete
+
+Requirement colors/prefixes are simple IMGUI feedback for now:
+
+- Green / `[OK]`: requirement satisfied
+- Red / `[MISS]`, `[PORT]`, `[TIER]`, `[LOCK]`: missing material, missing port, low port tier, or locked recipe
+- Yellow / `[QUEUE]`: missing item can be auto-processed from known recipes
+- Blue / `[PROC]`, `[RES]`: actively processing or logically reserved
+
 The HUD code is split into focused IMGUI helper classes so it can later move to UGUI/UI Toolkit without growing `MvpHud` into a catch-all:
 
 - `InventoryScreen`
@@ -83,6 +111,8 @@ The HUD code is split into focused IMGUI helper classes so it can later move to 
 - `ItemTooltipView`
 - `EquipmentComparisonTooltipView`
 - `CraftingPortComparisonTooltipView`
+- `CraftingFeedbackView`
+- `WorkOrderTrackerPanel`
 - `CraftingPanel`
 - `CraftingPortPanel`
 - `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
@@ -194,6 +224,41 @@ Recipes are `CraftingRecipe` objects. Add required `CraftingIngredient` entries 
 
 Recipes with `CraftingStationType.Inventory` craft directly from inventory materials. Port-gated recipes require an equipped matching crafting port, such as `FurnacePort`, `CauldronPort`, `ForgePort`, `AnvilPort`, or `UtilityPort`. Weapon recipe outputs can auto-equip only when `equipOutputIfWeapon` is true; normal crafted output should stay in inventory.
 
+Work Order flow:
+
+- Clicking Craft creates one active `WorkOrder`.
+- `CraftingPlanner` builds a deterministic dependency plan from the selected final recipe.
+- The planner first spends/reserves owned final ingredients, then recursively looks for one known recipe per missing output item.
+- Missing raw materials are reported but can still be collected later; the active Work Order updates live because processing checks current inventory every frame.
+- Missing ports, insufficient port tier, and locked recipes are reported distinctly.
+- Dependency loops are blocked with a Recipe Locked message.
+- `WorkOrder` starts queued steps when their ingredients and station lane are available.
+- Inputs are consumed when a step starts processing.
+- Outputs are added when the processing timer completes.
+- Completed intermediates stay in inventory if the Work Order is canceled afterward.
+- Canceling clears unused logical reservations and pending/processing jobs. First-pass limitation: inputs already consumed by a started processing step are not refunded.
+
+Material reservation direction:
+
+- The current pass uses WorkOrder-local logical reservations, exposed as total owned / reserved / available counts.
+- Because only one active Work Order is supported, this prevents double-queuing through the crafting UI.
+- Other future systems should consult `CraftingSystem.CountAvailableItem` before consuming materials that may be reserved.
+
+Crafting queue and lanes:
+
+- `CraftingPortDefinition.LaneCount` models future multi-lane ports.
+- Basic ports default to one lane.
+- Inventory crafts use effectively unlimited lanes but still flow through the same step model.
+- Different `CraftingStationType` values can process in parallel.
+- Multiple jobs using the same station type wait for that station's available lane count.
+
+Completion cue hooks:
+
+- `CraftingRecipe.CompletionSound` can play when the final Work Order step completes.
+- `CraftingRecipe.CompletionCueText` can provide text feedback.
+- If no cue text is assigned, anvil recipes default to `TINK TINK TINK`.
+- Do not add copyrighted sounds. Use original audio later.
+
 Recipe assets live under `Assets/ProjectEclipse/Data/Recipes` and are assigned to `MvpGameManager.availableRecipes`.
 
 ## Expanding Furnace Logic
@@ -249,8 +314,18 @@ Crafting-port data now supports:
 - Allowed recipe category text
 - Special effect text
 - Upgrade requirement text
+- Lane count
 
 The old world furnace stays for MVP compatibility until the inventory-port flow is tested.
+
+Metal/data progression direction:
+
+- Stone/basic ports are slow one-lane starters.
+- Copper ports should speed up early production and unlock more recipes.
+- Tin can be added as a monster/drop processing material.
+- Copper plus Tin can lead to Bronze Ingot recipes and Bronze crafting ports.
+- Iron, Silver, Gold, and gems can later add deeper port upgrades, sockets, accessories, and skill modifiers.
+- This pass adds code support and docs for these concepts, but does not add the full ScriptableObject data tree yet.
 
 ## Art Style Guide
 
@@ -402,6 +477,13 @@ This pass was made without opening Unity. Do not treat these items as visually o
 - IMGUI unified inventory screen, inventory tabs, tooltip placement, and comparison tooltip placement.
 - Equipment slot display, right-click equip/swap, right-click unequip, and secondary shift-click equip behavior.
 - Inventory crafting port equip/swap/unequip behavior and port-gated recipe rules.
+- Craft amount selector, preset/custom amount reset rules, and invalid amount handling.
+- Work Order creation, cancellation, missing-material waiting, automatic queued step processing, and completion feedback.
+- Work Order HUD tracker visibility during normal gameplay.
+- Requirement line colors/prefixes, missing-port/tier/locked recipe messages, and insufficient-material banner details.
+- Parallel processing across different port types and serial processing within one-lane base ports.
+- Logical reservations versus inventory totals/available counts.
+- Completion cue hook and `TINK TINK TINK` fallback for anvil/smithing recipes.
 - Magnet pickup radius/speed, item landing behavior, and collection timing.
 - Enemy ledge/platform awareness probe distances on each current creature.
 - Drop spawning/collection using the new `DropTableDefinition` references.

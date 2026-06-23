@@ -21,3 +21,7 @@ MonoBehaviour:
   outputQuantity: 1
   equipOutputIfWeapon: 1
   stationType: 0
+  requiredPortLevel: 1
+  craftTimeSeconds: 0.35
+  completionSound: {fileID: 0}
+  completionCueText:
