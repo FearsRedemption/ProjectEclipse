@@ -66,7 +66,11 @@ namespace ProjectEclipse.Player
 
             if (combatInput != null)
             {
-                combatInput.PollActions(facingDirection);
+                int requestedFacing = combatInput.PollActions(facingDirection);
+                if (requestedFacing != 0)
+                {
+                    SetFacingDirection(requestedFacing);
+                }
             }
             else if (WantsAttack() && combat != null)
             {
@@ -104,14 +108,19 @@ namespace ProjectEclipse.Player
         {
             if (Mathf.Abs(horizontal) > 0.01f)
             {
-                facingDirection = horizontal > 0f ? 1 : -1;
-                Vector3 scale = transform.localScale;
-                scale.x = Mathf.Abs(scale.x) * facingDirection;
-                transform.localScale = scale;
-                if (equipment != null)
-                {
-                    equipment.SetFacingDirection(facingDirection);
-                }
+                SetFacingDirection(horizontal > 0f ? 1 : -1);
+            }
+        }
+
+        private void SetFacingDirection(int direction)
+        {
+            facingDirection = direction >= 0 ? 1 : -1;
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facingDirection;
+            transform.localScale = scale;
+            if (equipment != null)
+            {
+                equipment.SetFacingDirection(facingDirection);
             }
         }
 

@@ -26,5 +26,10 @@ MonoBehaviour:
   portSlot: 1
   stationType: 2
   allowedRecipes: []
+  portLevel: 1
   speedMultiplier: 1
+  fuelEfficiency: 1
   fuelRules: Potion catalyst rules are not implemented yet.
+  allowedRecipeCategories: Potions, Consumables
+  specialEffectText: Placeholder port for future potion and buff crafting recipes.
+  upgradeRequirements: Future upgrade path should use creature reagents, not survival gathering.

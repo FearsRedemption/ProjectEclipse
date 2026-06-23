@@ -1,6 +1,6 @@
 # Project Eclipse
 
-Project Eclipse is a standalone Unity 2D side-scrolling combat and grinding prototype. The long-term fantasy is Terraria-style boss-locked progression and crafted equipment with MapleStory-like enemy grinding, pop-out drops, and weapon-driven combat.
+Project Eclipse is a standalone Unity 2D side-scrolling monster-grinding crafting RPG prototype. The long-term fantasy is readable MapleStory-like platform grinding and loot, Terraria-like movement-heavy boss fights, BDO-inspired class skill flow, and inventory-driven equipment/crafting progression.
 
 This is not a Terraria mod, not a tModLoader project, and does not depend on any paid assets.
 
@@ -17,17 +17,21 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Homemade prefab copies exist only as reusable references; the MVP scene does not depend on invisible runtime level generation.
 - ScriptableObject data assets for items, weapons, enemies, recipes, and progression tiers.
 - Warrior class foundation asset under `Assets/ProjectEclipse/Data/Classes`.
-- Inventory foundation now separates Equipment, Materials, Consumables, and Key Items / Special Items.
-- Inventory UI is split into focused IMGUI helper classes with icon slots and icon-backed tooltips.
+- Tab now opens one unified IMGUI inventory/equipment/crafting screen instead of separate prototype windows.
+- Inventory tabs now separate Equipment, Usable, Materials, Misc, and Key Items.
+- Left-side character equipment area shows mainhand, offhand, armor, accessory, belt, and back slots around a paper-doll placeholder.
+- Crafting ports are shown as equipment-adjacent Furnace, Cauldron, Forge, Anvil, and Utility slots.
+- Inventory UI is split into focused IMGUI helper classes with icon slots, right-click interactions, normal item tooltips, equipment comparison tooltips, and crafting-port comparison tooltips.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
-- Horizontal melee attack in front of the player.
-- Starter Blade equipped by default.
+- Mainhand and offhand attacks now resolve a Terraria-like mouse aim direction, with facing-direction fallback if no camera/mouse world point is available.
+- Warrior Q/E/R/F now execute playable placeholder skills: Cleave, Guard Break, Leap Strike, and Battle Cry.
+- Starter Blade is equipped by default without seeding extra starter inventory items.
 - Stone Cleaver craftable from Stone drops.
 - Tree, Stone, Coal, and Copper creatures with replaced original chibi side-scroller sprite sheets, sizes, animation rows, combat stats, and reusable drop table assets.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
 - Sticks, Stone, Coal, and Copper Ore drops have distinct homemade icons.
 - Infinite-style storage foundation with stack sizes up to 999.
-- Small HUD by default, with storage, crafting, and furnace panels toggled open with Tab.
+- Small HUD by default, with the unified inventory/equipment/crafting screen toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
 - Data structures for Earth/Forest, Stone, Coal, and Copper progression tiers.
 - Progression skeleton models for stages, world tiers, bosses, unlock requirements, resource tiers, crafting tiers, and recommended levels.
@@ -37,18 +41,21 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Starter Blade and Stone Cleaver now have separate inventory/equipped sprites, with shield and cape equipped visuals prepared for future layered anchors.
 - Connector-safe platform kits live under `Assets/ProjectEclipse/Art/Platforms`; left, middle, and right pieces share flat seam edges so they can assemble into longer platforms.
 - The platform kit library now includes additional art-only ore, forest, winter, elemental, and biome variants for future crafting-map stages.
-- Inventory crafting port data seeds support furnace and cauldron ports for future inventory-based crafting.
+- Inventory crafting port data seeds support furnace and cauldron ports as real item-like, slottable, upgrade-ready crafting ports.
 - World drops now have magnet pickup behavior after a short delay and warn when art is missing.
 
 ## Controls
 
 - Move: A/D or Left/Right arrows
 - Jump: Space, W, or Up arrow
-- Attack: J, Left Ctrl, or left mouse button
+- Mainhand attack: J, Left Ctrl, or left mouse button
+- Offhand action: right mouse button
+- Warrior skills: Q, E, R, F
+- Sprint / modifier: Shift
 - Inventory/storage: Tab
-- Shift-click storage item buttons:
-  - Weapons attempt to equip.
-  - Coal and copper-related materials attempt to move into the furnace model.
+- Right-click inventory equipment or crafting-port items to equip/swap them into the matching slot.
+- Right-click equipped gear or equipped crafting ports to unequip them back into inventory.
+- Shift-click remains a secondary shortcut for inventory equip behavior.
 
 ## Current Enemies And Drops
 
@@ -65,16 +72,18 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Basic Furnace: Stone x12, Coal x3.
 - Copper Whetstone Placeholder: Copper Ore x8, Coal x2.
 
+Recipes craft from inventory materials. `Inventory` recipes only require ingredients; port-gated recipes require the matching equipped crafting port. Crafted output returns to inventory unless a recipe explicitly opts into auto-equipping.
+
 ## Progression Direction
 
-Project Eclipse is structured around enemy and boss-gated resource tiers instead of mining blocks. The current MVP seeds these tiers:
+Project Eclipse is structured around enemy and boss-gated resource tiers instead of mining blocks. Materials should primarily come from monster drops and processing monster drops, not mining/chopping/survival gathering. The current MVP seeds these tiers:
 
 - Earth / Forest
 - Earth / Stone Tier
 - Earth / Coal Tier
 - Earth / Copper Tier
 
-The intended long-term structure expands from Earth into Moon, Mars, and deeper cosmic or elemental dimensions. Each dimension should eventually contain multiple mini-bosses before a main boss or god unlocks the next progression layer.
+The intended long-term structure expands from Earth into Moon, Mars, and deeper cosmic or elemental dimensions. Each dimension should eventually contain multiple mini-bosses before a main boss or god unlocks the next progression layer. Bosses should test movement, dodge timing, positioning, telegraph reading, arena control, projectiles, phases, and skill usage instead of becoming static unavoidable damage sponges.
 
 ## Animation Notes
 
@@ -141,8 +150,10 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Let Unity regenerate `Packages/packages-lock.json` and any local Library data.
 - Needs Unity machine testing: confirm C# compilation, inspect new serialized fields, and run Play Mode.
 - Needs Unity machine testing: tune enemy ledge/platform probe distances per creature size.
-- Needs Unity machine testing: inspect the IMGUI inventory tabs, item tooltip placement, and shift-click equip/port actions.
-- Needs Unity machine testing: add/assign `CombatInputRouter`, `InventoryCraftingController`, and layered visual anchors where appropriate.
+- Needs Unity machine testing: inspect the unified IMGUI inventory/equipment/crafting screen, item tooltip placement, comparison tooltip placement, right-click equip/swap, and right-click unequip behavior.
+- Needs Unity machine testing: verify runtime-created `InventoryCraftingController` wiring or add it to the player prefab/scene object explicitly after inspection.
+- Needs Unity machine testing: verify LMB/RMB mouse aim, Warrior Q/E/R/F skill effects, cooldowns, knockback, and Shift sprint/modifier behavior.
+- Needs Unity machine testing: add/assign layered visual anchors where appropriate.
 - Needs Unity machine testing: tune acceleration, deceleration, coyote time, jump buffering, fall gravity, sprint, and magnet pickup feel.
 - Needs visual inspection in Unity: confirm player base sprite no longer appears to permanently include the weapon once a separate weapon anchor/renderer is added to the player prefab or scene object.
 - Needs visual inspection in Unity: tune equipped weapon sprite offsets, scale, sorting order, and attack readability.

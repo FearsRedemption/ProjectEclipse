@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectEclipse.Items;
 using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
@@ -14,8 +15,10 @@ namespace ProjectEclipse.Combat
         private float nextAttackTime;
         private float nextOffhandTime;
         private VisualStateAnimator visualState;
+        private int lastAimFacingDirection = 1;
 
         public WeaponDefinition EquippedWeapon { get { return equippedWeapon; } }
+        public int LastAimFacingDirection { get { return lastAimFacingDirection; } }
 
         private void Awake()
         {
@@ -40,32 +43,8 @@ namespace ProjectEclipse.Combat
                 visualState.TriggerAttack();
             }
 
-            float direction = facingDirection >= 0 ? 1f : -1f;
-            Vector2 center = GetAttackCenter(direction);
-            Vector2 size = new Vector2(equippedWeapon.AttackRange, equippedWeapon.AttackHeight);
-            Collider2D[] hits = Physics2D.OverlapBoxAll(center, size, 0f, targetMask);
-
-            bool hitSomething = false;
-            for (int i = 0; i < hits.Length; i++)
-            {
-                Collider2D hit = hits[i];
-                if (hit == null || hit.transform == transform || hit.transform.IsChildOf(transform))
-                {
-                    continue;
-                }
-
-                IDamageable damageable = hit.GetComponentInParent<IDamageable>();
-                if (damageable == null || !damageable.IsAlive)
-                {
-                    continue;
-                }
-
-                Vector2 knockback = new Vector2(direction * equippedWeapon.Knockback, 1.6f);
-                damageable.TakeDamage(new DamageInfo(equippedWeapon.Damage, gameObject, center, knockback));
-                hitSomething = true;
-            }
-
-            return hitSomething;
+            Vector2 aim = GetAimDirection(facingDirection);
+            return ExecuteDirectionalHit(aim, equippedWeapon.AttackRange, equippedWeapon.AttackHeight, equippedWeapon.Damage, equippedWeapon.Knockback, 1.6f, false);
         }
 
         public bool TryOffhandAction(EquipmentDefinition offhand, int facingDirection, bool modified)
@@ -81,12 +60,60 @@ namespace ProjectEclipse.Combat
                 visualState.TriggerAttack();
             }
 
-            float direction = facingDirection >= 0 ? 1f : -1f;
             float shoveRange = modified ? 1.1f : 0.85f;
-            Vector2 center = (Vector2)transform.position + new Vector2(direction * shoveRange * 0.5f, attackOriginOffset.y);
-            Collider2D[] hits = Physics2D.OverlapBoxAll(center, new Vector2(shoveRange, 0.95f), 0f, targetMask);
-            bool hitSomething = false;
+            int damage = Mathf.Max(1, offhand.Stats.Attack + (modified ? 1 : 0));
+            float shoveForce = 2.6f + offhand.Stats.Defense + (modified ? 1.6f : 0f);
+            return ExecuteDirectionalHit(GetAimDirection(facingDirection), shoveRange, 0.95f, damage, shoveForce, 1.05f, false);
+        }
 
+        public bool CanAttack()
+        {
+            return equippedWeapon != null && Time.time >= nextAttackTime;
+        }
+
+        public Vector2 GetAimDirection(int fallbackFacingDirection)
+        {
+            Vector2 origin = (Vector2)transform.position + attackOriginOffset;
+            Camera camera = Camera.main;
+            if (camera == null)
+            {
+                return FallbackAim(fallbackFacingDirection);
+            }
+
+            Vector3 mouse = Input.mousePosition;
+            mouse.z = Mathf.Abs(camera.transform.position.z - transform.position.z);
+            Vector3 world = camera.ScreenToWorldPoint(mouse);
+            Vector2 aim = (Vector2)world - origin;
+            if (aim.sqrMagnitude < 0.0001f)
+            {
+                return FallbackAim(fallbackFacingDirection);
+            }
+
+            aim.Normalize();
+            lastAimFacingDirection = aim.x >= 0f ? 1 : -1;
+            return aim;
+        }
+
+        public bool PerformSkillHit(int fallbackFacingDirection, float range, float height, int damage, float knockback, float lift)
+        {
+            if (visualState != null)
+            {
+                visualState.TriggerAttack();
+            }
+
+            return ExecuteDirectionalHit(GetAimDirection(fallbackFacingDirection), range, height, damage, knockback, lift, false);
+        }
+
+        public bool PerformRadialHit(float radius, int damage, float knockback, float lift)
+        {
+            if (visualState != null)
+            {
+                visualState.TriggerAttack();
+            }
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, targetMask);
+            List<IDamageable> damaged = new List<IDamageable>();
+            bool hitSomething = false;
             for (int i = 0; i < hits.Length; i++)
             {
                 Collider2D hit = hits[i];
@@ -96,31 +123,82 @@ namespace ProjectEclipse.Combat
                 }
 
                 IDamageable damageable = hit.GetComponentInParent<IDamageable>();
-                if (damageable == null || !damageable.IsAlive)
+                if (damageable == null || !damageable.IsAlive || damaged.Contains(damageable))
                 {
                     continue;
                 }
 
-                int damage = Mathf.Max(1, offhand.Stats.Attack + (modified ? 1 : 0));
-                float shoveForce = 2.6f + offhand.Stats.Defense + (modified ? 1.6f : 0f);
-                Vector2 knockback = new Vector2(direction * shoveForce, 1.05f);
-                damageable.TakeDamage(new DamageInfo(damage, gameObject, center, knockback));
+                Vector2 away = (hit.transform.position - transform.position);
+                if (away.sqrMagnitude < 0.0001f)
+                {
+                    away = Vector2.right * lastAimFacingDirection;
+                }
+                away.Normalize();
+                damageable.TakeDamage(new DamageInfo(damage, gameObject, transform.position, away * knockback + Vector2.up * lift));
+                damaged.Add(damageable);
                 hitSomething = true;
             }
 
             return hitSomething;
         }
 
-        public bool CanAttack()
-        {
-            return equippedWeapon != null && Time.time >= nextAttackTime;
-        }
-
         private Vector2 GetAttackCenter(float direction)
         {
+            float range = equippedWeapon != null ? equippedWeapon.AttackRange : 1f;
             return (Vector2)transform.position + new Vector2(
-                attackOriginOffset.x + direction * equippedWeapon.AttackRange * 0.5f,
+                attackOriginOffset.x + direction * range * 0.5f,
                 attackOriginOffset.y);
+        }
+
+        private Vector2 FallbackAim(int fallbackFacingDirection)
+        {
+            lastAimFacingDirection = fallbackFacingDirection >= 0 ? 1 : -1;
+            return Vector2.right * lastAimFacingDirection;
+        }
+
+        private bool ExecuteDirectionalHit(Vector2 aim, float range, float height, int damage, float knockback, float lift, bool triggerAnimation)
+        {
+            if (triggerAnimation && visualState != null)
+            {
+                visualState.TriggerAttack();
+            }
+
+            if (aim.sqrMagnitude < 0.0001f)
+            {
+                aim = Vector2.right * lastAimFacingDirection;
+            }
+            aim.Normalize();
+            lastAimFacingDirection = aim.x >= 0f ? 1 : -1;
+
+            Vector2 origin = (Vector2)transform.position + attackOriginOffset;
+            Vector2 center = origin + aim * Mathf.Max(0.1f, range) * 0.5f;
+            Vector2 size = new Vector2(Mathf.Max(0.1f, range), Mathf.Max(0.1f, height));
+            float angle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
+            Collider2D[] hits = Physics2D.OverlapBoxAll(center, size, angle, targetMask);
+            List<IDamageable> damaged = new List<IDamageable>();
+
+            bool hitSomething = false;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Collider2D hit = hits[i];
+                if (hit == null || hit.transform == transform || hit.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                IDamageable damageable = hit.GetComponentInParent<IDamageable>();
+                if (damageable == null || !damageable.IsAlive || damaged.Contains(damageable))
+                {
+                    continue;
+                }
+
+                Vector2 knockbackVector = aim * Mathf.Max(0f, knockback) + Vector2.up * lift;
+                damageable.TakeDamage(new DamageInfo(Mathf.Max(1, damage), gameObject, center, knockbackVector));
+                damaged.Add(damageable);
+                hitSomething = true;
+            }
+
+            return hitSomething;
         }
 
         private void OnDrawGizmosSelected()

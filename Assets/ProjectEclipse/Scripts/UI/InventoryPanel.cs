@@ -16,7 +16,7 @@ namespace ProjectEclipse.UI
         private readonly FurnaceSystem furnace;
         private readonly EquipmentPanel equipmentPanel;
         private readonly ItemGridView itemGrid = new ItemGridView();
-        private InventoryTab selectedTab = InventoryTab.Materials;
+        private InventoryTab selectedTab = InventoryTab.Equipment;
 
         public InventoryPanel(
             InventoryStore inventory,
@@ -51,11 +51,14 @@ namespace ProjectEclipse.UI
                 case InventoryTab.Materials:
                     DrawGrid(hover, item => item.Category == ItemCategory.Material);
                     break;
-                case InventoryTab.Consumables:
+                case InventoryTab.Usable:
                     DrawGrid(hover, item => item.Category == ItemCategory.Consumable);
                     break;
+                case InventoryTab.Misc:
+                    DrawGrid(hover, item => item.Category == ItemCategory.Upgrade || item.Category == ItemCategory.CraftingPort || item.Category == ItemCategory.Furnace || item.Category == ItemCategory.Placeholder);
+                    break;
                 case InventoryTab.KeyItems:
-                    DrawGrid(hover, item => item.Category == ItemCategory.KeyItem || item.Category == ItemCategory.CraftingPort || item.Category == ItemCategory.Furnace);
+                    DrawGrid(hover, item => item.Category == ItemCategory.KeyItem || item.Category == ItemCategory.Quest);
                     break;
             }
 
@@ -66,8 +69,9 @@ namespace ProjectEclipse.UI
         {
             GUILayout.BeginHorizontal();
             TabButton(InventoryTab.Equipment, "Equipment");
+            TabButton(InventoryTab.Usable, "Usable");
             TabButton(InventoryTab.Materials, "Materials");
-            TabButton(InventoryTab.Consumables, "Consumables");
+            TabButton(InventoryTab.Misc, "Misc");
             TabButton(InventoryTab.KeyItems, "Key Items");
             GUILayout.EndHorizontal();
         }
@@ -91,16 +95,18 @@ namespace ProjectEclipse.UI
         private void DrawGrid(ItemHoverState hover, System.Predicate<ItemDefinition> filter, float height = 255f)
         {
             List<InventoryStack> stacks = inventory.GetSnapshot();
-            ItemDefinition clicked = itemGrid.Draw(stacks, hover, filter, height);
-            if (clicked != null)
+            ItemDefinition clicked;
+            bool shiftHeld = Event.current != null && Event.current.shift;
+            ItemSlotClick click = itemGrid.DrawClickable(stacks, hover, filter, height, null, out clicked);
+            if (clicked != null && (click == ItemSlotClick.Right || shiftHeld))
             {
-                HandleClick(clicked, Event.current != null && Event.current.shift);
+                HandleClick(clicked);
             }
         }
 
-        private void HandleClick(ItemDefinition item, bool shift)
+        private void HandleClick(ItemDefinition item)
         {
-            if (!shift || item == null)
+            if (item == null)
             {
                 return;
             }

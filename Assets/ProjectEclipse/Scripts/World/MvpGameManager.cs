@@ -114,14 +114,17 @@ namespace ProjectEclipse.World
                 playerEquipment.Initialize(playerCombat, playerInventory);
             }
 
-            if (playerInventory != null && weaponToEquip != null && !playerInventory.HasItem(weaponToEquip, 1))
-            {
-                playerInventory.AddItem(weaponToEquip, 1);
-            }
-
             if (playerEquipment != null && weaponToEquip != null)
             {
                 playerEquipment.TryEquipWeapon(weaponToEquip);
+            }
+
+            if (playerInventory != null && weaponToEquip != null)
+            {
+                while (playerInventory.HasItem(weaponToEquip, 1))
+                {
+                    playerInventory.RemoveItem(weaponToEquip, 1);
+                }
             }
         }
 

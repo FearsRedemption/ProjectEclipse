@@ -12,8 +12,6 @@ namespace ProjectEclipse.Combat
             [SerializeField] private CombatAction action = CombatAction.SkillQ;
             [SerializeField] private float cooldown = 1f;
 
-            private float nextUseTime;
-
             public ActionBinding()
             {
             }
@@ -27,21 +25,17 @@ namespace ProjectEclipse.Combat
 
             public KeyCode Key { get { return key; } }
             public CombatAction Action { get { return action; } }
+            public float Cooldown { get { return Mathf.Max(0.05f, cooldown); } }
 
             public bool TryUse()
             {
-                if (!Input.GetKeyDown(key) || Time.time < nextUseTime)
-                {
-                    return false;
-                }
-
-                nextUseTime = Time.time + Mathf.Max(0.05f, cooldown);
-                return true;
+                return Input.GetKeyDown(key);
             }
         }
 
         [SerializeField] private CombatController combatController;
         [SerializeField] private EquipmentController equipmentController;
+        [SerializeField] private WarriorSkillController warriorSkills;
         [SerializeField] private float sprintSpeedMultiplier = 1.35f;
         [SerializeField] private ActionBinding[] actionBindings =
         {
@@ -65,10 +59,19 @@ namespace ProjectEclipse.Combat
             {
                 equipmentController = GetComponent<EquipmentController>();
             }
+            if (warriorSkills == null)
+            {
+                warriorSkills = GetComponent<WarriorSkillController>();
+            }
+            if (warriorSkills == null)
+            {
+                warriorSkills = gameObject.AddComponent<WarriorSkillController>();
+            }
         }
 
-        public void PollActions(int facingDirection)
+        public int PollActions(int facingDirection)
         {
+            int requestedFacingDirection = 0;
             SprintHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
             if (PressedMainhand())
@@ -77,6 +80,7 @@ namespace ProjectEclipse.Combat
                 if (combatController != null)
                 {
                     combatController.TryAttack(facingDirection);
+                    requestedFacingDirection = combatController.LastAimFacingDirection;
                 }
             }
 
@@ -86,6 +90,7 @@ namespace ProjectEclipse.Combat
                 if (combatController != null)
                 {
                     combatController.TryOffhandAction(equipmentController != null ? equipmentController.Offhand : null, facingDirection, SprintHeld);
+                    requestedFacingDirection = combatController.LastAimFacingDirection;
                 }
             }
 
@@ -93,9 +98,18 @@ namespace ProjectEclipse.Combat
             {
                 if (actionBindings[i] != null && actionBindings[i].TryUse())
                 {
-                    LastAction = actionBindings[i].Action;
+                    if (warriorSkills != null && warriorSkills.TryUseSkill(actionBindings[i].Action, facingDirection, SprintHeld))
+                    {
+                        LastAction = actionBindings[i].Action;
+                        if (combatController != null)
+                        {
+                            requestedFacingDirection = combatController.LastAimFacingDirection;
+                        }
+                    }
                 }
             }
+
+            return requestedFacingDirection;
         }
 
         private static bool PressedMainhand()

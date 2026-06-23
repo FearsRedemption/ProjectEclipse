@@ -26,5 +26,10 @@ MonoBehaviour:
   portSlot: 0
   stationType: 1
   allowedRecipes: []
+  portLevel: 1
   speedMultiplier: 1
+  fuelEfficiency: 1
   fuelRules: Uses fuel materials such as Coal. Fuel values still need balancing.
+  allowedRecipeCategories: Smelting, Refining
+  specialEffectText: Enables furnace-port recipes from the inventory crafting screen.
+  upgradeRequirements: Future upgrade path should use monster drops and refined materials.

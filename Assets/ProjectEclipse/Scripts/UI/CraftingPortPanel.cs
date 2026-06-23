@@ -17,37 +17,59 @@ namespace ProjectEclipse.UI
 
         public void Draw(int windowId)
         {
+            DrawEquipmentSlots(new ItemHoverState());
+            DrawLegacyFurnaceStatus();
+            GUI.DragWindow();
+        }
+
+        public void DrawEquipmentSlots(ItemHoverState hover)
+        {
             if (inventoryCrafting != null)
             {
-                GUILayout.Label("Equipped Ports");
-                for (int i = 0; i < inventoryCrafting.EquippedPorts.Count; i++)
-                {
-                    CraftingPortDefinition port = inventoryCrafting.EquippedPorts[i];
-                    if (port != null)
-                    {
-                        GUILayout.Label(port.PortSlot + ": " + port.DisplayName);
-                    }
-                }
+                GUILayout.Label("Crafting Ports");
+                GUILayout.BeginHorizontal();
+                DrawPortSlot(CraftingPortSlot.FurnacePort, "Furnace", hover);
+                DrawPortSlot(CraftingPortSlot.CauldronPort, "Cauldron", hover);
+                DrawPortSlot(CraftingPortSlot.ForgePort, "Forge", hover);
+                DrawPortSlot(CraftingPortSlot.AnvilPort, "Anvil", hover);
+                DrawPortSlot(CraftingPortSlot.UtilityPort, "Utility", hover);
+                GUILayout.EndHorizontal();
             }
             else
             {
                 GUILayout.Label("Inventory crafting ports not wired.");
             }
+        }
 
-            if (furnace != null)
+        public void DrawLegacyFurnaceStatus()
+        {
+            if (furnace == null)
             {
-                GUILayout.Space(6f);
-                GUILayout.Label("Legacy Furnace");
-                GUILayout.Label("Level: " + furnace.FurnaceLevel);
-                GUILayout.Label("Fuel: " + DescribeSlot(furnace.FuelSlot));
-                GUILayout.Label("Input: " + DescribeSlot(furnace.InputSlot));
-                GUILayout.Label("Output: " + DescribeSlot(furnace.OutputSlot));
-                Rect bar = GUILayoutUtility.GetRect(280f, 16f);
-                GUI.Box(bar, string.Empty);
-                GUI.Box(new Rect(bar.x, bar.y, bar.width * furnace.Progress01, bar.height), string.Empty);
+                return;
             }
 
-            GUI.DragWindow();
+            GUILayout.Space(6f);
+            GUILayout.Label("Legacy Furnace Station");
+            GUILayout.Label("Level: " + furnace.FurnaceLevel);
+            GUILayout.Label("Fuel: " + DescribeSlot(furnace.FuelSlot));
+            GUILayout.Label("Input: " + DescribeSlot(furnace.InputSlot));
+            GUILayout.Label("Output: " + DescribeSlot(furnace.OutputSlot));
+            Rect bar = GUILayoutUtility.GetRect(280f, 16f);
+            GUI.Box(bar, string.Empty);
+            GUI.Box(new Rect(bar.x, bar.y, bar.width * furnace.Progress01, bar.height), string.Empty);
+        }
+
+        private void DrawPortSlot(CraftingPortSlot slot, string label, ItemHoverState hover)
+        {
+            GUILayout.BeginVertical(GUILayout.Width(58f));
+            GUILayout.Label(label);
+            CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetEquippedPort(slot) : null;
+            ItemSlotClick click = ItemSlotView.DrawCraftingPortSlot(port, port != null ? 1 : 0, hover, slot, label, port != null);
+            if (click == ItemSlotClick.Right && port != null && inventoryCrafting != null)
+            {
+                inventoryCrafting.TryUnequipPort(slot);
+            }
+            GUILayout.EndVertical();
         }
 
         private static string DescribeSlot(FurnaceSlot slot)

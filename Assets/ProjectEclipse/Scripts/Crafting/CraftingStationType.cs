@@ -6,6 +6,7 @@ namespace ProjectEclipse.Crafting
         FurnacePort,
         CauldronPort,
         ForgePort,
-        AnvilPort
+        AnvilPort,
+        UtilityPort
     }
 }

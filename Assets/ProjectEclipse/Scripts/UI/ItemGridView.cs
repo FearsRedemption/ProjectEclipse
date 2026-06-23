@@ -15,7 +15,21 @@ namespace ProjectEclipse.UI
             System.Predicate<ItemDefinition> filter,
             float height)
         {
-            ItemDefinition clicked = null;
+            ItemDefinition clicked;
+            ItemSlotClick click = DrawClickable(stacks, hover, filter, height, null, out clicked);
+            return click != ItemSlotClick.None ? clicked : null;
+        }
+
+        public ItemSlotClick DrawClickable(
+            IReadOnlyList<InventoryStack> stacks,
+            ItemHoverState hover,
+            System.Predicate<ItemDefinition> filter,
+            float height,
+            ItemDefinition selectedItem,
+            out ItemDefinition clicked)
+        {
+            clicked = null;
+            ItemSlotClick clickedButton = ItemSlotClick.None;
             scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(height));
             int column = 0;
             GUILayout.BeginHorizontal();
@@ -28,9 +42,11 @@ namespace ProjectEclipse.UI
                     continue;
                 }
 
-                if (ItemSlotView.Draw(stack.Item, stack.Quantity, hover))
+                ItemSlotClick slotClick = ItemSlotView.DrawClick(stack.Item, stack.Quantity, hover, stack.Item == selectedItem);
+                if (slotClick != ItemSlotClick.None)
                 {
                     clicked = stack.Item;
+                    clickedButton = slotClick;
                 }
 
                 column++;
@@ -44,7 +60,7 @@ namespace ProjectEclipse.UI
 
             GUILayout.EndHorizontal();
             GUILayout.EndScrollView();
-            return clicked;
+            return clickedButton;
         }
     }
 }

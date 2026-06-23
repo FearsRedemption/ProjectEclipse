@@ -89,6 +89,8 @@ namespace ProjectEclipse.Items
 
         private InventoryStore FindPickupTarget()
         {
+            // Future pet collectors can use this same target path: identify the owning
+            // InventoryStore, then let the drop magnet toward that collector/player.
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, magnetRadius);
             for (int i = 0; i < hits.Length; i++)
             {

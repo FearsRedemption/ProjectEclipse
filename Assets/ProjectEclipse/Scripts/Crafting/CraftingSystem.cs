@@ -22,6 +22,10 @@ namespace ProjectEclipse.Crafting
             equipment = playerEquipment;
             recipes = new List<CraftingRecipe>(availableRecipes);
             inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
+            if (inventoryCrafting == null && store != null)
+            {
+                inventoryCrafting = store.gameObject.AddComponent<InventoryCraftingController>();
+            }
             if (inventoryCrafting != null)
             {
                 inventoryCrafting.Initialize(store);
@@ -35,8 +39,7 @@ namespace ProjectEclipse.Crafting
                 return false;
             }
 
-            return recipe.StationType == CraftingStationType.Inventory
-                || (inventoryCrafting != null && inventoryCrafting.HasPort(recipe.StationType));
+            return HasRequiredStation(recipe);
         }
 
         public bool TryCraft(CraftingRecipe recipe)
@@ -58,6 +61,32 @@ namespace ProjectEclipse.Crafting
             }
 
             return true;
+        }
+
+        public int CountItem(ItemDefinition item)
+        {
+            return inventory != null ? inventory.CountItem(item) : 0;
+        }
+
+        public bool HasRequiredStation(CraftingRecipe recipe)
+        {
+            if (recipe == null)
+            {
+                return false;
+            }
+
+            return recipe.StationType == CraftingStationType.Inventory
+                || (inventoryCrafting != null && inventoryCrafting.HasPort(recipe.StationType));
+        }
+
+        public CraftingPortDefinition GetPortForRecipe(CraftingRecipe recipe)
+        {
+            if (recipe == null || inventoryCrafting == null || recipe.StationType == CraftingStationType.Inventory)
+            {
+                return null;
+            }
+
+            return inventoryCrafting.GetPort(recipe.StationType);
         }
     }
 }
