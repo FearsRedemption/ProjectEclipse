@@ -23,10 +23,23 @@ namespace ProjectEclipse.UI
         private CraftingFilter selectedFilter = CraftingFilter.All;
         private bool availableOnly;
         private string search = string.Empty;
+        private CraftingRecipe selectedRecipe;
+        private int craftAmount = 1;
+        private bool customAmountSelected;
+        private string customAmountText = "1";
+
+        private const int MaxCraftAmount = 9999;
 
         public CraftingPanel(CraftingSystem crafting)
         {
             this.crafting = crafting;
+        }
+
+        public void ResetCraftAmount()
+        {
+            craftAmount = 1;
+            customAmountText = "1";
+            customAmountSelected = false;
         }
 
         public void Draw(int windowId)
@@ -49,6 +62,8 @@ namespace ProjectEclipse.UI
                 return;
             }
 
+            CraftingFeedbackView.Draw(crafting.Feedback);
+            DrawSelectedRecipeControls();
             DrawFilters();
             search = GUILayout.TextField(search);
             availableOnly = GUILayout.Toggle(availableOnly, "Available Only");
@@ -63,12 +78,14 @@ namespace ProjectEclipse.UI
                     continue;
                 }
 
-                GUI.enabled = crafting.CanCraft(recipe);
+                bool isSelected = recipe == selectedRecipe;
+                Color oldColor = GUI.color;
+                GUI.color = isSelected ? new Color(1f, 0.94f, 0.62f, 1f) : Color.white;
                 if (GUILayout.Button(recipe.DisplayName))
                 {
-                    crafting.TryCraft(recipe);
+                    SelectRecipe(recipe);
                 }
-                GUI.enabled = true;
+                GUI.color = oldColor;
                 GUILayout.Label(DescribeRecipe(recipe));
                 string missing = DescribeMissing(recipe);
                 if (!string.IsNullOrEmpty(missing))
@@ -101,8 +118,121 @@ namespace ProjectEclipse.UI
             if (GUILayout.Button(label, GUILayout.Height(24f)))
             {
                 selectedFilter = filter;
+                ResetCraftAmount();
             }
             GUI.enabled = true;
+        }
+
+        private void DrawSelectedRecipeControls()
+        {
+            if (selectedRecipe == null)
+            {
+                GUILayout.Label("Select a recipe to create a Work Order.");
+                return;
+            }
+
+            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.Label(selectedRecipe.DisplayName);
+            DrawAmountSelector();
+            if (GUILayout.Button("CRAFT", GUILayout.Height(28f)))
+            {
+                crafting.TryStartWorkOrder(selectedRecipe, GetCraftAmount());
+                ResetCraftAmount();
+            }
+
+            GUILayout.Label("Requirements");
+            List<CraftingRequirementLine> preview = crafting.GetRecipePreview(selectedRecipe, GetCraftAmount());
+            CraftingFeedbackView.DrawLines(preview);
+            GUILayout.EndVertical();
+        }
+
+        private void DrawAmountSelector()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Craft:", GUILayout.Width(42f));
+            AmountButton(1);
+            AmountButton(5);
+            AmountButton(10);
+            AmountButton(50);
+            AmountButton(100);
+            GUI.enabled = !customAmountSelected;
+            if (GUILayout.Button("Custom", GUILayout.Width(72f)))
+            {
+                customAmountSelected = true;
+                customAmountText = craftAmount.ToString();
+            }
+            GUI.enabled = true;
+            GUILayout.Label("x", GUILayout.Width(12f));
+            string nextCustom = GUILayout.TextField(customAmountText, GUILayout.Width(72f));
+            if (nextCustom != customAmountText)
+            {
+                customAmountSelected = true;
+                customAmountText = SanitizeAmountText(nextCustom);
+                craftAmount = ParseCustomAmount(customAmountText);
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void AmountButton(int amount)
+        {
+            GUI.enabled = craftAmount != amount || customAmountSelected;
+            if (GUILayout.Button(amount.ToString(), GUILayout.Width(42f)))
+            {
+                craftAmount = Mathf.Clamp(amount, 1, MaxCraftAmount);
+                customAmountText = craftAmount.ToString();
+                customAmountSelected = false;
+            }
+            GUI.enabled = true;
+        }
+
+        private void SelectRecipe(CraftingRecipe recipe)
+        {
+            if (selectedRecipe != recipe)
+            {
+                selectedRecipe = recipe;
+                ResetCraftAmount();
+            }
+        }
+
+        private int GetCraftAmount()
+        {
+            if (customAmountSelected)
+            {
+                craftAmount = ParseCustomAmount(customAmountText);
+                customAmountText = craftAmount.ToString();
+            }
+
+            return Mathf.Clamp(craftAmount, 1, MaxCraftAmount);
+        }
+
+        private static string SanitizeAmountText(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            List<char> digits = new List<char>();
+            for (int i = 0; i < value.Length; i++)
+            {
+                if (char.IsDigit(value[i]))
+                {
+                    digits.Add(value[i]);
+                }
+            }
+
+            return new string(digits.ToArray());
+        }
+
+        private static int ParseCustomAmount(string value)
+        {
+            int parsed;
+            if (!int.TryParse(value, out parsed))
+            {
+                return 1;
+            }
+
+            return Mathf.Clamp(parsed, 1, MaxCraftAmount);
         }
 
         private bool ShouldShow(CraftingRecipe recipe)
@@ -112,7 +242,7 @@ namespace ProjectEclipse.UI
                 return false;
             }
 
-            if (availableOnly && !crafting.CanCraft(recipe))
+            if (availableOnly && !crafting.CanQueueWorkOrder(recipe, GetCraftAmount()))
             {
                 return false;
             }

@@ -27,6 +27,7 @@ MonoBehaviour:
   stationType: 2
   allowedRecipes: []
   portLevel: 1
+  laneCount: 1
   speedMultiplier: 1
   fuelEfficiency: 1
   fuelRules: Potion catalyst rules are not implemented yet.

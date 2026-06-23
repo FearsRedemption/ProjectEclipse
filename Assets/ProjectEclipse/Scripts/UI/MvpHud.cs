@@ -40,6 +40,10 @@ namespace ProjectEclipse.UI
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 inventoryOpen = !inventoryOpen;
+                if (!inventoryOpen && inventoryScreen != null)
+                {
+                    inventoryScreen.ResetCraftingTransientState();
+                }
             }
         }
 
@@ -50,6 +54,7 @@ namespace ProjectEclipse.UI
             GUI.skin.button.fontSize = 13;
 
             GUILayout.Window(1, new Rect(12f, 12f, 280f, 120f), DrawStatusWindow, "Status");
+            DrawWorkOrderTracker();
             if (!inventoryOpen)
             {
                 return;
@@ -74,6 +79,22 @@ namespace ProjectEclipse.UI
             {
                 ItemTooltipView.Draw(hover, equipment, inventoryCrafting);
             }
+        }
+
+        private void DrawWorkOrderTracker()
+        {
+            if (crafting == null || crafting.ActiveWorkOrder == null)
+            {
+                return;
+            }
+
+            float width = 360f;
+            float x = Mathf.Max(304f, Screen.width - width - 12f);
+            GUILayout.Window(5, new Rect(x, 12f, width, 300f), id =>
+            {
+                WorkOrderTrackerPanel.Draw(crafting);
+                GUI.DragWindow();
+            }, "Work Order");
         }
 
         private void DrawStatusWindow(int windowId)

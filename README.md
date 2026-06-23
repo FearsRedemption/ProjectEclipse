@@ -22,6 +22,11 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Left-side character equipment area shows mainhand, offhand, armor, accessory, belt, and back slots around a paper-doll placeholder.
 - Crafting ports are shown as equipment-adjacent Furnace, Cauldron, Forge, Anvil, and Utility slots.
 - Inventory UI is split into focused IMGUI helper classes with icon slots, right-click interactions, normal item tooltips, equipment comparison tooltips, and crafting-port comparison tooltips.
+- Integrated crafting now has a craft amount selector for 1 / 5 / 10 / 50 / 100 / Custom, with safe clamping and reset behavior.
+- Crafting now creates one active Work Order with dependency-aware planning, requirement feedback, simple logical material reservations, and port-lane processing.
+- Work Orders can auto-queue craftable intermediates from known recipes, wait on missing materials or ports, and continue when inventory changes make pending steps possible.
+- Different crafting station/port types can process in parallel; basic ports expose one lane by default, with lane count modeled for future upgrades.
+- Crafting feedback includes Queue Started, Insufficient Materials, Missing Crafting Port, Insufficient Crafting Port Tier, Recipe Locked, and Work Order Complete states.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
 - Mainhand and offhand attacks now resolve a Terraria-like mouse aim direction, with facing-direction fallback if no camera/mouse world point is available.
 - Warrior Q/E/R/F now execute playable placeholder skills: Cleave, Guard Break, Leap Strike, and Battle Cry.
@@ -74,6 +79,14 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 
 Recipes craft from inventory materials. `Inventory` recipes only require ingredients; port-gated recipes require the matching equipped crafting port. Crafted output returns to inventory unless a recipe explicitly opts into auto-equipping.
 
+The first Work Order implementation is intentionally small:
+
+- One active Work Order at a time.
+- One deterministic producer recipe per output item.
+- Logical reservation display for inputs reserved by the active Work Order.
+- Processing jobs consume inputs when a step starts, then add outputs when the timer completes.
+- Completion cue hooks support an assigned `AudioClip`; if no clip exists, text cues such as `TINK TINK TINK` can be displayed/logged for smithing/anvil recipes.
+
 ## Progression Direction
 
 Project Eclipse is structured around enemy and boss-gated resource tiers instead of mining blocks. Materials should primarily come from monster drops and processing monster drops, not mining/chopping/survival gathering. The current MVP seeds these tiers:
@@ -84,6 +97,13 @@ Project Eclipse is structured around enemy and boss-gated resource tiers instead
 - Earth / Copper Tier
 
 The intended long-term structure expands from Earth into Moon, Mars, and deeper cosmic or elemental dimensions. Each dimension should eventually contain multiple mini-bosses before a main boss or god unlocks the next progression layer. Bosses should test movement, dodge timing, positioning, telegraph reading, arena control, projectiles, phases, and skill usage instead of becoming static unavoidable damage sponges.
+
+Crafting-port progression direction:
+
+- Basic/Stone ports start slow and one-lane.
+- Copper ports should become faster and unlock more recipes.
+- Tin plus Copper can lead into Bronze processing.
+- Bronze, Iron, Silver, Gold, and gem tiers can later add extra lanes, sockets, elemental modifiers, accessories, skill modifiers, and port upgrades.
 
 ## Animation Notes
 
@@ -151,6 +171,10 @@ Prefab copies live under these folders for later reuse, but current MVP iteratio
 - Needs Unity machine testing: confirm C# compilation, inspect new serialized fields, and run Play Mode.
 - Needs Unity machine testing: tune enemy ledge/platform probe distances per creature size.
 - Needs Unity machine testing: inspect the unified IMGUI inventory/equipment/crafting screen, item tooltip placement, comparison tooltip placement, right-click equip/swap, and right-click unequip behavior.
+- Needs Unity machine testing: inspect craft amount selector reset behavior, custom amount input, requirement colors, and insufficient-material feedback.
+- Needs Unity machine testing: verify Work Order planning, missing-material waiting, cancellation, completion, and active HUD tracker behavior.
+- Needs Unity machine testing: verify crafting-port lane processing, same-port serial jobs, different-port parallel jobs, and port tier/lock feedback.
+- Needs Unity machine testing: assign/test completion `AudioClip` hooks; until then, text cue fallback/logging is the expected behavior.
 - Needs Unity machine testing: verify runtime-created `InventoryCraftingController` wiring or add it to the player prefab/scene object explicitly after inspection.
 - Needs Unity machine testing: verify LMB/RMB mouse aim, Warrior Q/E/R/F skill effects, cooldowns, knockback, and Shift sprint/modifier behavior.
 - Needs Unity machine testing: add/assign layered visual anchors where appropriate.

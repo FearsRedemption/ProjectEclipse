@@ -61,6 +61,14 @@ namespace ProjectEclipse.UI
             GUI.DragWindow();
         }
 
+        public void ResetCraftingTransientState()
+        {
+            if (craftingPanel != null)
+            {
+                craftingPanel.ResetCraftAmount();
+            }
+        }
+
         private void DrawLeftSide(ItemHoverState hover)
         {
             GUILayout.BeginVertical(GUILayout.Width(510f));
