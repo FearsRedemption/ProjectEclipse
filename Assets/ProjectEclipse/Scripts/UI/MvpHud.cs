@@ -15,9 +15,7 @@ namespace ProjectEclipse.UI
         private CraftingSystem crafting;
         private InventoryCraftingController inventoryCrafting;
         private FurnaceSystem furnace;
-        private InventoryPanel inventoryPanel;
-        private CraftingPanel craftingPanel;
-        private CraftingPortPanel craftingPortPanel;
+        private InventoryScreen inventoryScreen;
         private bool inventoryOpen;
 
         public void Initialize(
@@ -34,9 +32,7 @@ namespace ProjectEclipse.UI
             inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
             furnace = furnaceSystem;
 
-            inventoryPanel = new InventoryPanel(inventory, equipment, inventoryCrafting, furnace);
-            craftingPanel = new CraftingPanel(crafting);
-            craftingPortPanel = new CraftingPortPanel(inventoryCrafting, furnace);
+            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace);
         }
 
         private void Update()
@@ -59,7 +55,7 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            if (inventoryPanel == null || craftingPanel == null || craftingPortPanel == null)
+            if (inventoryScreen == null)
             {
                 GUILayout.Window(2, new Rect(12f, 140f, 300f, 90f), id =>
                 {
@@ -70,13 +66,13 @@ namespace ProjectEclipse.UI
             }
 
             ItemHoverState hover = new ItemHoverState();
-            GUILayout.Window(2, new Rect(12f, 140f, 500f, 390f), id => inventoryPanel.Draw(id, hover), "Inventory");
-            GUILayout.Window(3, new Rect(Screen.width - 348f, 12f, 336f, 240f), id => craftingPanel.Draw(id), "Crafting");
-            GUILayout.Window(4, new Rect(Screen.width - 348f, 260f, 336f, 210f), id => craftingPortPanel.Draw(id), "Crafting Ports");
+            float width = Mathf.Max(720f, Mathf.Min(1040f, Screen.width - 24f));
+            float height = Mathf.Max(420f, Mathf.Min(650f, Screen.height - 152f));
+            GUILayout.Window(2, new Rect(12f, 140f, width, height), id => inventoryScreen.Draw(id, hover), "Inventory / Equipment / Crafting");
 
-            if (hover.Item != null)
+            if (hover.HasHover)
             {
-                ItemTooltipView.Draw(hover.Item, hover.Quantity);
+                ItemTooltipView.Draw(hover, equipment, inventoryCrafting);
             }
         }
 

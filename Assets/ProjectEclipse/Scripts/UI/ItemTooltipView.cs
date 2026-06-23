@@ -9,7 +9,33 @@ namespace ProjectEclipse.UI
     {
         public static void Draw(ItemDefinition item, int quantity)
         {
-            Rect rect = new Rect(Event.current.mousePosition.x + 18f, Event.current.mousePosition.y + 18f, 330f, 250f);
+            Draw(item, quantity, null, null);
+        }
+
+        public static void Draw(ItemHoverState hover, EquipmentController equipment, InventoryCraftingController inventoryCrafting)
+        {
+            if (hover == null || !hover.HasHover)
+            {
+                return;
+            }
+
+            if (hover.Item != null)
+            {
+                Draw(hover.Item, hover.Quantity, equipment, inventoryCrafting);
+                return;
+            }
+
+            DrawEmptySlot(hover);
+        }
+
+        public static void Draw(ItemDefinition item, int quantity, EquipmentController equipment, InventoryCraftingController inventoryCrafting)
+        {
+            if (item == null)
+            {
+                return;
+            }
+
+            Rect rect = new Rect(Event.current.mousePosition.x + 18f, Event.current.mousePosition.y + 18f, 350f, 360f);
             GUILayout.BeginArea(rect, GUI.skin.box);
             GUILayout.BeginHorizontal();
             Texture icon = ItemSlotView.GetIconTexture(item);
@@ -46,22 +72,10 @@ namespace ProjectEclipse.UI
                 GUILayout.Label("Used for: " + item.CraftingUsage);
             }
 
-            EquipmentDefinition equipment = item as EquipmentDefinition;
-            if (equipment != null)
+            EquipmentDefinition equipmentItem = item as EquipmentDefinition;
+            if (equipmentItem != null)
             {
-                GUILayout.Label("Slot: " + equipment.Slot + " / " + equipment.EquipmentType);
-                GUILayout.Label("Rarity: " + equipment.Rarity);
-                GUILayout.Label("Level: " + equipment.LevelRequirement);
-                GUILayout.Label("Stats: ATK " + equipment.Stats.Attack + " / DEF " + equipment.Stats.Defense);
-                string classText = equipment.ClassRestriction == null || equipment.ClassRestriction.Unrestricted
-                    ? "Any"
-                    : equipment.ClassRestriction.RequiredClass.ToString();
-                GUILayout.Label("Class: " + classText);
-                GUILayout.Label("Visual layer: " + equipment.VisualLayer);
-                if (!string.IsNullOrEmpty(equipment.SpecialEffectsPlaceholder))
-                {
-                    GUILayout.Label("Effect: " + equipment.SpecialEffectsPlaceholder);
-                }
+                EquipmentComparisonTooltipView.Draw(equipmentItem, equipment);
             }
 
             ConsumableDefinition consumable = item as ConsumableDefinition;
@@ -75,14 +89,27 @@ namespace ProjectEclipse.UI
             CraftingPortDefinition port = item as CraftingPortDefinition;
             if (port != null)
             {
-                GUILayout.Label("Unlocks: " + port.StationType);
-                GUILayout.Label("Port slot: " + port.PortSlot);
-                GUILayout.Label("Speed: x" + port.SpeedMultiplier);
-                GUILayout.Label("Recipes: " + port.AllowedRecipes.Count);
-                if (!string.IsNullOrEmpty(port.FuelRules))
-                {
-                    GUILayout.Label("Fuel: " + port.FuelRules);
-                }
+                CraftingPortComparisonTooltipView.Draw(port, inventoryCrafting);
+            }
+            GUILayout.EndArea();
+        }
+
+        private static void DrawEmptySlot(ItemHoverState hover)
+        {
+            Rect rect = new Rect(Event.current.mousePosition.x + 18f, Event.current.mousePosition.y + 18f, 300f, 95f);
+            GUILayout.BeginArea(rect, GUI.skin.box);
+            GUILayout.Label(hover.SlotLabel);
+            if (hover.Kind == ItemHoverKind.EquipmentSlot)
+            {
+                GUILayout.Label("Equipment slot: " + hover.EquipmentSlot);
+            }
+            else if (hover.Kind == ItemHoverKind.CraftingPortSlot)
+            {
+                GUILayout.Label("Crafting port slot: " + hover.CraftingPortSlot);
+            }
+            if (!string.IsNullOrEmpty(hover.SlotDescription))
+            {
+                GUILayout.Label(hover.SlotDescription);
             }
             GUILayout.EndArea();
         }

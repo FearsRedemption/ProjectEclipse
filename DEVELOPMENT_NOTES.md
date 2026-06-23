@@ -8,11 +8,11 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 
 `MvpGameManager` is intentionally small. It wires serialized references at play time:
 
-- equips the starter weapon
+- equips the Starter Blade / beginner sword without seeding extra starting inventory
 - can use the Warrior class asset as the default class foundation when assigned
-- initializes crafting with recipe assets
+- initializes crafting with recipe assets and ensures an `InventoryCraftingController` exists for crafting-port loadouts
 - connects furnace storage to the player inventory
-- connects the Tab-toggled HUD to player/storage/furnace systems
+- connects the Tab-toggled unified inventory/equipment/crafting HUD to player/storage/furnace systems
 - gives placed enemies their player target and drop spawner
 
 `PrototypeBootstrapper` is deprecated and no longer creates the world. It remains only as a compatibility stub so old scene references do not break compilation.
@@ -29,7 +29,7 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 - `Assets/ProjectEclipse/Scripts/Equipment`: equipment slots, stats, rarity, restrictions, layered visual anchors, and equipped item state.
 - `Assets/ProjectEclipse/Scripts/Furnace`: furnace level, fuel/input/output slots, and smelting timer foundation.
 - `Assets/ProjectEclipse/Scripts/Progression`: resource tiers, crafting tiers, stages, world tiers, boss definitions, and unlock requirement models.
-- `Assets/ProjectEclipse/Scripts/UI`: small HUD plus Tab-toggled storage, crafting, and furnace panels.
+- `Assets/ProjectEclipse/Scripts/UI`: small HUD plus the Tab-toggled unified inventory, equipment, crafting-port, crafting-list, item-grid, and tooltip views.
 - `Assets/ProjectEclipse/Scripts/Utilities`: sprite placeholders, sprite-sheet animation, camera follow, and runtime animation feedback.
 - `Assets/ProjectEclipse/Scripts/Editor`: Unity editor-only generation helpers.
 - `Assets/ProjectEclipse/Art/Player`: homemade player idle/run/jump/attack/hurt/death sheet.
@@ -43,21 +43,46 @@ For the MVP, the visible scene is the source of truth. Build and tune homemade o
 Inventory tabs are:
 
 - Equipment
+- Usable
 - Materials
-- Consumables
-- Key Items / Special Items
+- Misc
+- Key Items
+
+Equipment contains weapons and armor. Usable contains consumables. Materials contains monster drops and crafting materials. Misc contains upgrades, crafting ports, furnace-like special items, and nonstandard items until a better category is added. Key Items remains for quest/progression-locked items.
 
 Monster drops are crafting materials and belong in Materials. Current material drops are `Sticks`, `Stone`, `Coal`, `Copper Ore`, future `Iron Ore`, and future `Gold Ore`.
 
-The MVP HUD is still IMGUI and still needs Unity inspection, but it now follows the intended tab structure and exposes tooltip data hooks.
+The MVP HUD is still IMGUI and still needs Unity inspection, but Tab now opens one unified BDO-inspired layout rather than separate floating inventory/crafting/port windows:
+
+- Left side: character equipment slots around a paper-doll placeholder.
+- Lower left: crafting-port slots for Furnace, Cauldron, Forge, Anvil, and Utility.
+- Lower center/left: filterable inventory crafting list with category filters, Available Only, and text search.
+- Right side: inventory grid with Equipment, Usable, Materials, Misc, and Key Items tabs.
+
+Primary item interaction is right-click:
+
+- Right-click inventory equipment to equip/swap into its matching combat slot.
+- Right-click inventory crafting ports to equip/swap into the matching crafting-port slot.
+- Right-click equipped gear or equipped crafting ports to unequip back into inventory.
+- Shift-click remains a secondary shortcut, not the primary path.
+
+Tooltip direction:
+
+- Normal items show icon, type, stack, description, tier, dropped-by, and crafting usage.
+- Equipment items append comparison against the currently equipped item in the same slot.
+- Crafting ports append comparison against the currently equipped port in the same crafting-port slot.
+- Empty equipment and port slots identify what can go there.
 
 The HUD code is split into focused IMGUI helper classes so it can later move to UGUI/UI Toolkit without growing `MvpHud` into a catch-all:
 
+- `InventoryScreen`
 - `InventoryPanel`
 - `EquipmentPanel`
 - `ItemGridView`
 - `ItemSlotView`
 - `ItemTooltipView`
+- `EquipmentComparisonTooltipView`
+- `CraftingPortComparisonTooltipView`
 - `CraftingPanel`
 - `CraftingPortPanel`
 - `Assets/ProjectEclipse/Prefabs`: reusable copies for later, not the primary MVP authoring path.
@@ -165,9 +190,9 @@ Current enemy behavior tuning:
 
 ## Adding Recipes
 
-Recipes are `CraftingRecipe` objects. Add required `CraftingIngredient` entries and an output item. The crafting system already checks storage, consumes ingredients, and adds the result back to storage.
+Recipes are `CraftingRecipe` objects. Add required `CraftingIngredient` entries and an output item. The crafting system checks storage, consumes ingredients, and adds the result back to storage.
 
-Weapon recipe outputs can auto-equip when `equipOutputIfWeapon` is true.
+Recipes with `CraftingStationType.Inventory` craft directly from inventory materials. Port-gated recipes require an equipped matching crafting port, such as `FurnacePort`, `CauldronPort`, `ForgePort`, `AnvilPort`, or `UtilityPort`. Weapon recipe outputs can auto-equip only when `equipOutputIfWeapon` is true; normal crafted output should stay in inventory.
 
 Recipe assets live under `Assets/ProjectEclipse/Data/Recipes` and are assigned to `MvpGameManager.availableRecipes`.
 
@@ -191,7 +216,9 @@ TODO:
 
 ## Inventory Crafting Ports
 
-Crafting should move toward inventory-equipped ports instead of requiring world-placed stations. Current seed models:
+Crafting is moving toward inventory-equipped ports instead of requiring world-placed stations. Ports should stay real inventory items so they can later be dropped, traded, upgraded, or filtered by multiplayer/pet systems.
+
+Current seed models:
 
 - `CraftingPortDefinition`
 - `CraftingPortSlot`
@@ -207,6 +234,21 @@ Examples:
 - Furnace Port: future Copper Ore smelting from inventory.
 - Cauldron Port: future potion crafting from inventory.
 - Forge/Anvil Port: future weapon crafting and upgrades.
+
+Crafting ports are intentionally separate from combat gear slots. Use `EquipmentController` for combat/character gear and `InventoryCraftingController` for crafting-port loadouts. A port equip should remove one port item from inventory, swap the previous port back into inventory, and never act like a permanent invisible unlock flag.
+
+Crafting-port data now supports:
+
+- Port slot
+- Station type
+- Port level / upgrade tier
+- Speed multiplier
+- Fuel efficiency
+- Fuel rules
+- Allowed recipe list
+- Allowed recipe category text
+- Special effect text
+- Upgrade requirement text
 
 The old world furnace stays for MVP compatibility until the inventory-port flow is tested.
 
@@ -330,7 +372,7 @@ Newer full-game progression skeleton assets live alongside the original MVP tier
 - `CraftingTier`
 - `RecommendedLevel` fields on stage, world tier, boss, and unlock requirement data
 
-Keep boss implementations lightweight until the stage loop, equipment, and drops are tested in Unity.
+Keep boss implementations lightweight until the stage loop, equipment, and drops are tested in Unity. Bosses should follow Terraria-like action-fight direction: telegraphed attacks, dodgeable projectiles, movement checks, phases, arenas, and pattern variation. Avoid static MapleStory-style damage-sponge bosses that rely on unavoidable overlap damage and potion spam.
 
 Boss direction: use original planet/celestial/godlike themes later, but avoid copying existing boss names, patterns, sprites, music, or effects from other games. The eventual endgame can be chaotic, high-energy, pattern-heavy, and cosmic, with final stages around escaping the solar system and later universal escape.
 
@@ -338,12 +380,17 @@ Boss direction: use original planet/celestial/godlike themes later, but avoid co
 
 Current action model foundations:
 
-- LMB / J: mainhand attack
-- RMB: offhand action placeholder
-- Q / E / R / F: class or weapon actions
+- LMB / J / Left Ctrl: mainhand attack
+- RMB: offhand action
+- Q: Warrior Cleave placeholder
+- E: Warrior Guard Break / bash placeholder
+- R: Warrior Leap Strike placeholder
+- F: Warrior Battle Cry placeholder
 - Shift: sprint and attack modifier
 
-Warrior remains the only implemented starting class. Future class models can include Rogue, Mage/Wizard, Archer, and Gunslinger, but do not implement those until Warrior and equipment loops work.
+Mainhand, offhand, and Warrior skill hits now resolve mouse world position through `CombatController.GetAimDirection`, with facing-direction fallback when no camera/mouse world point is available. Player facing updates toward the most recent attack/skill aim direction.
+
+Warrior remains the only implemented starting class. `WarriorSkillController` owns the first Q/E/R/F cooldowns and placeholder effects so `CombatInputRouter` does not become the permanent home for every class behavior. Future class models can include Rogue, Mage/Wizard, Archer, and Gunslinger, but do not implement those until Warrior and equipment loops work.
 
 ## Unity Testing Required
 
@@ -351,10 +398,10 @@ This pass was made without opening Unity. Do not treat these items as visually o
 
 - Unity compile/import of the new ScriptableObject types and `.asset` files.
 - Play Mode movement, jump buffering, attack input timing, and enemy pursuit.
-- Mainhand/offhand action routing, Shift sprint, and Q/E/R/F input hooks.
-- IMGUI inventory tabs and tooltip placement.
-- Equipment slot display and shift-click equip behavior.
-- Inventory crafting port equip behavior and port-gated recipe rules.
+- Mainhand/offhand mouse-aim action routing, Shift sprint/modifier, and Q/E/R/F Warrior skill behavior.
+- IMGUI unified inventory screen, inventory tabs, tooltip placement, and comparison tooltip placement.
+- Equipment slot display, right-click equip/swap, right-click unequip, and secondary shift-click equip behavior.
+- Inventory crafting port equip/swap/unequip behavior and port-gated recipe rules.
 - Magnet pickup radius/speed, item landing behavior, and collection timing.
 - Enemy ledge/platform awareness probe distances on each current creature.
 - Drop spawning/collection using the new `DropTableDefinition` references.

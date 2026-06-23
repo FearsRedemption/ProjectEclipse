@@ -61,7 +61,11 @@ namespace ProjectEclipse.UI
             GUILayout.BeginHorizontal();
             GUILayout.Label(label, GUILayout.Width(68f));
             ItemDefinition item = equipment != null ? equipment.GetEquippedItem(slot) : null;
-            ItemSlotView.Draw(item, item != null ? 1 : 0, hover, item != null);
+            ItemSlotClick click = ItemSlotView.DrawEquipmentSlot(item, item != null ? 1 : 0, hover, slot, label, item != null);
+            if (click == ItemSlotClick.Right && item != null && equipment != null)
+            {
+                equipment.TryUnequipToStorage(slot);
+            }
             GUILayout.EndHorizontal();
         }
     }

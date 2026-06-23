@@ -82,11 +82,6 @@ namespace ProjectEclipse.Equipment
 
         public bool TryEquipWeapon(WeaponDefinition weapon)
         {
-            if (weapon == null)
-            {
-                return false;
-            }
-
             equippedWeapon = weapon;
             SetSlot(EquipmentSlot.Mainhand, weapon);
             if (combatController != null)
@@ -187,6 +182,11 @@ namespace ProjectEclipse.Equipment
             }
 
             EquipmentDefinition previous = equipmentItem.Slot == EquipmentSlot.Mainhand ? equippedWeapon : GetEquippedEquipment(equipmentItem.Slot);
+            if (previous == equipmentItem)
+            {
+                return false;
+            }
+
             if (!inventory.RemoveItem(equipmentItem, 1))
             {
                 return false;
@@ -201,6 +201,37 @@ namespace ProjectEclipse.Equipment
             if (previous != null && previous != equipmentItem)
             {
                 inventory.AddItem(previous, 1);
+            }
+
+            return true;
+        }
+
+        public bool TryUnequipToStorage(EquipmentSlot slot)
+        {
+            if (inventory == null)
+            {
+                return false;
+            }
+
+            EquipmentDefinition equipped = slot == EquipmentSlot.Mainhand ? equippedWeapon : GetEquippedEquipment(slot);
+            if (equipped == null)
+            {
+                return false;
+            }
+
+            if (!inventory.AddItem(equipped, 1))
+            {
+                return false;
+            }
+
+            if (slot == EquipmentSlot.Mainhand)
+            {
+                TryEquipWeapon(null);
+            }
+            else
+            {
+                SetSlot(slot, null);
+                ApplyEquipmentVisual(slot, null);
             }
 
             return true;
