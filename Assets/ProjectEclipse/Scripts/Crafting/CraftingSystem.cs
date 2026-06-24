@@ -231,7 +231,7 @@ namespace ProjectEclipse.Crafting
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetPort(recipe.StationType) : null;
             if (port == null)
             {
-                return new CraftingRequirementLine(null, "Missing " + CraftingTerminology.GetStationDisplayName(recipe.StationType), 0, 1, 0, CraftingRequirementStatus.MissingPort, "Equip " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
+                return new CraftingRequirementLine(null, "Missing " + CraftingTerminology.GetStationDisplayName(recipe.StationType), 0, 1, 0, CraftingRequirementStatus.MissingPort, "Socket " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
             }
 
             if (port.PortLevel < recipe.RequiredPortLevel)

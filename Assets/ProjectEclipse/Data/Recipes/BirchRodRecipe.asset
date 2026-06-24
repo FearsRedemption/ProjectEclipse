@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Carve Birch Rod
   ingredients:
   - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
-    quantity: 10
+    quantity: 4
   outputItem: {fileID: 11400000, guid: c68b18e9528643f29aaad41b6a28bb02, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0

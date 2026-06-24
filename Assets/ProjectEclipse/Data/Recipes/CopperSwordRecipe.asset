@@ -16,9 +16,9 @@ MonoBehaviour:
   displayName: Craft Copper Sword
   ingredients:
   - item: {fileID: 11400000, guid: d3b8c44c688c4bcfb64a5cd798f46c03, type: 2}
-    quantity: 30
+    quantity: 5
   - item: {fileID: 11400000, guid: c68b18e9528643f29aaad41b6a28bb02, type: 2}
-    quantity: 10
+    quantity: 2
   outputItem: {fileID: 11400000, guid: e289c1d6a2d543df95d10bb6fd289fe4, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 1

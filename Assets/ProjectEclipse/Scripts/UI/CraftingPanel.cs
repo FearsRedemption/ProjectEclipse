@@ -317,7 +317,7 @@ namespace ProjectEclipse.UI
             List<string> missing = new List<string>();
             if (!crafting.HasRequiredStation(recipe))
             {
-                missing.Add("Equip " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
+                missing.Add("Socket " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
             }
 
             for (int i = 0; i < recipe.Ingredients.Count; i++)

@@ -821,7 +821,7 @@ namespace ProjectEclipse.Crafting
                     1,
                     0,
                     CraftingRequirementStatus.MissingPort,
-                    "Equip " + stationName + " for " + step.Recipe.DisplayName));
+                    "Socket " + stationName + " for " + step.Recipe.DisplayName));
                 if (stationLinesAdded != null)
                 {
                     stationLinesAdded.Add(step);

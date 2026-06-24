@@ -31,6 +31,6 @@ MonoBehaviour:
   dropTable: {fileID: 11400000, guid: 67eeb763cb764db5b0f6fd61de3ffeb2, type: 2}
   drops:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
-    minQuantity: 2
-    maxQuantity: 5
+    minQuantity: 3
+    maxQuantity: 6
     chance: 1

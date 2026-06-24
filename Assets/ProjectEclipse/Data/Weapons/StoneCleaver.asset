@@ -20,13 +20,13 @@ MonoBehaviour:
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   icon: {fileID: 21300000, guid: 5999fe03f5094f8dadb9ceee061e2745, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 5999fe03f5094f8dadb9ceee061e2745, type: 3}
-  description: The first real crafted weapon after Beginner Sword, assembled from Stone and a Simple Handle.
+  description: The first real crafted weapon after Beginner Sword, assembled at the Workbench from Sticks and Stone.
   droppedBy:
   craftingUsage: First stronger Warrior mainhand weapon before Birch, Coal, and Copper routes.
   slot: 0
   rarity: 1
   stats:
-    attack: 5
+    attack: 6
     defense: 0
     maxHealth: 0
     moveSpeedBonus: 0
@@ -38,13 +38,13 @@ MonoBehaviour:
   legacyProgressionGateValue: 1
   materialTierRequirement: 1
   routeRequirement: Sapling and Rock Creature route
-  unlockRequirement: Craft Basic Workbench Trinket and Simple Handle
+  unlockRequirement: Craft and socket Basic Workbench Trinket, then use Sticks and Stone
   visualSprite: {fileID: 21300000, guid: 630dc6e95275442f8e9a314cfd9de374, type: 3}
   visualLayer: 6
   equipmentType: Sword
   specialEffectsPlaceholder: Heavier starter sword with stronger knockback than Beginner Sword.
   archetype: 2
-  damage: 5
+  damage: 6
   attackRange: 1.55
   attackHeight: 1.15
   cooldown: 0.55

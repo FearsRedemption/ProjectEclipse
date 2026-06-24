@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 1
   stackLimit: 1
   placeholderColor: {r: 0.62, g: 0.56, b: 0.42, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: 14398bac64154682a846679a46672ccb, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 14398bac64154682a846679a46672ccb, type: 3}
   description: Archer stone-tier weapon placeholder made from primitive Sticks and Stone.
   droppedBy:
   craftingUsage: Workbench Trinket Stone-tier Archer path before later log-route bow upgrades.
@@ -39,7 +39,7 @@ MonoBehaviour:
   materialTierRequirement: 1
   routeRequirement: Sapling and Rock Creature route
   unlockRequirement: Future Archer Workbench recipe using Sticks and Stone
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: 89c294671cbf456e9d8c77bdbc34a71a, type: 3}
   visualLayer: 6
   equipmentType: Bow
   specialEffectsPlaceholder: Stone-tier Archer bow placeholder; Archer runtime attacks are not implemented yet.
@@ -49,7 +49,7 @@ MonoBehaviour:
   attackHeight: 1.1
   cooldown: 0.6
   knockback: 2.5
-  equippedVisualSprite: {fileID: 0}
+  equippedVisualSprite: {fileID: 21300000, guid: 89c294671cbf456e9d8c77bdbc34a71a, type: 3}
   equippedVisualOffset: {x: 0.28, y: -0.02}
   equippedVisualRotation: -8
   equippedVisualScale: {x: 0.6, y: 0.6}

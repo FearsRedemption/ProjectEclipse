@@ -244,26 +244,15 @@ MonoBehaviour:
   - {fileID: 236007}
   availableRecipes:
   - {fileID: 11400000, guid: 9f70203bef3c47e38093293969e5a563, type: 2}
-  - {fileID: 11400000, guid: 7ba4d4188c92466db1f37226ae5dd313, type: 2}
-  - {fileID: 11400000, guid: 9c42e624c2b7485cbca5129c3a72163f, type: 2}
   - {fileID: 11400000, guid: 05202f6ed7642fb35b7baf8e071747bd, type: 2}
+  - {fileID: 11400000, guid: 7ba4d4188c92466db1f37226ae5dd313, type: 2}
   - {fileID: 11400000, guid: ef31a4ca2a14458b9b80a5a3e77455ad, type: 2}
+  - {fileID: 11400000, guid: 9c42e624c2b7485cbca5129c3a72163f, type: 2}
   - {fileID: 11400000, guid: fae5bdad8f114dd1a3ac918e564dcb50, type: 2}
   - {fileID: 11400000, guid: 4df1f73f13b94f168442dde07002412f, type: 2}
   - {fileID: 11400000, guid: c50112449dc3477495b56c698473e7d4, type: 2}
-  - {fileID: 11400000, guid: 787027c906ed2f50686294b58fe3be10, type: 2}
   debugSeedCopperSwordTestKit: 0
-  debugInventorySeeds:
-  - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
-    quantity: 300
-  - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
-    quantity: 100
-  - item: {fileID: 11400000, guid: 55953519b7404aedb91105c77bd8bcdc, type: 2}
-    quantity: 1
-  - item: {fileID: 11400000, guid: 5bc0e90335d94ba6af52cf9bf74ba306, type: 2}
-    quantity: 1
-  - item: {fileID: 11400000, guid: a91f488e4ad54372988efc03f24ed901, type: 2}
-    quantity: 1
+  debugInventorySeeds: []
 --- !u!114 &260003
 MonoBehaviour:
   m_ObjectHideFlags: 0

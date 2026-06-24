@@ -178,7 +178,7 @@ namespace ProjectEclipse.UI
             if (port != null)
             {
                 bool equipped = inventoryCrafting != null && inventoryCrafting.TryEquipPortFromStorage(port);
-                feedback = equipped ? "Equipped " + port.DisplayName + "." : "Could not equip " + port.DisplayName + ".";
+                feedback = equipped ? "Socketed " + port.DisplayName + "." : "Could not socket " + port.DisplayName + ".";
                 return;
             }
 

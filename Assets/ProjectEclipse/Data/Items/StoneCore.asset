@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 1
   stackLimit: 999
   placeholderColor: {r: 0.58, g: 0.6, b: 0.63, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: cb37af3a9bde47b39264ad121271c9c2, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: cb37af3a9bde47b39264ad121271c9c2, type: 3}
   description: Simple early magical core made from Stone for beginner Wizard weapons.
   droppedBy:
   craftingUsage: Early wand core that keeps Wizard progression aligned with Stone Sword pacing.
