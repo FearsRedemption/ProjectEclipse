@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
-  m_Name: Stone-Core Wand
+  m_Name: Stone-Tipped Bow
   m_EditorClassIdentifier:
-  itemId: stone_core_wand
-  displayName: Stone-Core Wand
+  itemId: stone_tipped_bow
+  displayName: Stone-Tipped Bow
   category: 1
   resourceTier: 1
   stackLimit: 1
-  placeholderColor: {r: 0.62, g: 0.56, b: 0.8, a: 1}
+  placeholderColor: {r: 0.62, g: 0.56, b: 0.42, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Wizard stone-tier weapon placeholder aligned with Stone Sword progression.
+  description: Archer stone-tier weapon placeholder made from primitive Sticks and Stone.
   droppedBy:
-  craftingUsage: Future Wizard Workbench craft using Stone Core and Sticks.
+  craftingUsage: Workbench Trinket Stone-tier Archer path before later log-route bow upgrades.
   slot: 0
   rarity: 1
   stats:
@@ -34,22 +34,22 @@ MonoBehaviour:
     airControlBonus: 0
   classRestriction:
     unrestricted: 0
-    requiredClass: 2
+    requiredClass: 3
   legacyProgressionGateValue: 1
   materialTierRequirement: 1
   routeRequirement: Sapling and Rock Creature route
-  unlockRequirement: Craft Stone Core through early workbench or gemcutting processing
+  unlockRequirement: Future Archer Workbench recipe using Sticks and Stone
   visualSprite: {fileID: 0}
   visualLayer: 6
-  equipmentType: Wand
-  specialEffectsPlaceholder: Stone-core magic placeholder without elemental gem requirements.
-  archetype: 4
+  equipmentType: Bow
+  specialEffectsPlaceholder: Stone-tier Archer bow placeholder; Archer runtime attacks are not implemented yet.
+  archetype: 3
   damage: 4
-  attackRange: 1.6
-  attackHeight: 1.05
-  cooldown: 0.5
-  knockback: 2.6
+  attackRange: 2.15
+  attackHeight: 1.1
+  cooldown: 0.6
+  knockback: 2.5
   equippedVisualSprite: {fileID: 0}
   equippedVisualOffset: {x: 0.28, y: -0.02}
-  equippedVisualRotation: -12
-  equippedVisualScale: {x: 0.58, y: 0.58}
+  equippedVisualRotation: -8
+  equippedVisualScale: {x: 0.6, y: 0.6}

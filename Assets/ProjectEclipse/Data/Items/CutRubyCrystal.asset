@@ -22,4 +22,4 @@ MonoBehaviour:
   worldDropSprite: {fileID: 0}
   description: Refined ruby crystal prepared by Gemcutting Trinket processing.
   droppedBy:
-  craftingUsage: Refined through Cauldron alchemy processing into Ruby Core.
+  craftingUsage: Refined through Arcane Trinket processing into Ruby Core.

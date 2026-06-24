@@ -12,6 +12,7 @@ namespace ProjectEclipse.Player
         [SerializeField] private PlayerClassArchetype archetype = PlayerClassArchetype.Warrior;
         [SerializeField] private ResourceTier materialTierRequirement = ResourceTier.Wood;
         [SerializeField] private int routeOrder = 1;
+        [SerializeField] private BossDefinition requiredMainBoss;
         [SerializeField] private string routeRequirement;
         [SerializeField] private string trialRequirement;
         [SerializeField] private List<ClassBranchDefinition> availableBranches = new List<ClassBranchDefinition>();
@@ -21,6 +22,7 @@ namespace ProjectEclipse.Player
         public PlayerClassArchetype Archetype { get { return archetype; } }
         public ResourceTier MaterialTierRequirement { get { return materialTierRequirement; } }
         public int RouteOrder { get { return Mathf.Max(1, routeOrder); } }
+        public BossDefinition RequiredMainBoss { get { return requiredMainBoss; } }
         public string RouteRequirement { get { return routeRequirement; } }
         public string TrialRequirement { get { return trialRequirement; } }
         public IReadOnlyList<ClassBranchDefinition> AvailableBranches { get { return availableBranches; } }

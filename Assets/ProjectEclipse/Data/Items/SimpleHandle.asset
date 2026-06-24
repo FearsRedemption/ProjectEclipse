@@ -20,6 +20,6 @@ MonoBehaviour:
   placeholderColor: {r: 0.5, g: 0.32, b: 0.17, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: A rough starter handle shaped from Sticks with a Woodworking Trinket.
+  description: Later handle component shaped from processed Logs/Rods after the log route opens.
   droppedBy:
-  craftingUsage: Direct handle component for Stone Sword.
+  craftingUsage: Deprecated from the active Stone Sword path; future handle recipes should use Rods from Logs.

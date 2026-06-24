@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
-  m_Name: Craft Brass-Core Wand
+  m_Name: Craft Stone Slingshot
   m_EditorClassIdentifier:
-  recipeId: brass_core_wand
-  displayName: Craft Brass-Core Wand
+  recipeId: stone_slingshot
+  displayName: Craft Stone Slingshot
   ingredients:
-  - item: {fileID: 11400000, guid: 754f518c2d7d471ea50711cbf9bfe6bd, type: 2}
-    quantity: 1
-  - item: {fileID: 11400000, guid: c68b18e9528643f29aaad41b6a28bb02, type: 2}
-    quantity: 2
-  outputItem: {fileID: 11400000, guid: 3949326d5e1444a8b79d7bc4b908d54c, type: 2}
+  - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
+    quantity: 12
+  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
+    quantity: 10
+  outputItem: {fileID: 11400000, guid: 94b4d2a3f2be42eca384605983540b43, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 1
-  stationType: 7
+  stationType: 6
   requiredPortLevel: 1
-  craftTimeSeconds: 0.85
+  craftTimeSeconds: 0.7
   completionSound: {fileID: 0}
   completionCueText:

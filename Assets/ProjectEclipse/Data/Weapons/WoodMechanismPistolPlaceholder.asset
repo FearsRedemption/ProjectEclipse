@@ -20,9 +20,9 @@ MonoBehaviour:
   placeholderColor: {r: 0.58, g: 0.42, b: 0.24, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Gunslinger early mechanism placeholder using wood and simple parts.
+  description: Later Gunslinger mechanism placeholder; early class path uses Slingshot plus Runic Ammo.
   droppedBy:
-  craftingUsage: Future bridge before brass mechanisms and fittings.
+  craftingUsage: Future firearm bridge after Stone Slingshot and Runic Ammo.
   slot: 0
   rarity: 1
   stats:

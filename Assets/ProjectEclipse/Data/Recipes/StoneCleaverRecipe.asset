@@ -15,8 +15,8 @@ MonoBehaviour:
   recipeId: stone_sword
   displayName: Craft Stone Sword
   ingredients:
-  - item: {fileID: 11400000, guid: 0b22cc45f33048d7bf4084d89e212720, type: 2}
-    quantity: 1
+  - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
+    quantity: 10
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 20
   outputItem: {fileID: 11400000, guid: 8347749b678e9b653e0a8325bf53eea7, type: 2}

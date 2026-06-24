@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3889d23f09df413a8839bfa8d34aac5e, type: 3}
+  m_Name: Basic Arcane Trinket
+  m_EditorClassIdentifier:
+  itemId: arcane_port
+  displayName: Basic Arcane Trinket
+  category: 9
+  resourceTier: 22
+  stackLimit: 1
+  placeholderColor: {r: 0.56, g: 0.36, b: 0.9, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Socketed crafting trinket for magical cores, spell catalysts, staffs, spellbooks, and magic weapons.
+  droppedBy:
+  craftingUsage: Refines cut crystals into magical cores and supports future Wizard weapon crafting.
+  portSlot: 6
+  stationType: 7
+  allowedRecipes: []
+  portLevel: 1
+  laneCount: 1
+  speedMultiplier: 1
+  fuelEfficiency: 1
+  fuelRules: No fuel rules yet; future upgrades can improve magical core processing.
+  allowedRecipeCategories: Magical Cores, Spell Catalysts, Wands, Staffs, Spellbooks
+  specialEffectText: Handles magical crafting; it does not create consumable buffs or potions.
+  upgradeRequirements: Future upgrade path should use cut crystals, magical cores, and boss-route unlocks.

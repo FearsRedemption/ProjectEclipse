@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ee289b2b37e4088b394673a06ac947a, type: 3}
+  m_Name: Basic Runic Ammo Satchel
+  m_EditorClassIdentifier:
+  itemId: basic_runic_ammo_satchel
+  displayName: Basic Runic Ammo Satchel
+  category: 4
+  resourceTier: 0
+  stackLimit: 1
+  placeholderColor: {r: 0.42, g: 0.34, b: 0.56, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Equipped Gunslinger offhand ammo focus that is not consumed.
+  droppedBy:
+  craftingUsage: Future starter Runic Ammo modifier paired with Beginner Slingshot.
+  slot: 1
+  rarity: 0
+  stats:
+    attack: 1
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 4
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Starter Safe Zone
+  unlockRequirement: Future Gunslinger starter offhand
+  visualSprite: {fileID: 0}
+  visualLayer: 7
+  equipmentType: Runic Ammo
+  specialEffectsPlaceholder: Equipped offhand modifier; ammo does not run out.

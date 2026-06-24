@@ -20,7 +20,7 @@ MonoBehaviour:
   outputItem: {fileID: 11400000, guid: ef054cf14e1c49a197a018557130fc74, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0
-  stationType: 2
+  stationType: 7
   requiredPortLevel: 1
   craftTimeSeconds: 0.8
   completionSound: {fileID: 0}
