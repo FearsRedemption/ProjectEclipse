@@ -16,9 +16,7 @@ MonoBehaviour:
   displayName: Craft Basic Workbench Trinket
   ingredients:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
-    quantity: 8
-  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
-    quantity: 6
+    quantity: 12
   outputItem: {fileID: 11400000, guid: c6559a5e336548309eaaaa4780e23a05, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0

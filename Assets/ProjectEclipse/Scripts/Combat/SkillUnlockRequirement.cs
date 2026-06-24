@@ -10,6 +10,7 @@ namespace ProjectEclipse.Combat
     public class SkillUnlockRequirement
     {
         [SerializeField] private SkillUnlockRequirementType requirementType = SkillUnlockRequirementType.None;
+        [SerializeField] private BossDefinition requiredMainBoss;
         [SerializeField] private BossDefinition requiredMiniBoss;
         [SerializeField] private ItemDefinition requiredItem;
         [SerializeField] private ResourceTier requiredMaterialTier = ResourceTier.Wood;
@@ -22,6 +23,7 @@ namespace ProjectEclipse.Combat
         [SerializeField] private string requiredFlag;
 
         public SkillUnlockRequirementType RequirementType { get { return requirementType; } }
+        public BossDefinition RequiredMainBoss { get { return requiredMainBoss; } }
         public BossDefinition RequiredMiniBoss { get { return requiredMiniBoss; } }
         public ItemDefinition RequiredItem { get { return requiredItem; } }
         public ResourceTier RequiredMaterialTier { get { return requiredMaterialTier; } }

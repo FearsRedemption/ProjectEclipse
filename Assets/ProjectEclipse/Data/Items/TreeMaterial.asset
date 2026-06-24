@@ -22,4 +22,4 @@ MonoBehaviour:
   worldDropSprite: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
   description: Flexible wood scraps gathered from forest creatures.
   droppedBy: Sapling
-  craftingUsage: Handcrafted trinkets, Simple Handles, and starter weapon parts.
+  craftingUsage: First Workbench Trinket, Stone-tier weapon parts, and other primitive starter recipes.

@@ -22,7 +22,7 @@ MonoBehaviour:
   worldDropSprite: {fileID: 0}
   description: Socketed crafting trinket for cutting raw gem shards into refined crystals.
   droppedBy:
-  craftingUsage: Creates cut crystals from raw gem shards for later alchemy and arcane core crafting.
+  craftingUsage: Creates cut crystals from raw gem shards for later Arcane core crafting.
   portSlot: 9
   stationType: 10
   allowedRecipes: []

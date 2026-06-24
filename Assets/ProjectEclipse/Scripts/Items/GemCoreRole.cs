@@ -11,6 +11,6 @@ namespace ProjectEclipse.Items
         UniqueWeaponIngredient,
         TrinketUpgradeMaterial,
         WorkOrderIngredient,
-        AlchemyProcessingOutput
+        ArcaneProcessingOutput
     }
 }

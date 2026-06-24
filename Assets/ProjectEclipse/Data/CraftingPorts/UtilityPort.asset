@@ -20,9 +20,9 @@ MonoBehaviour:
   placeholderColor: {r: 0.47, g: 0.34, b: 0.2, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Socketed crafting trinket for rods, handles, wooden mechanisms, and other shaping work.
+  description: Socketed crafting trinket for processing Logs into Rods and later wooden mechanisms.
   droppedBy:
-  craftingUsage: Shaping Sticks into Simple Handles and Birch Logs into Birch Rods.
+  craftingUsage: Carving Logs into Rods after log creatures become available; not required for Stone Sword.
   portSlot: 4
   stationType: 5
   allowedRecipes: []

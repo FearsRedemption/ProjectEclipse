@@ -20,6 +20,6 @@ MonoBehaviour:
   placeholderColor: {r: 0.86, g: 0.73, b: 0.48, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: A straight carved birch rod ready to become a weapon grip.
+  description: A straight carved birch rod, the wood equivalent of an ingot.
   droppedBy:
-  craftingUsage: Direct intermediate for Copper Sword crafting.
+  craftingUsage: Later wood/component recipes after Birch Logs are available.
