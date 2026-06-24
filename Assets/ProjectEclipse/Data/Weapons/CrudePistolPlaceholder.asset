@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
+  m_Name: Crude Pistol Placeholder
+  m_EditorClassIdentifier:
+  itemId: crude_pistol_placeholder
+  displayName: Crude Pistol Placeholder
+  category: 1
+  resourceTier: 0
+  stackLimit: 1
+  placeholderColor: {r: 0.42, g: 0.38, b: 0.34, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Gunslinger starter weapon placeholder; class is not active in the MVP.
+  droppedBy:
+  craftingUsage: Future Gunslinger starter or trial weapon.
+  slot: 0
+  rarity: 0
+  stats:
+    attack: 2
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 4
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Starter Safe Zone or class trial
+  unlockRequirement: Future Gunslinger unlock path
+  visualSprite: {fileID: 0}
+  visualLayer: 6
+  equipmentType: Hand Cannon
+  specialEffectsPlaceholder: Gunslinger runtime attacks are not implemented yet.
+  archetype: 6
+  damage: 2
+  attackRange: 1.7
+  attackHeight: 0.9
+  cooldown: 0.7
+  knockback: 2.4
+  equippedVisualSprite: {fileID: 0}
+  equippedVisualOffset: {x: 0.28, y: -0.02}
+  equippedVisualRotation: -6
+  equippedVisualScale: {x: 0.5, y: 0.5}

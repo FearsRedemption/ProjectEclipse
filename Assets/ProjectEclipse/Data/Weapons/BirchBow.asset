@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
+  m_Name: Birch Bow
+  m_EditorClassIdentifier:
+  itemId: birch_bow
+  displayName: Birch Bow
+  category: 1
+  resourceTier: 0
+  stackLimit: 1
+  placeholderColor: {r: 0.78, g: 0.62, b: 0.38, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Archer early route weapon placeholder using Birchling materials.
+  droppedBy:
+  craftingUsage: Future Archer craft from Birch Logs or Birch Rods.
+  slot: 0
+  rarity: 1
+  stats:
+    attack: 4
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 3
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Birchling route
+  unlockRequirement: Future Archer recipe using Birch Rods
+  visualSprite: {fileID: 0}
+  visualLayer: 6
+  equipmentType: Bow
+  specialEffectsPlaceholder: Early Archer bow placeholder before reinforced metal parts.
+  archetype: 3
+  damage: 4
+  attackRange: 2.2
+  attackHeight: 1.1
+  cooldown: 0.6
+  knockback: 2.5
+  equippedVisualSprite: {fileID: 0}
+  equippedVisualOffset: {x: 0.28, y: -0.02}
+  equippedVisualRotation: -8
+  equippedVisualScale: {x: 0.6, y: 0.6}

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
+  m_Name: Brass-Core Wand
+  m_EditorClassIdentifier:
+  itemId: brass_core_wand
+  displayName: Brass-Core Wand
+  category: 1
+  resourceTier: 13
+  stackLimit: 1
+  placeholderColor: {r: 0.84, g: 0.62, b: 0.24, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Wizard brass-tier weapon placeholder before Ruby Core and Sapphire Core elemental paths.
+  droppedBy:
+  craftingUsage: Future Wizard Work Order using Brass Core and Birch Rod.
+  slot: 0
+  rarity: 1
+  stats:
+    attack: 6
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 2
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 13
+  routeRequirement: Copper, Tin, and Zinc alloy route
+  unlockRequirement: Future Brass Core and Birch Rod Work Order
+  visualSprite: {fileID: 0}
+  visualLayer: 6
+  equipmentType: Wand
+  specialEffectsPlaceholder: Brass-core magic placeholder; Ruby Core and Sapphire Core branches come later.
+  archetype: 4
+  damage: 6
+  attackRange: 1.72
+  attackHeight: 1.08
+  cooldown: 0.52
+  knockback: 2.9
+  equippedVisualSprite: {fileID: 0}
+  equippedVisualOffset: {x: 0.28, y: -0.02}
+  equippedVisualRotation: -12
+  equippedVisualScale: {x: 0.6, y: 0.6}
