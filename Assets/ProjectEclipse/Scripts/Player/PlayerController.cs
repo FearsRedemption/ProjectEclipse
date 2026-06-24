@@ -1,6 +1,8 @@
 using ProjectEclipse.Combat;
 using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
+using ProjectEclipse.World;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ProjectEclipse.Player
@@ -18,9 +20,18 @@ namespace ProjectEclipse.Player
         [SerializeField] private float jumpBufferTime = 0.12f;
         [SerializeField] private float lowJumpGravityMultiplier = 2.1f;
         [SerializeField] private float fallGravityMultiplier = 2.4f;
+        [SerializeField] private float oneWayIgnoreSeconds = 0.18f;
+        [SerializeField] private float dropThroughSeconds = 0.34f;
         [SerializeField] private LayerMask groundMask = ~0;
         [SerializeField] private PlayerClassDefinition classDefinition;
 
+        private class IgnoredPlatformCollision
+        {
+            public Collider2D Collider;
+            public float ExpiresAt;
+        }
+
+        private readonly List<IgnoredPlatformCollision> ignoredPlatforms = new List<IgnoredPlatformCollision>();
         private Rigidbody2D body;
         private Collider2D bodyCollider;
         private CombatController combat;
@@ -29,6 +40,7 @@ namespace ProjectEclipse.Player
         private VisualStateAnimator visualState;
         private int facingDirection = 1;
         private bool grounded;
+        private Collider2D groundedCollider;
         private float horizontalInput;
         private float lastGroundedTime;
         private float jumpBufferExpiresAt;
@@ -50,13 +62,21 @@ namespace ProjectEclipse.Player
 
         private void Update()
         {
-            grounded = CheckGrounded();
+            ExpireIgnoredPlatforms();
+            grounded = CheckGrounded(out groundedCollider);
             if (grounded)
             {
                 lastGroundedTime = Time.time;
             }
             horizontalInput = ReadHorizontalInput();
-            if (WantsJump())
+            bool jumpPressed = WantsJump();
+            if (WantsDropThrough(jumpPressed))
+            {
+                DropThroughCurrentPlatform();
+                jumpPressed = false;
+            }
+
+            if (jumpPressed)
             {
                 jumpBufferExpiresAt = Time.time + jumpBufferTime;
             }
@@ -86,17 +106,18 @@ namespace ProjectEclipse.Player
 
         private void FixedUpdate()
         {
+            ExpireIgnoredPlatforms();
             Vector2 velocity = body.linearVelocity;
             float speedMultiplier = combatInput != null && combatInput.SprintHeld ? combatInput.SprintSpeedMultiplier : 1f;
-            float targetSpeed = horizontalInput * moveSpeed * speedMultiplier;
-            float control = grounded ? 1f : airControl;
+            float targetSpeed = horizontalInput * GetEffectiveMoveSpeed() * speedMultiplier;
+            float control = grounded ? 1f : GetEffectiveAirControl();
             float rate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
             velocity.x = Mathf.MoveTowards(velocity.x, targetSpeed, rate * control * Time.fixedDeltaTime);
             body.linearVelocity = velocity;
 
             if (CanConsumeJump())
             {
-                body.linearVelocity = new Vector2(body.linearVelocity.x, jumpForce + GetBackJumpBonus());
+                body.linearVelocity = new Vector2(body.linearVelocity.x, GetEffectiveJumpForce());
                 jumpBufferExpiresAt = 0f;
                 lastGroundedTime = 0f;
             }
@@ -161,6 +182,16 @@ namespace ProjectEclipse.Player
             return Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
         }
 
+        private bool WantsDropHeld()
+        {
+            return Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow);
+        }
+
+        private bool WantsDropThrough(bool jumpPressed)
+        {
+            return jumpPressed && grounded && WantsDropHeld() && IsOneWayPlatform(groundedCollider);
+        }
+
         private bool CanConsumeJump()
         {
             return Time.time <= jumpBufferExpiresAt && Time.time - lastGroundedTime <= coyoteTime;
@@ -178,14 +209,22 @@ namespace ProjectEclipse.Player
             }
         }
 
-        private float GetBackJumpBonus()
+        private float GetEffectiveMoveSpeed()
         {
-            if (equipment == null || equipment.Back == null)
-            {
-                return 0f;
-            }
+            float bonus = equipment != null ? equipment.TotalMoveSpeedBonus : 0f;
+            return Mathf.Max(0.1f, moveSpeed + bonus);
+        }
 
-            return equipment.Back.Stats.JumpForceBonus;
+        private float GetEffectiveJumpForce()
+        {
+            float bonus = equipment != null ? equipment.TotalJumpForceBonus : 0f;
+            return Mathf.Max(0.1f, jumpForce + bonus);
+        }
+
+        private float GetEffectiveAirControl()
+        {
+            float bonus = equipment != null ? equipment.TotalAirControlBonus : 0f;
+            return Mathf.Max(0.05f, airControl + bonus);
         }
 
         private bool WantsAttack()
@@ -193,8 +232,9 @@ namespace ProjectEclipse.Player
             return Input.GetKeyDown(KeyCode.J) || Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.LeftControl);
         }
 
-        private bool CheckGrounded()
+        private bool CheckGrounded(out Collider2D groundCollider)
         {
+            groundCollider = null;
             Bounds bounds = bodyCollider.bounds;
             Vector2 origin = new Vector2(bounds.center.x, bounds.min.y + 0.03f);
             Vector2 size = new Vector2(bounds.size.x * 0.88f, 0.05f);
@@ -202,13 +242,156 @@ namespace ProjectEclipse.Player
 
             for (int i = 0; i < hits.Length; i++)
             {
-                if (hits[i].collider != null && hits[i].collider != bodyCollider && !hits[i].collider.isTrigger)
+                Collider2D hitCollider = hits[i].collider;
+                if (IsValidGroundHit(hitCollider))
                 {
+                    groundCollider = hitCollider;
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private bool IsValidGroundHit(Collider2D hitCollider)
+        {
+            if (hitCollider == null || hitCollider == bodyCollider || hitCollider.isTrigger)
+            {
+                return false;
+            }
+
+            if (Physics2D.GetIgnoreCollision(bodyCollider, hitCollider))
+            {
+                return false;
+            }
+
+            if (IsOneWayPlatform(hitCollider) && ShouldIgnoreOneWayPlatform(hitCollider))
+            {
+                IgnorePlatformTemporarily(hitCollider, oneWayIgnoreSeconds);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void DropThroughCurrentPlatform()
+        {
+            if (!IsOneWayPlatform(groundedCollider))
+            {
+                return;
+            }
+
+            IgnorePlatformTemporarily(groundedCollider, dropThroughSeconds);
+            grounded = false;
+            groundedCollider = null;
+            lastGroundedTime = 0f;
+            jumpBufferExpiresAt = 0f;
+            body.linearVelocity = new Vector2(body.linearVelocity.x, Mathf.Min(body.linearVelocity.y, -0.75f));
+        }
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            TryIgnoreOneWayCollision(collision);
+        }
+
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            TryIgnoreOneWayCollision(collision);
+        }
+
+        private void TryIgnoreOneWayCollision(Collision2D collision)
+        {
+            if (collision == null || collision.collider == null || !IsOneWayPlatform(collision.collider))
+            {
+                return;
+            }
+
+            if (ShouldIgnoreOneWayPlatform(collision.collider))
+            {
+                IgnorePlatformTemporarily(collision.collider, oneWayIgnoreSeconds);
+            }
+        }
+
+        private bool ShouldIgnoreOneWayPlatform(Collider2D platformCollider)
+        {
+            if (platformCollider == null || bodyCollider == null)
+            {
+                return false;
+            }
+
+            OneWayPlatform oneWay = platformCollider.GetComponent<OneWayPlatform>();
+            if (oneWay == null)
+            {
+                return false;
+            }
+
+            float platformTop = platformCollider.bounds.max.y;
+            float playerBottom = bodyCollider.bounds.min.y;
+            return body.linearVelocity.y > 0.05f || playerBottom < platformTop - oneWay.SurfaceTolerance;
+        }
+
+        private static bool IsOneWayPlatform(Collider2D platformCollider)
+        {
+            return platformCollider != null && platformCollider.GetComponent<OneWayPlatform>() != null;
+        }
+
+        private void IgnorePlatformTemporarily(Collider2D platformCollider, float seconds)
+        {
+            if (platformCollider == null || bodyCollider == null)
+            {
+                return;
+            }
+
+            Physics2D.IgnoreCollision(bodyCollider, platformCollider, true);
+            float expiresAt = Time.time + Mathf.Max(0.05f, seconds);
+            for (int i = 0; i < ignoredPlatforms.Count; i++)
+            {
+                if (ignoredPlatforms[i] != null && ignoredPlatforms[i].Collider == platformCollider)
+                {
+                    ignoredPlatforms[i].ExpiresAt = Mathf.Max(ignoredPlatforms[i].ExpiresAt, expiresAt);
+                    return;
+                }
+            }
+
+            ignoredPlatforms.Add(new IgnoredPlatformCollision
+            {
+                Collider = platformCollider,
+                ExpiresAt = expiresAt
+            });
+        }
+
+        private void ExpireIgnoredPlatforms()
+        {
+            for (int i = ignoredPlatforms.Count - 1; i >= 0; i--)
+            {
+                IgnoredPlatformCollision ignored = ignoredPlatforms[i];
+                if (ignored == null || ignored.Collider == null || bodyCollider == null)
+                {
+                    ignoredPlatforms.RemoveAt(i);
+                    continue;
+                }
+
+                if (Time.time < ignored.ExpiresAt || ShouldIgnoreOneWayPlatform(ignored.Collider))
+                {
+                    continue;
+                }
+
+                Physics2D.IgnoreCollision(bodyCollider, ignored.Collider, false);
+                ignoredPlatforms.RemoveAt(i);
+            }
+        }
+
+        private void OnDisable()
+        {
+            for (int i = ignoredPlatforms.Count - 1; i >= 0; i--)
+            {
+                if (ignoredPlatforms[i] != null && ignoredPlatforms[i].Collider != null && bodyCollider != null)
+                {
+                    Physics2D.IgnoreCollision(bodyCollider, ignoredPlatforms[i].Collider, false);
+                }
+            }
+
+            ignoredPlatforms.Clear();
         }
     }
 }

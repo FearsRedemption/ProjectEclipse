@@ -114,6 +114,18 @@ namespace ProjectEclipse.Crafting
                 return false;
             }
 
+            if (HasStationBlockingProblem(plan))
+            {
+                WorkOrder previewOrder = new WorkOrder(plan, inventory.CountItem(recipe.OutputItem));
+                feedback = new CraftingFeedbackMessage(
+                    GetBlockingHeader(plan),
+                    BuildStationBlockingDetail(plan),
+                    true,
+                    false,
+                    previewOrder.GetRequirementLines(inventory, inventoryCrafting));
+                return false;
+            }
+
             activeWorkOrder = new WorkOrder(plan, inventory.CountItem(recipe.OutputItem));
             if (plan.HasBlockingProblems)
             {
@@ -396,11 +408,6 @@ namespace ProjectEclipse.Crafting
                 return "Insufficient Materials";
             }
 
-            if (plan.MissingMaterials.Count > 0)
-            {
-                return "Insufficient Materials";
-            }
-
             for (int i = 0; i < plan.BlockingMessages.Count; i++)
             {
                 string message = plan.BlockingMessages[i];
@@ -418,7 +425,69 @@ namespace ProjectEclipse.Crafting
                 }
             }
 
+            if (plan.MissingMaterials.Count > 0)
+            {
+                return "Insufficient Materials";
+            }
+
             return "Insufficient Materials";
+        }
+
+        private static bool HasStationBlockingProblem(CraftingPlan plan)
+        {
+            if (plan == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < plan.BlockingMessages.Count; i++)
+            {
+                string message = plan.BlockingMessages[i];
+                if (IsStationBlockingMessage(message))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static string BuildStationBlockingDetail(CraftingPlan plan)
+        {
+            if (plan == null || plan.FinalRecipe == null)
+            {
+                return "Socket the required crafting trinket before starting this Work Order.";
+            }
+
+            for (int i = 0; i < plan.BlockingMessages.Count; i++)
+            {
+                string message = plan.BlockingMessages[i];
+                if (message.Contains("Missing Crafting Trinket"))
+                {
+                    string socketInstruction = message.Replace("Missing Crafting Trinket: socket ", string.Empty).TrimEnd('.');
+                    return "Socket " + socketInstruction + " before starting " + plan.FinalRecipe.DisplayName + ".";
+                }
+
+                if (message.Contains("Insufficient Crafting Trinket Tier"))
+                {
+                    return "Upgrade the socketed crafting trinket before starting " + plan.FinalRecipe.DisplayName + ".";
+                }
+
+                if (message.Contains("Recipe Locked"))
+                {
+                    return "Socket a crafting trinket that allows " + plan.FinalRecipe.DisplayName + ".";
+                }
+            }
+
+            return "Socket the required crafting trinket before starting this Work Order.";
+        }
+
+        private static bool IsStationBlockingMessage(string message)
+        {
+            return message != null
+                && (message.Contains("Missing Crafting Trinket")
+                    || message.Contains("Insufficient Crafting Trinket Tier")
+                    || message.Contains(" is not allowed by "));
         }
 
         private static string DescribePlanProblem(CraftingPlan plan)

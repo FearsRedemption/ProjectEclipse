@@ -49,6 +49,16 @@ namespace ProjectEclipse.Equipment
         public ItemDefinition HeadArmorPlaceholder { get { return headArmorPlaceholder; } }
         public ItemDefinition ChestArmorPlaceholder { get { return chestArmorPlaceholder; } }
         public ItemDefinition LegsArmorPlaceholder { get { return legsArmorPlaceholder; } }
+        public float TotalMoveSpeedBonus { get { return SumMovementStat(MovementStatKind.MoveSpeed); } }
+        public float TotalJumpForceBonus { get { return SumMovementStat(MovementStatKind.JumpForce); } }
+        public float TotalAirControlBonus { get { return SumMovementStat(MovementStatKind.AirControl); } }
+
+        private enum MovementStatKind
+        {
+            MoveSpeed,
+            JumpForce,
+            AirControl
+        }
 
         private void Awake()
         {
@@ -255,6 +265,47 @@ namespace ProjectEclipse.Equipment
             if (characterVisuals != null)
             {
                 characterVisuals.ApplyEquipment(slot, equipmentItem);
+            }
+        }
+
+        private float SumMovementStat(MovementStatKind statKind)
+        {
+            float total = 0f;
+            HashSet<EquipmentDefinition> counted = new HashSet<EquipmentDefinition>();
+            AddMovementStat(equippedWeapon, statKind, counted, ref total);
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null)
+                {
+                    AddMovementStat(slots[i].Item, statKind, counted, ref total);
+                }
+            }
+
+            return total;
+        }
+
+        private static void AddMovementStat(
+            EquipmentDefinition equipmentItem,
+            MovementStatKind statKind,
+            HashSet<EquipmentDefinition> counted,
+            ref float total)
+        {
+            if (equipmentItem == null || counted == null || !counted.Add(equipmentItem))
+            {
+                return;
+            }
+
+            switch (statKind)
+            {
+                case MovementStatKind.MoveSpeed:
+                    total += equipmentItem.Stats.MoveSpeedBonus;
+                    break;
+                case MovementStatKind.JumpForce:
+                    total += equipmentItem.Stats.JumpForceBonus;
+                    break;
+                case MovementStatKind.AirControl:
+                    total += equipmentItem.Stats.AirControlBonus;
+                    break;
             }
         }
     }
