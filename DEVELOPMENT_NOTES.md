@@ -236,6 +236,8 @@ Work Order flow:
 - Inputs are consumed when a step starts processing.
 - Consumed Work Order inputs remain represented in tracker counts as consumed/reserved progress, so raw material and intermediate rows stay understandable after processing starts.
 - If inventory changes unexpectedly between the readiness check and consumption, the affected step is blocked and the feedback banner reports the material issue.
+- Material-change blocked steps become pending again automatically once their required ingredients and ports are available.
+- Tracker requirement lines are generated in objective order: final item, direct final ingredients, immediate producer ingredients, remaining requirements, then current station blockers.
 - Outputs are added when the processing timer completes.
 - Completed intermediates stay in inventory if the Work Order is canceled afterward.
 - Canceling clears unused logical reservations and pending/processing jobs. First-pass limitation: inputs already consumed by a started processing step are not refunded.
@@ -243,7 +245,7 @@ Work Order flow:
 Material reservation direction:
 
 - The current pass uses WorkOrder-local logical reservations, exposed as total owned / reserved / available counts.
-- Recipe previews use available counts first, then expose dependency details behind the Show Details toggle.
+- Recipe previews use available counts first, show immediate raw producer requirements in compact view, and expose deeper nested producer details behind the Show Details toggle.
 - Because only one active Work Order is supported, this prevents double-queuing through the crafting UI.
 - Other future systems should consult `CraftingSystem.CountAvailableItem` before consuming materials that may be reserved.
 
@@ -266,10 +268,14 @@ Recipe assets live under `Assets/ProjectEclipse/Data/Recipes` and are assigned t
 
 Current Work Order chain seed:
 
+- `Craft Furnace Port`: Stone x12 + Coal x3 -> Furnace Port x1, Inventory.
+- `Craft Utility Port`: Sticks x12 + Birch Log x4 -> Utility Port x1, Inventory.
+- `Craft Anvil Port`: Stone x20 + Copper Ingot x5 -> Anvil Port x1, Inventory.
 - `Smelt Copper Ingot`: Copper Ore x10 -> Copper Ingot x1, Furnace Port.
 - `Carve Birch Rod`: Birch Log x10 -> Birch Rod x1, Utility Port.
 - `Craft Copper Sword`: Copper Ingot x30 + Birch Rod x10 -> Copper Sword x1, Anvil Port, completion cue `TINK TINK TINK`.
 - One Copper Sword currently requires 300 Copper Ore and 100 Birch Logs if no intermediates already exist.
+- `MvpGameManager.debugSeedCopperSwordTestKit` is disabled by default. When enabled in Unity, its seed list adds Copper Ore x300, Birch Log x100, and the three required port items for Play Mode validation.
 
 ## Expanding Furnace Logic
 
@@ -283,9 +289,9 @@ The current `FurnaceSystem` has:
 
 TODO:
 
-- Add data-driven smelting recipes.
+- Expand data-driven smelting beyond the current Copper Ingot recipe.
 - Make Coal fuel value explicit.
-- Add Copper processing output.
+- Decide whether the old world furnace should share the Copper Ingot recipe data or remain a separate MVP compatibility panel.
 - Add upgrade slots and furnace upgrades.
 - Add station interaction rules instead of always showing the furnace panel.
 
@@ -301,14 +307,23 @@ Current seed models:
 - `InventoryCraftingController`
 - Furnace Port data asset
 - Cauldron Port data asset
+- Utility Port data asset
+- Anvil Port data asset
 - Training Shield offhand seed asset
 - Traveler Cape back-slot seed asset
 
 Examples:
 
-- Furnace Port: future Copper Ore smelting from inventory.
+- Furnace Port: Copper Ore smelting from inventory.
 - Cauldron Port: future potion crafting from inventory.
-- Forge/Anvil Port: future weapon crafting and upgrades.
+- Utility Port: Birch Log carving and future simple shaping recipes.
+- Anvil Port: Copper Sword assembly and future weapon crafting/upgrades.
+
+Current port acquisition recipes:
+
+- Furnace Port: Stone x12 + Coal x3.
+- Utility Port: Sticks x12 + Birch Log x4.
+- Anvil Port: Stone x20 + Copper Ingot x5.
 
 Crafting ports are intentionally separate from combat gear slots. Use `EquipmentController` for combat/character gear and `InventoryCraftingController` for crafting-port loadouts. A port equip should remove one port item from inventory, swap the previous port back into inventory, and never act like a permanent invisible unlock flag.
 
