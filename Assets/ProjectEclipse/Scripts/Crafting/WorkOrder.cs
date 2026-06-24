@@ -16,6 +16,7 @@ namespace ProjectEclipse.Crafting
         }
 
         private readonly List<ActiveCraftingJob> activeJobs = new List<ActiveCraftingJob>();
+        private readonly Dictionary<ItemDefinition, int> consumedInputs = new Dictionary<ItemDefinition, int>();
         private readonly int initialFinalOwned;
         private int completedFinalQuantity;
 
@@ -48,6 +49,7 @@ namespace ProjectEclipse.Crafting
                     step.State = CraftingPlanStepState.Blocked;
                     step.Progress01 = 0f;
                     step.RemainingSeconds = 0f;
+                    step.BlockReason = "Work Order canceled.";
                 }
             }
         }
@@ -76,10 +78,15 @@ namespace ProjectEclipse.Crafting
                 return 0;
             }
 
-            return Plan.GetReserved(item);
+            return Mathf.Max(0, Plan.GetReserved(item) - GetConsumed(item));
         }
 
         public List<CraftingRequirementLine> GetRequirementLines(InventoryStore inventory)
+        {
+            return GetRequirementLines(inventory, null);
+        }
+
+        public List<CraftingRequirementLine> GetRequirementLines(InventoryStore inventory, InventoryCraftingController inventoryCrafting)
         {
             List<CraftingRequirementLine> lines = new List<CraftingRequirementLine>();
             if (Plan == null || Plan.FinalRecipe == null)
@@ -96,27 +103,37 @@ namespace ProjectEclipse.Crafting
                 finalProgress,
                 Plan.TargetQuantity,
                 0,
-                IsComplete ? CraftingRequirementStatus.Complete : GetRequirementStatus(finalItem, finalProgress, Plan.TargetQuantity),
-                IsComplete ? "Complete" : string.Empty));
+                IsComplete ? CraftingRequirementStatus.Complete : GetRequirementStatus(finalItem, finalProgress, Plan.TargetQuantity, 0),
+                IsComplete ? GetCompletionDetail() : string.Empty));
 
             foreach (KeyValuePair<ItemDefinition, int> pair in Plan.Requirements)
             {
                 ItemDefinition item = pair.Key;
                 int required = pair.Value;
-                int owned = inventory != null ? inventory.CountItem(item) : 0;
-                int reserved = Plan.GetReserved(item);
+                int actualOwned = inventory != null ? inventory.CountItem(item) : 0;
+                int consumed = GetConsumed(item);
+                int owned = actualOwned + consumed;
+                int reserved = CountReserved(item);
+                int reservedDisplay = reserved + consumed;
                 lines.Add(new CraftingRequirementLine(
                     item,
                     item != null ? item.DisplayName : "Item",
                     owned,
                     required,
-                    reserved,
-                    GetRequirementStatus(item, owned, required),
-                    GetRequirementDetail(item, owned, required, reserved)));
+                    reservedDisplay,
+                    GetRequirementStatus(item, owned, required, reservedDisplay),
+                    GetRequirementDetail(item, actualOwned, owned, required, reserved, consumed)));
             }
+
+            AppendCurrentStationLines(lines, inventoryCrafting);
 
             for (int i = 0; i < Plan.BlockingMessages.Count; i++)
             {
+                if (inventoryCrafting != null && IsStationBlockingMessage(Plan.BlockingMessages[i]))
+                {
+                    continue;
+                }
+
                 lines.Add(new CraftingRequirementLine(
                     null,
                     Plan.BlockingMessages[i],
@@ -180,6 +197,8 @@ namespace ProjectEclipse.Crafting
 
                 if (!ConsumeIngredients(step, inventory))
                 {
+                    step.State = CraftingPlanStepState.Blocked;
+                    step.BlockReason = "Queued ingredients changed before processing could start.";
                     feedback = BuildFeedback("Insufficient Materials", "Queued ingredients changed before processing could start.", true, false, GetRequirementLines(inventory));
                     return;
                 }
@@ -281,7 +300,21 @@ namespace ProjectEclipse.Crafting
                 }
             }
 
-            return inventory.ConsumeIngredients(ingredients);
+            if (!inventory.ConsumeIngredients(ingredients))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < ingredients.Count; i++)
+            {
+                CraftingIngredient ingredient = ingredients[i];
+                if (ingredient != null)
+                {
+                    RecordConsumed(ingredient.Item, ingredient.Quantity);
+                }
+            }
+
+            return true;
         }
 
         private bool CanUseStation(CraftingPlanStep step, InventoryCraftingController inventoryCrafting)
@@ -362,11 +395,11 @@ namespace ProjectEclipse.Crafting
             return Mathf.Max(0.1f, seconds / Mathf.Max(0.01f, speed));
         }
 
-        private CraftingRequirementStatus GetRequirementStatus(ItemDefinition item, int owned, int required)
+        private CraftingRequirementStatus GetRequirementStatus(ItemDefinition item, int owned, int required, int reserved)
         {
-            if (required <= 0 || owned >= required)
+            if (IsOutputBlocked(item))
             {
-                return CraftingRequirementStatus.Satisfied;
+                return CraftingRequirementStatus.Missing;
             }
 
             if (IsOutputProcessing(item))
@@ -379,13 +412,17 @@ namespace ProjectEclipse.Crafting
                 return CraftingRequirementStatus.Queueable;
             }
 
+            if (required <= 0 || owned >= required)
+            {
+                return reserved > 0 ? CraftingRequirementStatus.Reserved : CraftingRequirementStatus.Satisfied;
+            }
+
             int missing;
             if (Plan.MissingMaterials.TryGetValue(item, out missing) && owned < required)
             {
                 return CraftingRequirementStatus.Missing;
             }
 
-            int reserved = Plan.GetReserved(item);
             if (reserved > 0)
             {
                 return CraftingRequirementStatus.Reserved;
@@ -394,32 +431,167 @@ namespace ProjectEclipse.Crafting
             return CraftingRequirementStatus.Missing;
         }
 
-        private string GetRequirementDetail(ItemDefinition item, int owned, int required, int reserved)
+        private string GetRequirementDetail(ItemDefinition item, int actualOwned, int owned, int required, int reserved, int consumed)
         {
+            CraftingPlanStep blockedStep = GetOutputStep(item, CraftingPlanStepState.Blocked);
+            if (blockedStep != null && !string.IsNullOrEmpty(blockedStep.BlockReason))
+            {
+                return blockedStep.BlockReason;
+            }
+
+            CraftingPlanStep processingStep = GetOutputStep(item, CraftingPlanStepState.Processing);
+            if (processingStep != null)
+            {
+                int progress = Mathf.RoundToInt(processingStep.Progress01 * 100f);
+                return "Processing " + progress + "%, " + processingStep.RemainingSeconds.ToString("0.0") + "s";
+            }
+
+            if (GetOutputStep(item, CraftingPlanStepState.Pending) != null)
+            {
+                return "Queued";
+            }
+
+            if (consumed > 0 && owned >= required)
+            {
+                return "Consumed by Work Order";
+            }
+
             if (owned >= required)
             {
                 return reserved > 0 ? "Reserved" : "Ready";
             }
 
-            if (IsOutputProcessing(item))
-            {
-                return "Processing...";
-            }
-
-            if (IsOutputPending(item))
-            {
-                return "Ready to process";
-            }
-
-            return "Missing " + Mathf.Max(0, required - owned);
+            return "Missing " + Mathf.Max(0, required - owned) + " (available " + actualOwned + ")";
         }
 
         private bool IsOutputProcessing(ItemDefinition item)
         {
+            return GetOutputStep(item, CraftingPlanStepState.Processing) != null;
+        }
+
+        private bool IsOutputPending(ItemDefinition item)
+        {
+            return GetOutputStep(item, CraftingPlanStepState.Pending) != null;
+        }
+
+        private bool IsOutputBlocked(ItemDefinition item)
+        {
+            return GetOutputStep(item, CraftingPlanStepState.Blocked) != null;
+        }
+
+        private CraftingPlanStep GetOutputStep(ItemDefinition item, CraftingPlanStepState state)
+        {
+            if (item == null || Plan == null)
+            {
+                return null;
+            }
+
             for (int i = 0; i < Plan.Steps.Count; i++)
             {
                 CraftingPlanStep step = Plan.Steps[i];
-                if (step != null && step.OutputItem == item && step.State == CraftingPlanStepState.Processing)
+                if (step != null && step.OutputItem == item && step.State == state)
+                {
+                    return step;
+                }
+            }
+
+            return null;
+        }
+
+        private void RecordConsumed(ItemDefinition item, int quantity)
+        {
+            if (item == null || quantity <= 0)
+            {
+                return;
+            }
+
+            int existing;
+            consumedInputs.TryGetValue(item, out existing);
+            consumedInputs[item] = existing + quantity;
+        }
+
+        private int GetConsumed(ItemDefinition item)
+        {
+            int value;
+            return item != null && consumedInputs.TryGetValue(item, out value) ? value : 0;
+        }
+
+        private string GetCompletionDetail()
+        {
+            if (string.IsNullOrEmpty(CompletionCue))
+            {
+                return "Complete";
+            }
+
+            return "Complete - " + CompletionCue;
+        }
+
+        private void AppendCurrentStationLines(List<CraftingRequirementLine> lines, InventoryCraftingController inventoryCrafting)
+        {
+            if (lines == null || inventoryCrafting == null || Plan == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < Plan.Steps.Count; i++)
+            {
+                CraftingPlanStep step = Plan.Steps[i];
+                if (step == null || step.Recipe == null || step.State == CraftingPlanStepState.Complete || step.StationType == CraftingStationType.Inventory)
+                {
+                    continue;
+                }
+
+                CraftingPortDefinition port = inventoryCrafting.GetPort(step.StationType);
+                if (port == null)
+                {
+                    lines.Add(new CraftingRequirementLine(
+                        null,
+                        "Missing " + step.StationType,
+                        0,
+                        1,
+                        0,
+                        CraftingRequirementStatus.MissingPort,
+                        "Equip " + step.StationType + " for " + step.Recipe.DisplayName));
+                    continue;
+                }
+
+                if (port.PortLevel < step.RequiredPortLevel)
+                {
+                    lines.Add(new CraftingRequirementLine(
+                        port,
+                        port.DisplayName,
+                        port.PortLevel,
+                        step.RequiredPortLevel,
+                        0,
+                        CraftingRequirementStatus.InsufficientPortTier,
+                        "Upgrade required for " + step.Recipe.DisplayName));
+                    continue;
+                }
+
+                if (port.AllowedRecipes.Count > 0 && !PortAllowsRecipe(port, step.Recipe))
+                {
+                    lines.Add(new CraftingRequirementLine(
+                        port,
+                        step.Recipe.DisplayName,
+                        0,
+                        1,
+                        0,
+                        CraftingRequirementStatus.RecipeLocked,
+                        "Recipe locked on " + port.DisplayName));
+                }
+            }
+        }
+
+        private static bool PortAllowsRecipe(CraftingPortDefinition port, CraftingRecipe recipe)
+        {
+            if (port == null || recipe == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < port.AllowedRecipes.Count; i++)
+            {
+                if (port.AllowedRecipes[i] == recipe)
                 {
                     return true;
                 }
@@ -428,18 +600,12 @@ namespace ProjectEclipse.Crafting
             return false;
         }
 
-        private bool IsOutputPending(ItemDefinition item)
+        private static bool IsStationBlockingMessage(string message)
         {
-            for (int i = 0; i < Plan.Steps.Count; i++)
-            {
-                CraftingPlanStep step = Plan.Steps[i];
-                if (step != null && step.OutputItem == item && step.State == CraftingPlanStepState.Pending)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return message != null
+                && (message.Contains("Missing Crafting Port")
+                    || message.Contains("Insufficient Crafting Port Tier")
+                    || message.Contains(" is not allowed by "));
         }
 
         private static CraftingRequirementStatus BlockingStatus(string message)

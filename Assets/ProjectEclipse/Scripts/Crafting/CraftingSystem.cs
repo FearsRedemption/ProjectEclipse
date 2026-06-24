@@ -16,6 +16,7 @@ namespace ProjectEclipse.Crafting
         private CraftingPlanner planner;
         private WorkOrder activeWorkOrder;
         private CraftingFeedbackMessage feedback;
+        private bool validatedRecipeData;
 
         public IReadOnlyList<CraftingRecipe> Recipes { get { return recipes; } }
         public WorkOrder ActiveWorkOrder { get { return activeWorkOrder; } }
@@ -36,6 +37,7 @@ namespace ProjectEclipse.Crafting
                 inventoryCrafting.Initialize(store);
             }
             planner = new CraftingPlanner(recipes, inventory, inventoryCrafting);
+            ValidateRecipeDataOnce();
         }
 
         private void Update()
@@ -100,7 +102,7 @@ namespace ProjectEclipse.Crafting
 
             if (activeWorkOrder != null && !activeWorkOrder.IsComplete && !activeWorkOrder.IsCanceled)
             {
-                feedback = new CraftingFeedbackMessage("Work Order Already Active", "Cancel the current Work Order before starting another.", true, false, activeWorkOrder.GetRequirementLines(inventory));
+                feedback = new CraftingFeedbackMessage("Work Order Already Active", "Cancel the current Work Order before starting another.", true, false, activeWorkOrder.GetRequirementLines(inventory, inventoryCrafting));
                 return false;
             }
 
@@ -115,11 +117,11 @@ namespace ProjectEclipse.Crafting
             activeWorkOrder = new WorkOrder(plan, inventory.CountItem(recipe.OutputItem));
             if (plan.HasBlockingProblems)
             {
-                feedback = new CraftingFeedbackMessage(GetBlockingHeader(plan), "Work Order created and will continue when requirements are met.", true, false, activeWorkOrder.GetRequirementLines(inventory));
+                feedback = new CraftingFeedbackMessage(GetBlockingHeader(plan), "Work Order created and will continue when requirements are met.", true, false, activeWorkOrder.GetRequirementLines(inventory, inventoryCrafting));
             }
             else
             {
-                feedback = new CraftingFeedbackMessage("Queue Started", recipe.DisplayName + " x" + Mathf.Clamp(targetQuantity, 1, 9999), false, false, activeWorkOrder.GetRequirementLines(inventory));
+                feedback = new CraftingFeedbackMessage("Queue Started", recipe.DisplayName + " x" + Mathf.Clamp(targetQuantity, 1, 9999), false, false, activeWorkOrder.GetRequirementLines(inventory, inventoryCrafting));
             }
 
             return true;
@@ -133,7 +135,7 @@ namespace ProjectEclipse.Crafting
             }
 
             activeWorkOrder.Cancel();
-            feedback = new CraftingFeedbackMessage("Work Order Canceled", "Unused logical reservations released. Completed intermediates remain in inventory.", false, false, activeWorkOrder.GetRequirementLines(inventory));
+            feedback = new CraftingFeedbackMessage("Work Order Canceled", "Unused logical reservations released. Completed intermediates remain in inventory.", false, false, activeWorkOrder.GetRequirementLines(inventory, inventoryCrafting));
             activeWorkOrder = null;
         }
 
@@ -255,6 +257,11 @@ namespace ProjectEclipse.Crafting
 
         public List<CraftingRequirementLine> GetRecipePreview(CraftingRecipe recipe, int targetQuantity)
         {
+            return GetRecipePreview(recipe, targetQuantity, false);
+        }
+
+        public List<CraftingRequirementLine> GetRecipePreview(CraftingRecipe recipe, int targetQuantity, bool showDetails)
+        {
             List<CraftingRequirementLine> lines = new List<CraftingRequirementLine>();
             if (recipe == null)
             {
@@ -263,6 +270,7 @@ namespace ProjectEclipse.Crafting
 
             EnsurePlanner();
             int craftCount = Mathf.CeilToInt((float)Mathf.Clamp(targetQuantity, 1, 9999) / recipe.OutputQuantity);
+            List<CraftingRequirementLine> detailLines = new List<CraftingRequirementLine>();
             for (int i = 0; i < recipe.Ingredients.Count; i++)
             {
                 CraftingIngredient ingredient = recipe.Ingredients[i];
@@ -272,17 +280,22 @@ namespace ProjectEclipse.Crafting
                 }
 
                 int required = ingredient.Quantity * craftCount;
-                int owned = CountItem(ingredient.Item);
+                int totalOwned = CountItem(ingredient.Item);
                 int reserved = CountReservedItem(ingredient.Item);
-                CraftingRequirementStatus status = owned >= required ? CraftingRequirementStatus.Satisfied : CraftingRequirementStatus.Missing;
-                string detail = owned >= required ? "Ready" : "Missing " + Mathf.Max(0, required - owned);
+                int available = CountAvailableItem(ingredient.Item);
+                CraftingRequirementStatus status = available >= required
+                    ? (reserved > 0 ? CraftingRequirementStatus.Reserved : CraftingRequirementStatus.Satisfied)
+                    : CraftingRequirementStatus.Missing;
+                string detail = available >= required
+                    ? (reserved > 0 ? "Available " + available + " of " + totalOwned + " total" : "Ready")
+                    : "Missing " + Mathf.Max(0, required - available) + " available";
 
-                if (owned < required)
+                if (available < required)
                 {
                     CraftingRecipe producer = planner.FindRecipeFor(ingredient.Item);
                     if (producer != null)
                     {
-                        CraftingPlan subPlan = planner.BuildPlan(producer, required - owned);
+                        CraftingPlan subPlan = planner.BuildPlan(producer, required - available);
                         if (!subPlan.HasBlockingProblems)
                         {
                             status = CraftingRequirementStatus.Queueable;
@@ -292,10 +305,15 @@ namespace ProjectEclipse.Crafting
                         {
                             detail = DescribePlanProblem(subPlan);
                         }
+
+                        if (showDetails)
+                        {
+                            AddProducerDetailLines(detailLines, producer, Mathf.Max(0, required - available));
+                        }
                     }
                 }
 
-                lines.Add(new CraftingRequirementLine(ingredient.Item, ingredient.Item.DisplayName, owned, required, reserved, status, detail));
+                lines.Add(new CraftingRequirementLine(ingredient.Item, ingredient.Item.DisplayName, available, required, reserved, status, detail));
             }
 
             CraftingRequirementLine stationProblem = GetStationProblemLine(recipe);
@@ -304,12 +322,17 @@ namespace ProjectEclipse.Crafting
                 lines.Add(stationProblem);
             }
 
+            if (showDetails)
+            {
+                lines.AddRange(detailLines);
+            }
+
             return lines;
         }
 
         public List<CraftingRequirementLine> GetActiveWorkOrderLines()
         {
-            return activeWorkOrder != null ? activeWorkOrder.GetRequirementLines(inventory) : new List<CraftingRequirementLine>();
+            return activeWorkOrder != null ? activeWorkOrder.GetRequirementLines(inventory, inventoryCrafting) : new List<CraftingRequirementLine>();
         }
 
         private void EnsurePlanner()
@@ -350,9 +373,9 @@ namespace ProjectEclipse.Crafting
             foreach (KeyValuePair<ItemDefinition, int> pair in plan.Requirements)
             {
                 ItemDefinition item = pair.Key;
-                int owned = CountItem(item);
-                CraftingRequirementStatus status = owned >= pair.Value ? CraftingRequirementStatus.Satisfied : CraftingRequirementStatus.Missing;
-                lines.Add(new CraftingRequirementLine(item, item != null ? item.DisplayName : "Item", owned, pair.Value, plan.GetReserved(item), status, owned >= pair.Value ? "Ready" : "Missing " + (pair.Value - owned)));
+                int available = CountAvailableItem(item);
+                CraftingRequirementStatus status = available >= pair.Value ? CraftingRequirementStatus.Satisfied : CraftingRequirementStatus.Missing;
+                lines.Add(new CraftingRequirementLine(item, item != null ? item.DisplayName : "Item", available, pair.Value, plan.GetReserved(item), status, available >= pair.Value ? "Ready" : "Missing " + (pair.Value - available)));
             }
 
             foreach (KeyValuePair<ItemDefinition, int> pair in plan.MissingMaterials)
@@ -439,6 +462,114 @@ namespace ProjectEclipse.Crafting
             }
 
             return parts.Count > 0 ? string.Join(", ", parts.ToArray()) : "known recipe";
+        }
+
+        private void AddProducerDetailLines(List<CraftingRequirementLine> lines, CraftingRecipe producer, int outputShortage)
+        {
+            if (lines == null || producer == null || outputShortage <= 0)
+            {
+                return;
+            }
+
+            int craftCount = Mathf.CeilToInt((float)outputShortage / producer.OutputQuantity);
+            for (int i = 0; i < producer.Ingredients.Count; i++)
+            {
+                CraftingIngredient ingredient = producer.Ingredients[i];
+                if (ingredient == null || ingredient.Item == null)
+                {
+                    continue;
+                }
+
+                int required = ingredient.Quantity * craftCount;
+                int totalOwned = CountItem(ingredient.Item);
+                int reserved = CountReservedItem(ingredient.Item);
+                int available = CountAvailableItem(ingredient.Item);
+                CraftingRequirementStatus status = available >= required
+                    ? (reserved > 0 ? CraftingRequirementStatus.Reserved : CraftingRequirementStatus.Satisfied)
+                    : CraftingRequirementStatus.Missing;
+                string outputName = producer.OutputItem != null ? producer.OutputItem.DisplayName : producer.DisplayName;
+                string detail = available >= required
+                    ? "Needed for " + outputName
+                    : "Missing " + Mathf.Max(0, required - available) + " available for " + outputName;
+
+                lines.Add(new CraftingRequirementLine(
+                    ingredient.Item,
+                    "  " + ingredient.Item.DisplayName,
+                    available,
+                    required,
+                    reserved,
+                    status,
+                    detail + " (owned " + totalOwned + ")"));
+            }
+
+            CraftingRequirementLine stationProblem = GetStationProblemLine(producer);
+            if (stationProblem != null)
+            {
+                lines.Add(stationProblem);
+            }
+        }
+
+        private void ValidateRecipeDataOnce()
+        {
+            if (validatedRecipeData)
+            {
+                return;
+            }
+
+            validatedRecipeData = true;
+            Dictionary<ItemDefinition, CraftingRecipe> outputs = new Dictionary<ItemDefinition, CraftingRecipe>();
+            for (int i = 0; i < recipes.Count; i++)
+            {
+                CraftingRecipe recipe = recipes[i];
+                if (recipe == null)
+                {
+                    Debug.LogWarning("Crafting recipe list contains an empty entry.");
+                    continue;
+                }
+
+                if (recipe.OutputItem == null)
+                {
+                    Debug.LogWarning("Crafting recipe '" + recipe.DisplayName + "' has no output item.");
+                }
+                else
+                {
+                    CraftingRecipe existing;
+                    if (outputs.TryGetValue(recipe.OutputItem, out existing))
+                    {
+                        Debug.LogWarning("Crafting recipes '" + existing.DisplayName + "' and '" + recipe.DisplayName + "' both output " + recipe.OutputItem.DisplayName + ".");
+                    }
+                    else
+                    {
+                        outputs.Add(recipe.OutputItem, recipe);
+                    }
+                }
+
+                if (recipe.OutputQuantity <= 0)
+                {
+                    Debug.LogWarning("Crafting recipe '" + recipe.DisplayName + "' has an invalid output quantity.");
+                }
+
+                HashSet<ItemDefinition> seenIngredients = new HashSet<ItemDefinition>();
+                for (int ingredientIndex = 0; ingredientIndex < recipe.Ingredients.Count; ingredientIndex++)
+                {
+                    CraftingIngredient ingredient = recipe.Ingredients[ingredientIndex];
+                    if (ingredient == null || ingredient.Item == null)
+                    {
+                        Debug.LogWarning("Crafting recipe '" + recipe.DisplayName + "' has an empty ingredient slot.");
+                        continue;
+                    }
+
+                    if (ingredient.Quantity <= 0)
+                    {
+                        Debug.LogWarning("Crafting recipe '" + recipe.DisplayName + "' has an invalid quantity for " + ingredient.Item.DisplayName + ".");
+                    }
+
+                    if (!seenIngredients.Add(ingredient.Item))
+                    {
+                        Debug.LogWarning("Crafting recipe '" + recipe.DisplayName + "' lists " + ingredient.Item.DisplayName + " more than once.");
+                    }
+                }
+            }
         }
     }
 }

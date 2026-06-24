@@ -25,6 +25,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Integrated crafting now has a craft amount selector for 1 / 5 / 10 / 50 / 100 / Custom, with safe clamping and reset behavior.
 - Crafting now creates one active Work Order with dependency-aware planning, requirement feedback, simple logical material reservations, and port-lane processing.
 - Work Orders can auto-queue craftable intermediates from known recipes, wait on missing materials or ports, and continue when inventory changes make pending steps possible.
+- The MVP recipe list now includes a Copper Sword Work Order chain: Copper Ore -> Copper Ingot, Birch Log -> Birch Rod, then Copper Sword at an Anvil Port.
 - Different crafting station/port types can process in parallel; basic ports expose one lane by default, with lane count modeled for future upgrades.
 - Crafting feedback includes Queue Started, Insufficient Materials, Missing Crafting Port, Insufficient Crafting Port Tier, Recipe Locked, and Work Order Complete states.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
@@ -34,7 +35,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Stone Cleaver craftable from Stone drops.
 - Tree, Stone, Coal, and Copper creatures with replaced original chibi side-scroller sprite sheets, sizes, animation rows, combat stats, and reusable drop table assets.
 - Drops pop upward and sideways from defeated enemies, then collect into storage.
-- Sticks, Stone, Coal, and Copper Ore drops have distinct homemade icons.
+- Sticks, Stone, Coal, Copper Ore, and Birch Log drops are seeded as monster materials; Birch Log currently uses the dev missing-icon fallback.
 - Infinite-style storage foundation with stack sizes up to 999.
 - Small HUD by default, with the unified inventory/equipment/crafting screen toggled open with Tab.
 - Furnace model with fuel, input, output, level, and smelting timer placeholders.
@@ -46,7 +47,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Starter Blade and Stone Cleaver now have separate inventory/equipped sprites, with shield and cape equipped visuals prepared for future layered anchors.
 - Connector-safe platform kits live under `Assets/ProjectEclipse/Art/Platforms`; left, middle, and right pieces share flat seam edges so they can assemble into longer platforms.
 - The platform kit library now includes additional art-only ore, forest, winter, elemental, and biome variants for future crafting-map stages.
-- Inventory crafting port data seeds support furnace and cauldron ports as real item-like, slottable, upgrade-ready crafting ports.
+- Inventory crafting port data seeds support furnace, cauldron, anvil, and utility ports as real item-like, slottable, upgrade-ready crafting ports.
 - World drops now have magnet pickup behavior after a short delay and warn when art is missing.
 
 ## Controls
@@ -76,6 +77,9 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Stone Cleaver: Stone x4.
 - Basic Furnace: Stone x12, Coal x3.
 - Copper Whetstone Placeholder: Copper Ore x8, Coal x2.
+- Smelt Copper Ingot: Copper Ore x10 at a Furnace Port.
+- Carve Birch Rod: Birch Log x10 at a Utility Port.
+- Copper Sword: Copper Ingot x30, Birch Rod x10 at an Anvil Port. One sword requires 300 Copper Ore and 100 Birch Logs through the dependency chain.
 
 Recipes craft from inventory materials. `Inventory` recipes only require ingredients; port-gated recipes require the matching equipped crafting port. Crafted output returns to inventory unless a recipe explicitly opts into auto-equipping.
 
@@ -83,9 +87,10 @@ The first Work Order implementation is intentionally small:
 
 - One active Work Order at a time.
 - One deterministic producer recipe per output item.
-- Logical reservation display for inputs reserved by the active Work Order.
+- Logical reservation display for inputs reserved by the active Work Order, using available counts in recipe previews.
 - Processing jobs consume inputs when a step starts, then add outputs when the timer completes.
-- Completion cue hooks support an assigned `AudioClip`; if no clip exists, text cues such as `TINK TINK TINK` can be displayed/logged for smithing/anvil recipes.
+- The tracker keeps consumed Work Order inputs visible so raw/intermediate lines do not appear to vanish after processing starts.
+- Completion cue hooks support an assigned `AudioClip`; if no clip exists, text cues such as `TINK TINK TINK` are displayed/logged for smithing/anvil recipes.
 
 ## Progression Direction
 
