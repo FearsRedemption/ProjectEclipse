@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3889d23f09df413a8839bfa8d34aac5e, type: 3}
-  m_Name: Anvil Port
+  m_Name: Basic Anvil Trinket
   m_EditorClassIdentifier:
   itemId: anvil_port
-  displayName: Anvil Port
+  displayName: Basic Anvil Trinket
   category: 9
   resourceTier: 3
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.56, b: 0.53, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Inventory crafting port for final metal weapon assembly.
+  description: Socketed crafting trinket for weapons, armor, metal components, and reinforced plates.
   droppedBy:
   craftingUsage: Final copper-tier weapon recipes such as Copper Sword.
   portSlot: 3
@@ -32,5 +32,5 @@ MonoBehaviour:
   fuelEfficiency: 1
   fuelRules: No fuel requirement in the current Work Order slice.
   allowedRecipeCategories: Weapon Assembly, Smithing
-  specialEffectText: Enables anvil-port recipes from the inventory crafting screen.
+  specialEffectText: Enables anvil-trinket recipes from the inventory crafting screen.
   upgradeRequirements: Future upgrade path should use refined metals and creature drops.

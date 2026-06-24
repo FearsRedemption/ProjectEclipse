@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3889d23f09df413a8839bfa8d34aac5e, type: 3}
-  m_Name: Furnace Port
+  m_Name: Basic Furnace Trinket
   m_EditorClassIdentifier:
   itemId: furnace_port
-  displayName: Furnace Port
+  displayName: Basic Furnace Trinket
   category: 9
   resourceTier: 1
   stackLimit: 1
   placeholderColor: {r: 0.45, g: 0.28, b: 0.18, a: 1}
   icon: {fileID: 21300000, guid: be9de336d4d2402097cb7c4ee0c118b0, type: 3}
   worldDropSprite: {fileID: 21300000, guid: be9de336d4d2402097cb7c4ee0c118b0, type: 3}
-  description: Inventory crafting port for smelting ore without placing a world station.
+  description: Socketed crafting trinket for smelting ore without placing a world station.
   droppedBy:
   craftingUsage: Smelting Copper Ore into ingots and future furnace recipes.
   portSlot: 0
@@ -32,5 +32,5 @@ MonoBehaviour:
   fuelEfficiency: 1
   fuelRules: Uses fuel materials such as Coal. Fuel values still need balancing.
   allowedRecipeCategories: Smelting, Refining
-  specialEffectText: Enables furnace-port recipes from the inventory crafting screen.
+  specialEffectText: Enables furnace-trinket recipes from the inventory crafting screen.
   upgradeRequirements: Future upgrade path should use monster drops and refined materials.

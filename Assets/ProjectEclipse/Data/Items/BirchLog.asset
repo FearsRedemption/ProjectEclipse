@@ -20,6 +20,6 @@ MonoBehaviour:
   placeholderColor: {r: 0.78, g: 0.62, b: 0.38, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Solid pale wood from Tree Creatures, used for early handles and rods.
-  droppedBy: Tree Creature
+  description: Solid pale wood from Birchlings, used for early handles and rods.
+  droppedBy: Birchling
   craftingUsage: Carved into Birch Rods for copper-tier weapon crafting.

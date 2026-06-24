@@ -105,7 +105,7 @@ namespace ProjectEclipse.UI
             }
             else if (hover.Kind == ItemHoverKind.CraftingPortSlot)
             {
-                GUILayout.Label("Crafting port slot: " + hover.CraftingPortSlot);
+                GUILayout.Label("Crafting trinket slot: " + CraftingTerminology.GetSlotDisplayName(hover.CraftingPortSlot));
             }
             if (!string.IsNullOrEmpty(hover.SlotDescription))
             {

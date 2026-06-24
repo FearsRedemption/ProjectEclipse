@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3889d23f09df413a8839bfa8d34aac5e, type: 3}
-  m_Name: Basic Woodworking Trinket
+  m_Name: Basic Workbench Trinket
   m_EditorClassIdentifier:
-  itemId: utility_port
-  displayName: Basic Woodworking Trinket
+  itemId: workbench_port
+  displayName: Basic Workbench Trinket
   category: 9
-  resourceTier: 0
+  resourceTier: 1
   stackLimit: 1
-  placeholderColor: {r: 0.47, g: 0.34, b: 0.2, a: 1}
+  placeholderColor: {r: 0.48, g: 0.36, b: 0.22, a: 1}
   icon: {fileID: 0}
   worldDropSprite: {fileID: 0}
-  description: Socketed crafting trinket for rods, handles, wooden mechanisms, and other shaping work.
+  description: Socketed crafting trinket for primitive assembly, early components, and simple stone gear.
   droppedBy:
-  craftingUsage: Shaping Sticks into Simple Handles and Birch Logs into Birch Rods.
-  portSlot: 4
-  stationType: 5
+  craftingUsage: Final assembly for Stone Sword and early non-metal utility recipes.
+  portSlot: 5
+  stationType: 6
   allowedRecipes: []
   portLevel: 1
   laneCount: 1
   speedMultiplier: 1
   fuelEfficiency: 1
   fuelRules: No fuel requirement in the current Work Order slice.
-  allowedRecipeCategories: Carving, Woodworking
-  specialEffectText: Enables woodworking-trinket recipes from the inventory crafting screen.
-  upgradeRequirements: Future upgrade path should use wood, bindings, and creature drops.
+  allowedRecipeCategories: Assembly, Primitive Gear
+  specialEffectText: Enables workbench-trinket recipes from the inventory crafting screen.
+  upgradeRequirements: Future upgrade path should use creature drops and early refined parts.

@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
-  m_Name: Craft Anvil Port
+  m_Name: Craft Basic Anvil Trinket
   m_EditorClassIdentifier:
   recipeId: anvil_port
-  displayName: Craft Anvil Port
+  displayName: Craft Basic Anvil Trinket
   ingredients:
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 20

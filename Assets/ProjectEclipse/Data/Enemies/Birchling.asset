@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: Birchling
+  m_EditorClassIdentifier:
+  enemyId: birchling
+  displayName: Birchling
+  rank: 0
+  resourceTier: 0
+  maxHealth: 10
+  contactDamage: 2
+  moveSpeed: 1.05
+  chaseRange: 5.5
+  attackRange: 0.9
+  attackCooldown: 1.2
+  attackLungeForce: 0.7
+  attackKnockback: 2.8
+  visualScale: {x: 0.9, y: 0.9}
+  colliderSize: {x: 0.78, y: 0.76}
+  spriteSheet: {fileID: 2800000, guid: df425af303adb864f98c98a72abe402e, type: 3}
+  placeholderColor: {r: 0.58, g: 0.74, b: 0.42, a: 1}
+  dropTable: {fileID: 11400000, guid: da0d8f76dbbc441db02d579b8017615e, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
+    minQuantity: 4
+    maxQuantity: 8
+    chance: 1

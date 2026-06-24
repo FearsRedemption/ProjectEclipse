@@ -10,18 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
-  m_Name: Craft Stone Cleaver
+  m_Name: Craft Stone Sword
   m_EditorClassIdentifier:
-  recipeId: stone_weapon
-  displayName: Craft Stone Cleaver
+  recipeId: stone_sword
+  displayName: Craft Stone Sword
   ingredients:
+  - item: {fileID: 11400000, guid: 0b22cc45f33048d7bf4084d89e212720, type: 2}
+    quantity: 1
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
-    quantity: 4
+    quantity: 20
   outputItem: {fileID: 11400000, guid: 8347749b678e9b653e0a8325bf53eea7, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 1
-  stationType: 0
+  stationType: 6
   requiredPortLevel: 1
-  craftTimeSeconds: 0.35
+  craftTimeSeconds: 0.7
   completionSound: {fileID: 0}
   completionCueText:

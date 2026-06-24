@@ -20,6 +20,6 @@ MonoBehaviour:
   placeholderColor: {r: 0.78, g: 0.35, b: 0.12, a: 1}
   icon: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 3c6040fbebd666344957dd17a1b2cd61, type: 3}
-  description: Raw copper-bearing ore from tougher mineral creatures.
-  droppedBy: Copper Creature
+  description: Raw copper-bearing ore from Copper Orelets and later copper creature variants.
+  droppedBy: Copper Orelet
   craftingUsage: Copper smelting, weapon upgrades, and copper-tier gear.

@@ -243,15 +243,16 @@ MonoBehaviour:
   - {fileID: 235007}
   - {fileID: 236007}
   availableRecipes:
-  - {fileID: 11400000, guid: 05202f6ed7642fb35b7baf8e071747bd, type: 2}
-  - {fileID: 11400000, guid: c875e35075b1c6907f2e3b56db2584d6, type: 2}
-  - {fileID: 11400000, guid: 787027c906ed2f50686294b58fe3be10, type: 2}
-  - {fileID: 11400000, guid: 9c42e624c2b7485cbca5129c3a72163f, type: 2}
+  - {fileID: 11400000, guid: 9f70203bef3c47e38093293969e5a563, type: 2}
   - {fileID: 11400000, guid: 7ba4d4188c92466db1f37226ae5dd313, type: 2}
-  - {fileID: 11400000, guid: 4df1f73f13b94f168442dde07002412f, type: 2}
-  - {fileID: 11400000, guid: fae5bdad8f114dd1a3ac918e564dcb50, type: 2}
+  - {fileID: 11400000, guid: 9c42e624c2b7485cbca5129c3a72163f, type: 2}
+  - {fileID: 11400000, guid: 781ea68db8334a949880a437fd7c5df3, type: 2}
+  - {fileID: 11400000, guid: 05202f6ed7642fb35b7baf8e071747bd, type: 2}
   - {fileID: 11400000, guid: ef31a4ca2a14458b9b80a5a3e77455ad, type: 2}
+  - {fileID: 11400000, guid: fae5bdad8f114dd1a3ac918e564dcb50, type: 2}
+  - {fileID: 11400000, guid: 4df1f73f13b94f168442dde07002412f, type: 2}
   - {fileID: 11400000, guid: c50112449dc3477495b56c698473e7d4, type: 2}
+  - {fileID: 11400000, guid: 787027c906ed2f50686294b58fe3be10, type: 2}
   debugSeedCopperSwordTestKit: 0
   debugInventorySeeds:
   - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
@@ -745,7 +746,7 @@ GameObject:
   - component: {fileID: 214001}
   - component: {fileID: 214002}
   m_Layer: 0
-  m_Name: Tree Creature Area
+  m_Name: Sapling and Birchling Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -829,7 +830,7 @@ GameObject:
   - component: {fileID: 215001}
   - component: {fileID: 215002}
   m_Layer: 0
-  m_Name: Stone Creature Area
+  m_Name: Rock Creature Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -913,7 +914,7 @@ GameObject:
   - component: {fileID: 216001}
   - component: {fileID: 216002}
   m_Layer: 0
-  m_Name: Coal Creature Area
+  m_Name: Coal Sprite Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -997,7 +998,7 @@ GameObject:
   - component: {fileID: 217001}
   - component: {fileID: 217002}
   m_Layer: 0
-  m_Name: Copper Creature Area
+  m_Name: Copper Orelet Area
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1344,7 +1345,7 @@ GameObject:
   - component: {fileID: 222002}
   - component: {fileID: 222003}
   m_Layer: 0
-  m_Name: Stone Creature Platform
+  m_Name: Rock Creature Platform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1741,7 +1742,7 @@ GameObject:
   - component: {fileID: 230006}
   - component: {fileID: 230007}
   m_Layer: 0
-  m_Name: Tree Creature
+  m_Name: Sapling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1959,7 +1960,7 @@ GameObject:
   - component: {fileID: 231006}
   - component: {fileID: 231007}
   m_Layer: 0
-  m_Name: Tree Creature
+  m_Name: Birchling
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2160,7 +2161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72247341906ec6e4185938a4b1ac503f, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  definition: {fileID: 11400000, guid: 20c9c759fa2ac83879db290055303bbb, type: 2}
+  definition: {fileID: 11400000, guid: c63024577db248da817719a85f8ce863, type: 2}
 --- !u!1 &232000
 GameObject:
   m_ObjectHideFlags: 0
@@ -2177,7 +2178,7 @@ GameObject:
   - component: {fileID: 232006}
   - component: {fileID: 232007}
   m_Layer: 0
-  m_Name: Stone Creature
+  m_Name: Rock Creature
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2395,7 +2396,7 @@ GameObject:
   - component: {fileID: 233006}
   - component: {fileID: 233007}
   m_Layer: 0
-  m_Name: Stone Creature
+  m_Name: Rock Creature
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2613,7 +2614,7 @@ GameObject:
   - component: {fileID: 234006}
   - component: {fileID: 234007}
   m_Layer: 0
-  m_Name: Coal Creature
+  m_Name: Coal Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2831,7 +2832,7 @@ GameObject:
   - component: {fileID: 235006}
   - component: {fileID: 235007}
   m_Layer: 0
-  m_Name: Copper Creature
+  m_Name: Copper Orelet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3049,7 +3050,7 @@ GameObject:
   - component: {fileID: 236006}
   - component: {fileID: 236007}
   m_Layer: 0
-  m_Name: Copper Creature
+  m_Name: Copper Orelet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

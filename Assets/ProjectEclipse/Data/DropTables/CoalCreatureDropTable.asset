@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce794da494d04da4ad32a6731f1cc114, type: 3}
-  m_Name: Coal Creature Drop Table
+  m_Name: Coal Sprite Drop Table
   m_EditorClassIdentifier:
-  tableId: coal_creature_drops
+  tableId: coal_sprite_drops
   entries:
   - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     minQuantity: 1

@@ -152,13 +152,13 @@ namespace ProjectEclipse.Crafting
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetPort(recipe.StationType) : null;
             if (port == null)
             {
-                plan.AddBlockingMessage("Missing Crafting Port: equip " + recipe.StationType + " for " + recipe.DisplayName + ".");
+                plan.AddBlockingMessage("Missing Crafting Trinket: equip " + CraftingTerminology.GetStationDisplayName(recipe.StationType) + " for " + recipe.DisplayName + ".");
                 return;
             }
 
             if (port.PortLevel < recipe.RequiredPortLevel)
             {
-                plan.AddBlockingMessage("Insufficient Crafting Port Tier: " + port.DisplayName + " level " + port.PortLevel + " / " + recipe.RequiredPortLevel + ".");
+                plan.AddBlockingMessage("Insufficient Crafting Trinket Tier: " + port.DisplayName + " level " + port.PortLevel + " / " + recipe.RequiredPortLevel + ".");
             }
 
             if (port.AllowedRecipes.Count > 0 && !ContainsRecipe(port, recipe))

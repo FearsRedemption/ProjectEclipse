@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ProjectEclipse.Crafting
 {
-    [CreateAssetMenu(menuName = "Project Eclipse/Crafting/Crafting Port Definition")]
+    [CreateAssetMenu(menuName = "Project Eclipse/Crafting/Crafting Trinket Definition")]
     public class CraftingPortDefinition : ItemDefinition
     {
         [SerializeField] private CraftingPortSlot portSlot = CraftingPortSlot.FurnacePort;

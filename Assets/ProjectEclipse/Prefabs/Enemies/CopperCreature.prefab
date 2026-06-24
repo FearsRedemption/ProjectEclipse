@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 110006}
   - component: {fileID: 110007}
   m_Layer: 0
-  m_Name: Copper Creature
+  m_Name: Copper Orelet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

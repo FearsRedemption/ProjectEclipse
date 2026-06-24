@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
-  m_Name: Craft Basic Woodworking Trinket
+  m_Name: Craft Basic Workbench Trinket
   m_EditorClassIdentifier:
-  recipeId: utility_port
-  displayName: Craft Basic Woodworking Trinket
+  recipeId: workbench_port
+  displayName: Craft Basic Workbench Trinket
   ingredients:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
-    quantity: 12
+    quantity: 8
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 6
-  outputItem: {fileID: 11400000, guid: 5bc0e90335d94ba6af52cf9bf74ba306, type: 2}
+  outputItem: {fileID: 11400000, guid: c6559a5e336548309eaaaa4780e23a05, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0
   stationType: 0
   requiredPortLevel: 1
-  craftTimeSeconds: 0.4
+  craftTimeSeconds: 0.35
   completionSound: {fileID: 0}
   completionCueText:

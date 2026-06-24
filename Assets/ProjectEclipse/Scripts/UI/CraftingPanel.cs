@@ -10,6 +10,7 @@ namespace ProjectEclipse.UI
         private enum CraftingFilter
         {
             All,
+            Handcrafted,
             Weapons,
             Armor,
             CraftingPorts,
@@ -102,9 +103,10 @@ namespace ProjectEclipse.UI
         {
             GUILayout.BeginHorizontal();
             FilterButton(CraftingFilter.All, "All");
+            FilterButton(CraftingFilter.Handcrafted, "Handcrafted");
             FilterButton(CraftingFilter.Weapons, "Weapons");
             FilterButton(CraftingFilter.Armor, "Armor");
-            FilterButton(CraftingFilter.CraftingPorts, "Ports");
+            FilterButton(CraftingFilter.CraftingPorts, "Trinkets");
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             FilterButton(CraftingFilter.Materials, "Materials");
@@ -252,7 +254,7 @@ namespace ProjectEclipse.UI
 
             if (!string.IsNullOrEmpty(search))
             {
-                string haystack = recipe.DisplayName + " " + recipe.OutputItem.DisplayName + " " + recipe.StationType;
+                string haystack = recipe.DisplayName + " " + recipe.OutputItem.DisplayName + " " + CraftingTerminology.GetStationDisplayName(recipe.StationType);
                 if (haystack.IndexOf(search, System.StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     return false;
@@ -262,6 +264,8 @@ namespace ProjectEclipse.UI
             ItemCategory category = recipe.OutputItem.Category;
             switch (selectedFilter)
             {
+                case CraftingFilter.Handcrafted:
+                    return recipe.StationType == CraftingStationType.Inventory;
                 case CraftingFilter.Weapons:
                     return category == ItemCategory.Weapon;
                 case CraftingFilter.Armor:
@@ -300,7 +304,7 @@ namespace ProjectEclipse.UI
             }
 
             string output = recipe.OutputItem != null ? recipe.OutputItem.DisplayName + " x" + recipe.OutputQuantity : "Unknown";
-            return "[" + recipe.StationType + "] " + string.Join(", ", parts.ToArray()) + " -> " + output;
+            return "[" + CraftingTerminology.GetStationDisplayName(recipe.StationType) + "] " + string.Join(", ", parts.ToArray()) + " -> " + output;
         }
 
         private string DescribeMissing(CraftingRecipe recipe)
@@ -313,7 +317,7 @@ namespace ProjectEclipse.UI
             List<string> missing = new List<string>();
             if (!crafting.HasRequiredStation(recipe))
             {
-                missing.Add("Equip " + recipe.StationType);
+                missing.Add("Equip " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
             }
 
             for (int i = 0; i < recipe.Ingredients.Count; i++)
