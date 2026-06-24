@@ -12,7 +12,7 @@ namespace ProjectEclipse.Progression
         [SerializeField] private WorldTierDefinition worldTier;
         [SerializeField] private ResourceTier resourceTier = ResourceTier.Wood;
         [SerializeField] private CraftingTier craftingTier = CraftingTier.Camp;
-        [SerializeField] private int recommendedLevel = 1;
+        [SerializeField] private int routeOrder = 1;
         [SerializeField] private StageUnlockRequirement unlockRequirement = new StageUnlockRequirement();
         [SerializeField] private List<EnemyDefinition> enemies = new List<EnemyDefinition>();
         [SerializeField] private List<EnemyDefinition> enhancedEnemies = new List<EnemyDefinition>();
@@ -25,7 +25,7 @@ namespace ProjectEclipse.Progression
         public WorldTierDefinition WorldTier { get { return worldTier; } }
         public ResourceTier ResourceTier { get { return resourceTier; } }
         public CraftingTier CraftingTier { get { return craftingTier; } }
-        public int RecommendedLevel { get { return Mathf.Max(1, recommendedLevel); } }
+        public int RouteOrder { get { return Mathf.Max(1, routeOrder); } }
         public StageUnlockRequirement UnlockRequirement { get { return unlockRequirement; } }
         public IReadOnlyList<EnemyDefinition> Enemies { get { return enemies; } }
         public IReadOnlyList<EnemyDefinition> EnhancedEnemies { get { return enhancedEnemies; } }

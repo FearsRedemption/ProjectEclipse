@@ -2,6 +2,10 @@ namespace ProjectEclipse.Player
 {
     public enum PlayerClassArchetype
     {
-        Warrior
+        Warrior,
+        Rogue,
+        Wizard,
+        Archer,
+        Gunslinger
     }
 }

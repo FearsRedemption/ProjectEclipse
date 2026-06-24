@@ -15,7 +15,15 @@ namespace ProjectEclipse.UI
             EquipmentDefinition equipped = equipment != null ? equipment.GetEquippedItem(hovered.Slot) as EquipmentDefinition : null;
             GUILayout.Label("Slot: " + hovered.Slot + " / " + hovered.EquipmentType);
             GUILayout.Label("Rarity: " + hovered.Rarity);
-            GUILayout.Label("Level: " + hovered.LevelRequirement);
+            GUILayout.Label("Material tier: " + hovered.MaterialTierRequirement);
+            if (!string.IsNullOrEmpty(hovered.RouteRequirement))
+            {
+                GUILayout.Label("Route: " + hovered.RouteRequirement);
+            }
+            if (!string.IsNullOrEmpty(hovered.UnlockRequirement))
+            {
+                GUILayout.Label("Unlock: " + hovered.UnlockRequirement);
+            }
             string classText = hovered.ClassRestriction == null || hovered.ClassRestriction.Unrestricted
                 ? "Any"
                 : hovered.ClassRestriction.RequiredClass.ToString();

@@ -35,7 +35,10 @@ MonoBehaviour:
   classRestriction:
     unrestricted: 0
     requiredClass: 0
-  levelRequirement: 1
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Starter Safe Zone
+  unlockRequirement: Future starter shield recipe or class trial
   visualSprite: {fileID: 21300000, guid: 87be8b1ae1ec43bf82799c95e13564b2, type: 3}
   visualLayer: 7
   equipmentType: Shield

@@ -16,5 +16,5 @@ MonoBehaviour:
   displayName: Forest Guardian Placeholder
   resourceTier: 0
   expectedCraftingTier: 0
-  recommendedLevel: 5
+  routeOrder: 5
   unlocksNextStage: 1

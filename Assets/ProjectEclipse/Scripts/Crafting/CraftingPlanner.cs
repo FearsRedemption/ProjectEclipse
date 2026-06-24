@@ -158,7 +158,10 @@ namespace ProjectEclipse.Crafting
 
             if (port.PortLevel < recipe.RequiredPortLevel)
             {
-                plan.AddBlockingMessage("Insufficient Crafting Trinket Tier: " + port.DisplayName + " level " + port.PortLevel + " / " + recipe.RequiredPortLevel + ".");
+                plan.AddBlockingMessage(
+                    "Insufficient Crafting Trinket Tier: " + port.DisplayName +
+                    " tier " + CraftingTrinketTierUtility.FormatTier(port.PortLevel) +
+                    " / " + CraftingTrinketTierUtility.FormatTier(recipe.RequiredPortLevel) + ".");
             }
 
             if (port.AllowedRecipes.Count > 0 && !ContainsRecipe(port, recipe))

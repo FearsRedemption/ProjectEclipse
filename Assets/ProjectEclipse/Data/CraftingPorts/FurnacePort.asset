@@ -22,7 +22,7 @@ MonoBehaviour:
   worldDropSprite: {fileID: 21300000, guid: be9de336d4d2402097cb7c4ee0c118b0, type: 3}
   description: Socketed crafting trinket for smelting ore without placing a world station.
   droppedBy:
-  craftingUsage: Smelting Copper Ore into ingots and future furnace recipes.
+  craftingUsage: Smelting Copper Ore into ingots after the primitive Stone and Sticks trinket craft.
   portSlot: 0
   stationType: 1
   allowedRecipes: []
@@ -30,7 +30,7 @@ MonoBehaviour:
   laneCount: 1
   speedMultiplier: 1
   fuelEfficiency: 1
-  fuelRules: Uses fuel materials such as Coal. Fuel values still need balancing.
+  fuelRules: Coal is fuel and future upgrade/alloy material, not a requirement for crafting this trinket.
   allowedRecipeCategories: Smelting, Refining
   specialEffectText: Enables furnace-trinket recipes from the inventory crafting screen.
   upgradeRequirements: Future upgrade path should use monster drops and refined materials.
