@@ -10,6 +10,7 @@ namespace ProjectEclipse.Combat
     {
         [SerializeField] private WeaponDefinition equippedWeapon;
         [SerializeField] private LayerMask targetMask = ~0;
+        [SerializeField] private LayerMask obstructionMask = ~0;
         [SerializeField] private Vector2 attackOriginOffset = new Vector2(0f, 0.1f);
 
         private float nextAttackTime;
@@ -133,6 +134,11 @@ namespace ProjectEclipse.Combat
                     continue;
                 }
 
+                if (HasObstructionBetween(transform.position, hit, damageable))
+                {
+                    continue;
+                }
+
                 Vector2 away = (hit.transform.position - transform.position);
                 if (away.sqrMagnitude < 0.0001f)
                 {
@@ -197,6 +203,11 @@ namespace ProjectEclipse.Combat
                     continue;
                 }
 
+                if (HasObstructionBetween(origin, hit, damageable))
+                {
+                    continue;
+                }
+
                 Vector2 knockbackVector = aim * Mathf.Max(0f, knockback) + Vector2.up * lift;
                 damageable.TakeDamage(new DamageInfo(Mathf.Max(1, damage), gameObject, center, knockbackVector));
                 damaged.Add(damageable);
@@ -204,6 +215,34 @@ namespace ProjectEclipse.Combat
             }
 
             return hitSomething;
+        }
+
+        private bool HasObstructionBetween(Vector2 origin, Collider2D targetCollider, IDamageable targetDamageable)
+        {
+            if (targetCollider == null)
+            {
+                return false;
+            }
+
+            Vector2 targetPoint = targetCollider.bounds.center;
+            RaycastHit2D[] blockers = Physics2D.LinecastAll(origin, targetPoint, obstructionMask);
+            for (int i = 0; i < blockers.Length; i++)
+            {
+                Collider2D blocker = blockers[i].collider;
+                if (blocker == null || blocker.isTrigger || blocker.transform == transform || blocker.transform.IsChildOf(transform))
+                {
+                    continue;
+                }
+
+                if (blocker == targetCollider || blocker.GetComponentInParent<IDamageable>() == targetDamageable)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private void OnDrawGizmosSelected()
