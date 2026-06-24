@@ -306,10 +306,7 @@ namespace ProjectEclipse.Crafting
                             detail = DescribePlanProblem(subPlan);
                         }
 
-                        if (showDetails)
-                        {
-                            AddProducerDetailLines(detailLines, producer, Mathf.Max(0, required - available));
-                        }
+                        AddProducerDetailLines(detailLines, producer, Mathf.Max(0, required - available), showDetails);
                     }
                 }
 
@@ -464,7 +461,7 @@ namespace ProjectEclipse.Crafting
             return parts.Count > 0 ? string.Join(", ", parts.ToArray()) : "known recipe";
         }
 
-        private void AddProducerDetailLines(List<CraftingRequirementLine> lines, CraftingRecipe producer, int outputShortage)
+        private void AddProducerDetailLines(List<CraftingRequirementLine> lines, CraftingRecipe producer, int outputShortage, bool includeNestedProducers)
         {
             if (lines == null || producer == null || outputShortage <= 0)
             {
@@ -500,6 +497,15 @@ namespace ProjectEclipse.Crafting
                     reserved,
                     status,
                     detail + " (owned " + totalOwned + ")"));
+
+                if (includeNestedProducers && available < required)
+                {
+                    CraftingRecipe nestedProducer = planner.FindRecipeFor(ingredient.Item);
+                    if (nestedProducer != null && nestedProducer != producer)
+                    {
+                        AddProducerDetailLines(lines, nestedProducer, required - available, true);
+                    }
+                }
             }
 
             CraftingRequirementLine stationProblem = GetStationProblemLine(producer);

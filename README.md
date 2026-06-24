@@ -26,6 +26,9 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Crafting now creates one active Work Order with dependency-aware planning, requirement feedback, simple logical material reservations, and port-lane processing.
 - Work Orders can auto-queue craftable intermediates from known recipes, wait on missing materials or ports, and continue when inventory changes make pending steps possible.
 - The MVP recipe list now includes a Copper Sword Work Order chain: Copper Ore -> Copper Ingot, Birch Log -> Birch Rod, then Copper Sword at an Anvil Port.
+- Furnace, Utility, and Anvil crafting ports are now craftable inventory items rather than invisible scene-only unlocks.
+- Work Order tracker lines are ordered as final item, direct ingredients, and immediate raw inputs, with missing-port lines near the step they block.
+- A disabled Debug/Test Copper Sword kit exists on `MvpGameManager` for Unity validation without seeding normal starter inventory.
 - Different crafting station/port types can process in parallel; basic ports expose one lane by default, with lane count modeled for future upgrades.
 - Crafting feedback includes Queue Started, Insufficient Materials, Missing Crafting Port, Insufficient Crafting Port Tier, Recipe Locked, and Work Order Complete states.
 - 2D side-scroller player movement, jumping, facing, ground detection, health, and simple death handling.
@@ -65,7 +68,7 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 
 ## Current Enemies And Drops
 
-- Tree Creature: small animated stump/sapling monster. Slowest basic enemy, simple root/branch lunge, drops Sticks.
+- Tree Creature: small animated stump/sapling monster. Slowest basic enemy, simple root/branch lunge, drops Sticks and Birch Log.
 - Stone Creature: bulkier rock golem. Slower, higher health, heavier knockback, drops Stone.
 - Coal Creature: fast charcoal imp. Quicker chase and shorter attack cooldown, drops Coal with a chance for extra Stone.
 - Copper Creature: largest current basic enemy. Tougher mineral beast with stronger damage, charge-like lunge, drops Copper Ore with a chance for Coal.
@@ -77,6 +80,9 @@ The package manifest includes the built-in Unity modules needed for 2D sprites, 
 - Stone Cleaver: Stone x4.
 - Basic Furnace: Stone x12, Coal x3.
 - Copper Whetstone Placeholder: Copper Ore x8, Coal x2.
+- Furnace Port: Stone x12, Coal x3.
+- Utility Port: Sticks x12, Birch Log x4.
+- Anvil Port: Stone x20, Copper Ingot x5.
 - Smelt Copper Ingot: Copper Ore x10 at a Furnace Port.
 - Carve Birch Rod: Birch Log x10 at a Utility Port.
 - Copper Sword: Copper Ingot x30, Birch Rod x10 at an Anvil Port. One sword requires 300 Copper Ore and 100 Birch Logs through the dependency chain.
@@ -90,6 +96,7 @@ The first Work Order implementation is intentionally small:
 - Logical reservation display for inputs reserved by the active Work Order, using available counts in recipe previews.
 - Processing jobs consume inputs when a step starts, then add outputs when the timer completes.
 - The tracker keeps consumed Work Order inputs visible so raw/intermediate lines do not appear to vanish after processing starts.
+- Material-change blocked steps retry automatically once required materials and ports are available again.
 - Completion cue hooks support an assigned `AudioClip`; if no clip exists, text cues such as `TINK TINK TINK` are displayed/logged for smithing/anvil recipes.
 
 ## Progression Direction

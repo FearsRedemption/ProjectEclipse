@@ -14,6 +14,16 @@ namespace ProjectEclipse.World
 {
     public class MvpGameManager : MonoBehaviour
     {
+        [System.Serializable]
+        private class DebugInventorySeed
+        {
+            [SerializeField] private ItemDefinition item;
+            [SerializeField] private int quantity = 1;
+
+            public ItemDefinition Item { get { return item; } }
+            public int Quantity { get { return Mathf.Max(1, quantity); } }
+        }
+
 #pragma warning disable CS0649
         [Header("Player")]
         [SerializeField] private PlayerController player;
@@ -33,6 +43,10 @@ namespace ProjectEclipse.World
         [Header("Scene Content")]
         [SerializeField] private List<EnemyController> placedEnemies = new List<EnemyController>();
         [SerializeField] private List<CraftingRecipe> availableRecipes = new List<CraftingRecipe>();
+
+        [Header("Debug/Test")]
+        [SerializeField] private bool debugSeedCopperSwordTestKit;
+        [SerializeField] private List<DebugInventorySeed> debugInventorySeeds = new List<DebugInventorySeed>();
 #pragma warning restore CS0649
 
         private void Awake()
@@ -40,6 +54,7 @@ namespace ProjectEclipse.World
             Physics2D.gravity = new Vector2(0f, -24f);
             ResolveMissingReferences();
             WirePlayer();
+            ApplyDebugInventorySeeds();
             WireCraftingAndFurnace();
             WireEnemies();
             WireHud();
@@ -139,6 +154,27 @@ namespace ProjectEclipse.World
             {
                 furnaceSystem.Initialize(playerInventory);
             }
+        }
+
+        private void ApplyDebugInventorySeeds()
+        {
+            if (!debugSeedCopperSwordTestKit || playerInventory == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < debugInventorySeeds.Count; i++)
+            {
+                DebugInventorySeed seed = debugInventorySeeds[i];
+                if (seed == null || seed.Item == null)
+                {
+                    continue;
+                }
+
+                playerInventory.AddItem(seed.Item, seed.Quantity);
+            }
+
+            Debug.Log("Debug/Test Copper Sword kit seeded into player inventory.");
         }
 
         private void WireEnemies()

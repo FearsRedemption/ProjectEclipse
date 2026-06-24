@@ -18,7 +18,7 @@ namespace ProjectEclipse.UI
                 ? order.Plan.FinalRecipe.OutputItem.DisplayName
                 : "Item";
 
-            GUILayout.Label(order.IsComplete ? "Work Order Complete" : "Work Order: " + outputName);
+            GUILayout.Label(order.IsComplete ? "Work Order Complete" : "Work Order: " + outputName + " x" + order.Plan.TargetQuantity);
             CraftingFeedbackView.DrawLines(crafting.GetActiveWorkOrderLines());
 
             GUILayout.Space(4f);
