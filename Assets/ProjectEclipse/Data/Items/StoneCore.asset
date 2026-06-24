@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a59ec39a59eedf41b74af43d91dd9ac, type: 3}
+  m_Name: Stone Core
+  m_EditorClassIdentifier:
+  itemId: stone_core
+  displayName: Stone Core
+  category: 0
+  resourceTier: 1
+  stackLimit: 999
+  placeholderColor: {r: 0.58, g: 0.6, b: 0.63, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Simple early magical core made from Stone for beginner Wizard weapons.
+  droppedBy:
+  craftingUsage: Early wand core that keeps Wizard progression aligned with Stone Sword pacing.

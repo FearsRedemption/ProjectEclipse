@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
+  m_Name: Wood Mechanism Pistol Placeholder
+  m_EditorClassIdentifier:
+  itemId: wood_mechanism_pistol_placeholder
+  displayName: Wood Mechanism Pistol Placeholder
+  category: 1
+  resourceTier: 0
+  stackLimit: 1
+  placeholderColor: {r: 0.58, g: 0.42, b: 0.24, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Gunslinger early mechanism placeholder using wood and simple parts.
+  droppedBy:
+  craftingUsage: Future bridge before brass mechanisms and fittings.
+  slot: 0
+  rarity: 1
+  stats:
+    attack: 3
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 4
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Sapling, Rock Creature, and Birchling route
+  unlockRequirement: Future Gunslinger mechanism recipe
+  visualSprite: {fileID: 0}
+  visualLayer: 6
+  equipmentType: Hand Cannon
+  specialEffectsPlaceholder: Non-active Gunslinger placeholder for early pacing.
+  archetype: 6
+  damage: 3
+  attackRange: 1.8
+  attackHeight: 0.95
+  cooldown: 0.72
+  knockback: 2.6
+  equippedVisualSprite: {fileID: 0}
+  equippedVisualOffset: {x: 0.28, y: -0.02}
+  equippedVisualRotation: -6
+  equippedVisualScale: {x: 0.52, y: 0.52}

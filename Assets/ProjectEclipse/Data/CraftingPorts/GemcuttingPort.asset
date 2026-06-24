@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3889d23f09df413a8839bfa8d34aac5e, type: 3}
+  m_Name: Basic Gemcutting Trinket
+  m_EditorClassIdentifier:
+  itemId: gemcutting_port
+  displayName: Basic Gemcutting Trinket
+  category: 9
+  resourceTier: 21
+  stackLimit: 1
+  placeholderColor: {r: 0.54, g: 0.78, b: 0.95, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Socketed crafting trinket for cutting raw gem shards into refined crystals.
+  droppedBy:
+  craftingUsage: Creates cut crystals from raw gem shards for later alchemy and arcane core crafting.
+  portSlot: 9
+  stationType: 10
+  allowedRecipes: []
+  portLevel: 1
+  laneCount: 1
+  speedMultiplier: 1
+  fuelEfficiency: 1
+  fuelRules: No fuel rules yet; future upgrades can improve crystal yield or processing speed.
+  allowedRecipeCategories: Gemcutting, Cut Crystals, Magical Core Components
+  specialEffectText: Prepares raw shards into cut crystals; it does not modify equipment stats.
+  upgradeRequirements: Future upgrade path should use cut crystals, refined metal, and route unlocks.

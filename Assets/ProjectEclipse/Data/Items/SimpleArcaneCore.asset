@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a59ec39a59eedf41b74af43d91dd9ac, type: 3}
+  m_Name: Simple Arcane Core
+  m_EditorClassIdentifier:
+  itemId: simple_arcane_core
+  displayName: Simple Arcane Core
+  category: 0
+  resourceTier: 22
+  stackLimit: 999
+  placeholderColor: {r: 0.62, g: 0.38, b: 0.92, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: General early arcane crafting core for future Wizard weapon branches.
+  droppedBy:
+  craftingUsage: Future bridge from Stone Core and cut crystals into elemental wand paths.

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
+  m_Name: Brass Frame Pistol Placeholder
+  m_EditorClassIdentifier:
+  itemId: brass_frame_pistol_placeholder
+  displayName: Brass Frame Pistol Placeholder
+  category: 1
+  resourceTier: 13
+  stackLimit: 1
+  placeholderColor: {r: 0.86, g: 0.65, b: 0.26, a: 1}
+  icon: {fileID: 0}
+  worldDropSprite: {fileID: 0}
+  description: Gunslinger brass-tier placeholder for mechanisms, frames, fittings, and ammo-adjacent crafting.
+  droppedBy:
+  craftingUsage: Future Gunslinger Work Order after Copper, Tin, and Zinc alloy progression.
+  slot: 0
+  rarity: 1
+  stats:
+    attack: 5
+    defense: 0
+    maxHealth: 0
+    moveSpeedBonus: 0
+    jumpForceBonus: 0
+    airControlBonus: 0
+  classRestriction:
+    unrestricted: 0
+    requiredClass: 4
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 13
+  routeRequirement: Copper, Tin, and Zinc alloy route
+  unlockRequirement: Future brass mechanism Work Order
+  visualSprite: {fileID: 0}
+  visualLayer: 6
+  equipmentType: Hand Cannon
+  specialEffectsPlaceholder: Brass should matter for Gunslinger mechanisms, frames, fittings, and ammo-related crafting.
+  archetype: 6
+  damage: 5
+  attackRange: 1.9
+  attackHeight: 1
+  cooldown: 0.75
+  knockback: 3
+  equippedVisualSprite: {fileID: 0}
+  equippedVisualOffset: {x: 0.28, y: -0.02}
+  equippedVisualRotation: -6
+  equippedVisualScale: {x: 0.55, y: 0.55}

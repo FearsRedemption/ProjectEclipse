@@ -20,9 +20,9 @@ MonoBehaviour:
   placeholderColor: {r: 0.24, g: 0.42, b: 0.52, a: 1}
   icon: {fileID: 21300000, guid: e453551c978344a88c00ce207a9ee2d5, type: 3}
   worldDropSprite: {fileID: 21300000, guid: e453551c978344a88c00ce207a9ee2d5, type: 3}
-  description: Socketed crafting trinket for future potion, buff, poison, and monster essence crafting.
+  description: Socketed crafting trinket for alchemy processing, potions, reagents, and monster essence crafting.
   droppedBy:
-  craftingUsage: Health, buff, resistance, movement, and life-skill potion recipes later.
+  craftingUsage: Alchemy processing that can refine cut crystals into magical crafting cores, plus future potion recipes.
   portSlot: 1
   stationType: 2
   allowedRecipes: []
@@ -31,6 +31,6 @@ MonoBehaviour:
   speedMultiplier: 1
   fuelEfficiency: 1
   fuelRules: Potion catalyst rules are not implemented yet.
-  allowedRecipeCategories: Potions, Consumables
-  specialEffectText: Placeholder trinket for future potion and buff crafting recipes.
+  allowedRecipeCategories: Alchemy Processing, Potions, Consumables, Magical Cores
+  specialEffectText: Active alchemy trinket placeholder until Alchemist splits from Cauldron later.
   upgradeRequirements: Future upgrade path should use creature reagents, not survival gathering.
