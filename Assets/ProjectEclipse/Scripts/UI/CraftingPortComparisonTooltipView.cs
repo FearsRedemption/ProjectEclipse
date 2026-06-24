@@ -15,7 +15,7 @@ namespace ProjectEclipse.UI
             CraftingPortDefinition equipped = inventoryCrafting != null ? inventoryCrafting.GetEquippedPort(hovered.PortSlot) : null;
             GUILayout.Label("Trinket slot: " + CraftingTerminology.GetSlotDisplayName(hovered.PortSlot));
             GUILayout.Label("Station: " + CraftingTerminology.GetStationDisplayName(hovered.StationType));
-            GUILayout.Label("Level: " + hovered.PortLevel + Delta(hovered.PortLevel, equipped != null ? equipped.PortLevel : 0));
+            GUILayout.Label("Tier: " + CraftingTrinketTierUtility.FormatTier(hovered.PortLevel) + Delta(hovered.PortLevel, equipped != null ? equipped.PortLevel : 0));
             GUILayout.Label("Speed: x" + hovered.SpeedMultiplier.ToString("0.##") + Delta(hovered.SpeedMultiplier, equipped != null ? equipped.SpeedMultiplier : 1f));
             GUILayout.Label("Fuel efficiency: x" + hovered.FuelEfficiency.ToString("0.##") + Delta(hovered.FuelEfficiency, equipped != null ? equipped.FuelEfficiency : 1f));
             GUILayout.Label("Recipes: " + hovered.AllowedRecipes.Count);

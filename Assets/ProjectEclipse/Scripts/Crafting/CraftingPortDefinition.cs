@@ -23,6 +23,7 @@ namespace ProjectEclipse.Crafting
         public CraftingStationType StationType { get { return stationType; } }
         public IReadOnlyList<CraftingRecipe> AllowedRecipes { get { return allowedRecipes; } }
         public int PortLevel { get { return Mathf.Max(1, portLevel); } }
+        public CraftingTrinketTier TrinketTier { get { return CraftingTrinketTierUtility.FromNumericTier(PortLevel); } }
         public int LaneCount { get { return Mathf.Max(1, laneCount); } }
         public float SpeedMultiplier { get { return Mathf.Max(0.01f, speedMultiplier); } }
         public float FuelEfficiency { get { return Mathf.Max(0.01f, fuelEfficiency); } }

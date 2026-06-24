@@ -17,9 +17,9 @@ MonoBehaviour:
   worldTier: {fileID: 11400000, guid: b2c6ab347f0243278f59f4cc230a26d4, type: 2}
   resourceTier: 0
   craftingTier: 0
-  recommendedLevel: 1
+  routeOrder: 1
   unlockRequirement:
-    recommendedLevel: 1
+    requiredRouteOrder: 1
     requiredResourceTier: 0
     requiredCraftingTier: 0
     requiredBoss: {fileID: 0}

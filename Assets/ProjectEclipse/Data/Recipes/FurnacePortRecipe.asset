@@ -17,8 +17,8 @@ MonoBehaviour:
   ingredients:
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     quantity: 12
-  - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
-    quantity: 3
+  - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
+    quantity: 6
   outputItem: {fileID: 11400000, guid: 55953519b7404aedb91105c77bd8bcdc, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0

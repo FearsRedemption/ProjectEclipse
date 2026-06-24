@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   worldTierId: earth
   displayName: Earth
-  recommendedLevel: 1
+  routeOrder: 1
   stages:
   - {fileID: 11400000, guid: ecfecabf104644d8a76d56f6e043d9d1, type: 2}
   gateBoss: {fileID: 11400000, guid: 2693e6bf83ff45cf9814b835c629c448, type: 2}

@@ -35,7 +35,10 @@ MonoBehaviour:
   classRestriction:
     unrestricted: 0
     requiredClass: 0
-  levelRequirement: 1
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 1
+  routeRequirement: Sapling and Rock Creature route
+  unlockRequirement: Craft Basic Workbench Trinket and Simple Handle
   visualSprite: {fileID: 21300000, guid: 630dc6e95275442f8e9a314cfd9de374, type: 3}
   visualLayer: 6
   equipmentType: Sword

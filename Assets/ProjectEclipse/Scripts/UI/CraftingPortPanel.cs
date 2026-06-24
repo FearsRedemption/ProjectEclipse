@@ -50,7 +50,7 @@ namespace ProjectEclipse.UI
 
             GUILayout.Space(6f);
             GUILayout.Label("Legacy Furnace Station");
-            GUILayout.Label("Level: " + furnace.FurnaceLevel);
+            GUILayout.Label("Tier: " + CraftingTrinketTierUtility.FormatTier(furnace.FurnaceLevel));
             GUILayout.Label("Fuel: " + DescribeSlot(furnace.FuelSlot));
             GUILayout.Label("Input: " + DescribeSlot(furnace.InputSlot));
             GUILayout.Label("Output: " + DescribeSlot(furnace.OutputSlot));

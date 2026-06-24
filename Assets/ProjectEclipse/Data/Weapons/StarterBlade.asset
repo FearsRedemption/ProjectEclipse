@@ -35,7 +35,10 @@ MonoBehaviour:
   classRestriction:
     unrestricted: 0
     requiredClass: 0
-  levelRequirement: 1
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 0
+  routeRequirement: Starter Safe Zone
+  unlockRequirement: Starting Warrior weapon
   visualSprite: {fileID: 21300000, guid: 72010ce6a5834681841fe064a536e9ac, type: 3}
   visualLayer: 6
   equipmentType: Sword

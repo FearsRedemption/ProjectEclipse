@@ -35,7 +35,10 @@ MonoBehaviour:
   classRestriction:
     unrestricted: 0
     requiredClass: 0
-  levelRequirement: 1
+  legacyProgressionGateValue: 1
+  materialTierRequirement: 3
+  routeRequirement: Birch, Coal, and Copper route
+  unlockRequirement: Craft Basic Anvil Trinket, Birch Rods, and Copper Ingots
   visualSprite: {fileID: 0}
   visualLayer: 6
   equipmentType: Sword

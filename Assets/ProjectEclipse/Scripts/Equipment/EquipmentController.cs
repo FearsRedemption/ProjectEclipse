@@ -33,7 +33,6 @@ namespace ProjectEclipse.Equipment
         [SerializeField] private CharacterVisualController characterVisuals;
         [SerializeField] private List<EquipmentSlotState> slots = new List<EquipmentSlotState>();
         [SerializeField] private ProjectEclipse.Player.PlayerClassDefinition playerClass;
-        [SerializeField] private int playerLevel = 1;
 #pragma warning disable CS0649
         [SerializeField] private ItemDefinition headArmorPlaceholder;
         [SerializeField] private ItemDefinition chestArmorPlaceholder;
@@ -149,7 +148,7 @@ namespace ProjectEclipse.Equipment
 
         public bool CanEquip(EquipmentDefinition equipmentItem)
         {
-            return equipmentItem != null && equipmentItem.CanEquip(playerClass, playerLevel);
+            return equipmentItem != null && equipmentItem.CanEquip(playerClass);
         }
 
         public void SetFacingDirection(int direction)

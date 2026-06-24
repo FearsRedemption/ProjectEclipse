@@ -11,7 +11,10 @@ namespace ProjectEclipse.Equipment
         [SerializeField] private EquipmentRarity rarity = EquipmentRarity.Common;
         [SerializeField] private EquipmentStats stats = new EquipmentStats();
         [SerializeField] private ClassRestriction classRestriction = new ClassRestriction();
-        [SerializeField] private int levelRequirement = 1;
+        [SerializeField] private int legacyProgressionGateValue = 1;
+        [SerializeField] private ResourceTier materialTierRequirement = ResourceTier.Wood;
+        [SerializeField] private string routeRequirement;
+        [SerializeField] private string unlockRequirement;
         [SerializeField] private Sprite visualSprite;
         [SerializeField] private EquippedVisualLayer visualLayer = EquippedVisualLayer.Mainhand;
         [SerializeField] private string equipmentType = "Gear";
@@ -21,15 +24,23 @@ namespace ProjectEclipse.Equipment
         public EquipmentRarity Rarity { get { return rarity; } }
         public EquipmentStats Stats { get { return stats; } }
         public ClassRestriction ClassRestriction { get { return classRestriction; } }
-        public int LevelRequirement { get { return Mathf.Max(1, levelRequirement); } }
+        public int LegacyProgressionGateValue { get { return Mathf.Max(1, legacyProgressionGateValue); } }
+        public ResourceTier MaterialTierRequirement { get { return materialTierRequirement; } }
+        public string RouteRequirement { get { return routeRequirement; } }
+        public string UnlockRequirement { get { return unlockRequirement; } }
         public Sprite VisualSprite { get { return visualSprite != null ? visualSprite : WorldDropSprite; } }
         public EquippedVisualLayer VisualLayer { get { return visualLayer; } }
         public string EquipmentType { get { return equipmentType; } }
         public string SpecialEffectsPlaceholder { get { return specialEffectsPlaceholder; } }
 
-        public bool CanEquip(PlayerClassDefinition playerClass, int level)
+        public bool CanEquip(PlayerClassDefinition playerClass)
         {
-            return level >= LevelRequirement && (classRestriction == null || classRestriction.Allows(playerClass));
+            return classRestriction == null || classRestriction.Allows(playerClass);
+        }
+
+        public bool CanEquip(PlayerClassDefinition playerClass, int ignoredLegacyValue)
+        {
+            return CanEquip(playerClass);
         }
 
         protected void ConfigureEquipment(
