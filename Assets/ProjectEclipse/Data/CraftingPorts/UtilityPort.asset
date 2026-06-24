@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.47, g: 0.34, b: 0.2, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: dddb54dbfe7c42daaa0dda21c73d822c, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: dddb54dbfe7c42daaa0dda21c73d822c, type: 3}
   description: Socketed crafting trinket for processing Logs into Rods and later wooden mechanisms.
   droppedBy:
   craftingUsage: Carving Logs into Rods after log creatures become available; not required for Stone Sword.

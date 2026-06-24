@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Coal Sprite
   rank: 0
   resourceTier: 2
-  maxHealth: 11
+  maxHealth: 15
   contactDamage: 2
   moveSpeed: 2.05
   chaseRange: 6.2

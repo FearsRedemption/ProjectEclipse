@@ -54,6 +54,11 @@ namespace ProjectEclipse.Combat
                 return false;
             }
 
+            if (offhand.EquipmentType == "Runic Ammo")
+            {
+                return false;
+            }
+
             nextOffhandTime = Time.time + (modified ? 0.65f : 0.45f);
             if (visualState != null)
             {

@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Copper Orelet
   rank: 0
   resourceTier: 3
-  maxHealth: 20
+  maxHealth: 24
   contactDamage: 4
   moveSpeed: 1.35
   chaseRange: 6.6
@@ -31,8 +31,8 @@ MonoBehaviour:
   dropTable: {fileID: 11400000, guid: 0569510f747944a1bee03fdf8e1f1cbc, type: 2}
   drops:
   - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
-    minQuantity: 1
-    maxQuantity: 3
+    minQuantity: 3
+    maxQuantity: 5
     chance: 1
   - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     minQuantity: 1

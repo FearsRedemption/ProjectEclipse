@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.5, g: 0.34, b: 0.2, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: da84aa2e0f7e4ad59de8ec52d20b62b7, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: da84aa2e0f7e4ad59de8ec52d20b62b7, type: 3}
   description: Gunslinger starter placeholder before real firearms enter Bronze or Brass progression.
   droppedBy:
   craftingUsage: Future Gunslinger mainhand paired with equipped Runic Ammo.
@@ -39,7 +39,7 @@ MonoBehaviour:
   materialTierRequirement: 0
   routeRequirement: Starter Safe Zone
   unlockRequirement: Future Gunslinger starter loadout
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: a2181890895c42a09b9930aab0f999b3, type: 3}
   visualLayer: 6
   equipmentType: Slingshot
   specialEffectsPlaceholder: Early Gunslinger mainhand; ammo is an equipped offhand modifier, not a consumable stack.
@@ -49,7 +49,7 @@ MonoBehaviour:
   attackHeight: 0.9
   cooldown: 0.62
   knockback: 2.3
-  equippedVisualSprite: {fileID: 0}
+  equippedVisualSprite: {fileID: 21300000, guid: a2181890895c42a09b9930aab0f999b3, type: 3}
   equippedVisualOffset: {x: 0.28, y: -0.02}
   equippedVisualRotation: -6
   equippedVisualScale: {x: 0.5, y: 0.5}

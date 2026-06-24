@@ -18,11 +18,11 @@ MonoBehaviour:
   resourceTier: 1
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: 1520ff61a2ce49c0afe310135f7f0bc0, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 1520ff61a2ce49c0afe310135f7f0bc0, type: 3}
   description: Rogue stone-tier weapon placeholder matching Stone Sword pacing.
   droppedBy:
-  craftingUsage: Future Rogue craft from Stone and Simple Handle.
+  craftingUsage: Future Rogue Workbench craft from Sticks and Stone.
   slot: 0
   rarity: 1
   stats:
@@ -38,8 +38,8 @@ MonoBehaviour:
   legacyProgressionGateValue: 1
   materialTierRequirement: 1
   routeRequirement: Sapling and Rock Creature route
-  unlockRequirement: Future Rogue recipe using Stone and Simple Handle
-  visualSprite: {fileID: 0}
+  unlockRequirement: Future Rogue Workbench recipe using Sticks and Stone
+  visualSprite: {fileID: 21300000, guid: ef8bff6336934893a437f782782677eb, type: 3}
   visualLayer: 6
   equipmentType: Dagger
   specialEffectsPlaceholder: Faster but shorter stone-tier Rogue placeholder.
@@ -49,7 +49,7 @@ MonoBehaviour:
   attackHeight: 0.9
   cooldown: 0.31
   knockback: 2.6
-  equippedVisualSprite: {fileID: 0}
+  equippedVisualSprite: {fileID: 21300000, guid: ef8bff6336934893a437f782782677eb, type: 3}
   equippedVisualOffset: {x: 0.24, y: -0.02}
   equippedVisualRotation: -26
   equippedVisualScale: {x: 0.5, y: 0.5}

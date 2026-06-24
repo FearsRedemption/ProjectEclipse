@@ -16,9 +16,9 @@ MonoBehaviour:
   displayName: Craft Basic Anvil Trinket
   ingredients:
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
-    quantity: 20
+    quantity: 12
   - item: {fileID: 11400000, guid: d3b8c44c688c4bcfb64a5cd798f46c03, type: 2}
-    quantity: 5
+    quantity: 2
   outputItem: {fileID: 11400000, guid: a91f488e4ad54372988efc03f24ed901, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0
