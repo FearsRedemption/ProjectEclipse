@@ -27,6 +27,7 @@ namespace ProjectEclipse.UI
         private int craftAmount = 1;
         private bool customAmountSelected;
         private string customAmountText = "1";
+        private bool showRequirementDetails;
 
         private const int MaxCraftAmount = 9999;
 
@@ -141,7 +142,8 @@ namespace ProjectEclipse.UI
             }
 
             GUILayout.Label("Requirements");
-            List<CraftingRequirementLine> preview = crafting.GetRecipePreview(selectedRecipe, GetCraftAmount());
+            showRequirementDetails = GUILayout.Toggle(showRequirementDetails, "Show Details");
+            List<CraftingRequirementLine> preview = crafting.GetRecipePreview(selectedRecipe, GetCraftAmount(), showRequirementDetails);
             CraftingFeedbackView.DrawLines(preview);
             GUILayout.EndVertical();
         }
@@ -190,6 +192,7 @@ namespace ProjectEclipse.UI
             if (selectedRecipe != recipe)
             {
                 selectedRecipe = recipe;
+                showRequirementDetails = false;
                 ResetCraftAmount();
             }
         }
@@ -289,8 +292,10 @@ namespace ProjectEclipse.UI
                 CraftingIngredient ingredient = recipe.Ingredients[i];
                 if (ingredient != null && ingredient.Item != null)
                 {
-                    int count = crafting.CountItem(ingredient.Item);
-                    parts.Add(ingredient.Item.DisplayName + " " + count + "/" + ingredient.Quantity);
+                    int available = crafting.CountAvailableItem(ingredient.Item);
+                    int reserved = crafting.CountReservedItem(ingredient.Item);
+                    string reservedText = reserved > 0 ? " (" + reserved + " reserved)" : string.Empty;
+                    parts.Add(ingredient.Item.DisplayName + " " + available + "/" + ingredient.Quantity + reservedText);
                 }
             }
 
@@ -319,10 +324,10 @@ namespace ProjectEclipse.UI
                     continue;
                 }
 
-                int count = crafting.CountItem(ingredient.Item);
-                if (count < ingredient.Quantity)
+                int available = crafting.CountAvailableItem(ingredient.Item);
+                if (available < ingredient.Quantity)
                 {
-                    missing.Add(ingredient.Item.DisplayName + " +" + (ingredient.Quantity - count));
+                    missing.Add(ingredient.Item.DisplayName + " +" + (ingredient.Quantity - available));
                 }
             }
 

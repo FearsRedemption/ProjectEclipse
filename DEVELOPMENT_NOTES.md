@@ -134,7 +134,7 @@ Item definitions support:
 
 Current material names:
 
-- Tree Creature drops `Sticks`.
+- Tree Creature drops `Sticks` and `Birch Log`.
 - Stone/Rock Creature drops `Stone`.
 - Coal Creature drops `Coal`.
 - Copper Creature drops `Copper Ore`.
@@ -234,6 +234,8 @@ Work Order flow:
 - Dependency loops are blocked with a Recipe Locked message.
 - `WorkOrder` starts queued steps when their ingredients and station lane are available.
 - Inputs are consumed when a step starts processing.
+- Consumed Work Order inputs remain represented in tracker counts as consumed/reserved progress, so raw material and intermediate rows stay understandable after processing starts.
+- If inventory changes unexpectedly between the readiness check and consumption, the affected step is blocked and the feedback banner reports the material issue.
 - Outputs are added when the processing timer completes.
 - Completed intermediates stay in inventory if the Work Order is canceled afterward.
 - Canceling clears unused logical reservations and pending/processing jobs. First-pass limitation: inputs already consumed by a started processing step are not refunded.
@@ -241,6 +243,7 @@ Work Order flow:
 Material reservation direction:
 
 - The current pass uses WorkOrder-local logical reservations, exposed as total owned / reserved / available counts.
+- Recipe previews use available counts first, then expose dependency details behind the Show Details toggle.
 - Because only one active Work Order is supported, this prevents double-queuing through the crafting UI.
 - Other future systems should consult `CraftingSystem.CountAvailableItem` before consuming materials that may be reserved.
 
@@ -260,6 +263,13 @@ Completion cue hooks:
 - Do not add copyrighted sounds. Use original audio later.
 
 Recipe assets live under `Assets/ProjectEclipse/Data/Recipes` and are assigned to `MvpGameManager.availableRecipes`.
+
+Current Work Order chain seed:
+
+- `Smelt Copper Ingot`: Copper Ore x10 -> Copper Ingot x1, Furnace Port.
+- `Carve Birch Rod`: Birch Log x10 -> Birch Rod x1, Utility Port.
+- `Craft Copper Sword`: Copper Ingot x30 + Birch Rod x10 -> Copper Sword x1, Anvil Port, completion cue `TINK TINK TINK`.
+- One Copper Sword currently requires 300 Copper Ore and 100 Birch Logs if no intermediates already exist.
 
 ## Expanding Furnace Logic
 

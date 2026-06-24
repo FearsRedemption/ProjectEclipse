@@ -19,6 +19,7 @@ namespace ProjectEclipse.Crafting
         public CraftingPlanStepState State { get; set; }
         public float Progress01 { get; set; }
         public float RemainingSeconds { get; set; }
+        public string BlockReason { get; set; }
 
         public ItemDefinition OutputItem { get { return Recipe != null ? Recipe.OutputItem : null; } }
         public int OutputQuantity { get { return Recipe != null ? Recipe.OutputQuantity * CraftCount : 0; } }
@@ -32,6 +33,7 @@ namespace ProjectEclipse.Crafting
             CraftCount = Mathf.Max(1, craftCount);
             IsFinalStep = isFinalStep;
             State = CraftingPlanStepState.Pending;
+            BlockReason = string.Empty;
         }
     }
 }

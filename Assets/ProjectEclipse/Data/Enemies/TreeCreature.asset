@@ -34,3 +34,7 @@ MonoBehaviour:
     minQuantity: 2
     maxQuantity: 5
     chance: 1
+  - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
+    minQuantity: 4
+    maxQuantity: 8
+    chance: 1
