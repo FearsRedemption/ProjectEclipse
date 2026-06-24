@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce794da494d04da4ad32a6731f1cc114, type: 3}
-  m_Name: Stone Creature Drop Table
+  m_Name: Rock Creature Drop Table
   m_EditorClassIdentifier:
-  tableId: stone_creature_drops
+  tableId: rock_creature_drops
   entries:
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     minQuantity: 2

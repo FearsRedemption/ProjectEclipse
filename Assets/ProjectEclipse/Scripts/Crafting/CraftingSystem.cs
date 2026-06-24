@@ -231,7 +231,7 @@ namespace ProjectEclipse.Crafting
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetPort(recipe.StationType) : null;
             if (port == null)
             {
-                return new CraftingRequirementLine(null, "Missing " + recipe.StationType, 0, 1, 0, CraftingRequirementStatus.MissingPort, "Equip " + recipe.StationType);
+                return new CraftingRequirementLine(null, "Missing " + CraftingTerminology.GetStationDisplayName(recipe.StationType), 0, 1, 0, CraftingRequirementStatus.MissingPort, "Equip " + CraftingTerminology.GetStationDisplayName(recipe.StationType));
             }
 
             if (port.PortLevel < recipe.RequiredPortLevel)
@@ -404,13 +404,13 @@ namespace ProjectEclipse.Crafting
             for (int i = 0; i < plan.BlockingMessages.Count; i++)
             {
                 string message = plan.BlockingMessages[i];
-                if (message.Contains("Missing Crafting Port"))
+                if (message.Contains("Missing Crafting Trinket"))
                 {
-                    return "Missing Crafting Port";
+                    return "Missing Crafting Trinket";
                 }
-                if (message.Contains("Insufficient Crafting Port Tier"))
+                if (message.Contains("Insufficient Crafting Trinket Tier"))
                 {
-                    return "Insufficient Crafting Port Tier";
+                    return "Insufficient Crafting Trinket Tier";
                 }
                 if (message.Contains("Recipe Locked"))
                 {

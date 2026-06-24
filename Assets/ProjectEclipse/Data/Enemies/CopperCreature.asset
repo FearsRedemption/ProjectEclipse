@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
-  m_Name: Copper Creature
+  m_Name: Copper Orelet
   m_EditorClassIdentifier:
-  enemyId: copper_creature
-  displayName: Copper Creature
+  enemyId: copper_orelet
+  displayName: Copper Orelet
   rank: 0
   resourceTier: 3
   maxHealth: 20

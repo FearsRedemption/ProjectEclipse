@@ -26,18 +26,18 @@ namespace ProjectEclipse.UI
         {
             if (inventoryCrafting != null)
             {
-                GUILayout.Label("Crafting Ports");
+                GUILayout.Label(CraftingTerminology.TrinketPlural);
                 GUILayout.BeginHorizontal();
-                DrawPortSlot(CraftingPortSlot.FurnacePort, "Furnace", hover);
-                DrawPortSlot(CraftingPortSlot.CauldronPort, "Cauldron", hover);
-                DrawPortSlot(CraftingPortSlot.ForgePort, "Forge", hover);
-                DrawPortSlot(CraftingPortSlot.AnvilPort, "Anvil", hover);
-                DrawPortSlot(CraftingPortSlot.UtilityPort, "Utility", hover);
+                DrawPortSlot(CraftingPortSlot.WorkbenchPort, CraftingTerminology.GetSlotDisplayName(CraftingPortSlot.WorkbenchPort), hover);
+                DrawPortSlot(CraftingPortSlot.UtilityPort, CraftingTerminology.GetSlotDisplayName(CraftingPortSlot.UtilityPort), hover);
+                DrawPortSlot(CraftingPortSlot.FurnacePort, CraftingTerminology.GetSlotDisplayName(CraftingPortSlot.FurnacePort), hover);
+                DrawPortSlot(CraftingPortSlot.AnvilPort, CraftingTerminology.GetSlotDisplayName(CraftingPortSlot.AnvilPort), hover);
+                DrawPortSlot(CraftingPortSlot.CauldronPort, CraftingTerminology.GetSlotDisplayName(CraftingPortSlot.CauldronPort), hover);
                 GUILayout.EndHorizontal();
             }
             else
             {
-                GUILayout.Label("Inventory crafting ports not wired.");
+                GUILayout.Label("Inventory crafting trinkets not wired.");
             }
         }
 

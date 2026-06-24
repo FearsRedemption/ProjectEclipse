@@ -21,5 +21,5 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 92d049df300d3ab40b01a83e33752de2, type: 3}
   description: Flexible wood scraps gathered from forest creatures.
-  droppedBy: Tree Creature
-  craftingUsage: Early Warrior gear, handles, and camp-tier crafting.
+  droppedBy: Sapling
+  craftingUsage: Handcrafted trinkets, Simple Handles, and starter weapon parts.

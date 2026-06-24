@@ -10,20 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
-  m_Name: Craft Basic Furnace
+  m_Name: Shape Simple Handle
   m_EditorClassIdentifier:
-  recipeId: basic_furnace
-  displayName: Craft Basic Furnace
+  recipeId: simple_handle
+  displayName: Shape Simple Handle
   ingredients:
-  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
-    quantity: 12
-  - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
-    quantity: 3
-  outputItem: {fileID: 11400000, guid: 8a8c5ed33602a62df7c3683152a47727, type: 2}
+  - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
+    quantity: 10
+  outputItem: {fileID: 11400000, guid: 0b22cc45f33048d7bf4084d89e212720, type: 2}
   outputQuantity: 1
   equipOutputIfWeapon: 0
-  stationType: 0
+  stationType: 5
   requiredPortLevel: 1
-  craftTimeSeconds: 0.5
+  craftTimeSeconds: 0.35
   completionSound: {fileID: 0}
   completionCueText:

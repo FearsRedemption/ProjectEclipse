@@ -82,7 +82,7 @@ namespace ProjectEclipse.UI
                 }
                 else
                 {
-                    hover.SetCraftingPortSlot(slot, label, "Empty " + label + ". Right-click a matching crafting port in inventory to equip it.");
+                    hover.SetCraftingPortSlot(slot, label, "Empty " + label + ". Right-click a matching crafting trinket in inventory to equip it.");
                 }
             }
 

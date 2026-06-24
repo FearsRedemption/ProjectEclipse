@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
-  m_Name: Tree Creature
+  m_Name: Sapling
   m_EditorClassIdentifier:
-  enemyId: tree_creature
-  displayName: Tree Creature
+  enemyId: sapling
+  displayName: Sapling
   rank: 0
   resourceTier: 0
   maxHealth: 5
@@ -33,8 +33,4 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
     minQuantity: 2
     maxQuantity: 5
-    chance: 1
-  - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
-    minQuantity: 4
-    maxQuantity: 8
     chance: 1

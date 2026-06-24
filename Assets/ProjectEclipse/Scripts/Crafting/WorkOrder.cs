@@ -813,14 +813,15 @@ namespace ProjectEclipse.Crafting
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetPort(step.StationType) : null;
             if (port == null)
             {
+                string stationName = CraftingTerminology.GetStationDisplayName(step.StationType);
                 lines.Add(new CraftingRequirementLine(
                     null,
-                    "Missing " + step.StationType,
+                    "Missing " + stationName,
                     0,
                     1,
                     0,
                     CraftingRequirementStatus.MissingPort,
-                    "Equip " + step.StationType + " for " + step.Recipe.DisplayName));
+                    "Equip " + stationName + " for " + step.Recipe.DisplayName));
                 if (stationLinesAdded != null)
                 {
                     stationLinesAdded.Add(step);
@@ -883,19 +884,19 @@ namespace ProjectEclipse.Crafting
         private static bool IsStationBlockingMessage(string message)
         {
             return message != null
-                && (message.Contains("Missing Crafting Port")
-                    || message.Contains("Insufficient Crafting Port Tier")
+                && (message.Contains("Missing Crafting Trinket")
+                    || message.Contains("Insufficient Crafting Trinket Tier")
                     || message.Contains(" is not allowed by "));
         }
 
         private static CraftingRequirementStatus BlockingStatus(string message)
         {
-            if (message != null && message.Contains("Missing Crafting Port"))
+            if (message != null && message.Contains("Missing Crafting Trinket"))
             {
                 return CraftingRequirementStatus.MissingPort;
             }
 
-            if (message != null && message.Contains("Insufficient Crafting Port Tier"))
+            if (message != null && message.Contains("Insufficient Crafting Trinket Tier"))
             {
                 return CraftingRequirementStatus.InsufficientPortTier;
             }

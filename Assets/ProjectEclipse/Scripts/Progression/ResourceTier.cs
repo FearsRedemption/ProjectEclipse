@@ -11,6 +11,20 @@ namespace ProjectEclipse.Progression
         Moon,
         Mars,
         Cosmic,
-        Elemental
+        Elemental,
+        Tin,
+        Bronze,
+        Zinc,
+        Brass,
+        Steel,
+        Silver,
+        Cobalt,
+        Mithril,
+        Adamant,
+        Titanium,
+        Crystal,
+        Gem,
+        Arcane,
+        Celestial
     }
 }

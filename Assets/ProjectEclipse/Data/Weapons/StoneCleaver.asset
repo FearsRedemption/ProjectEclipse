@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 895a3f784784d7c448beef318521d3c7, type: 3}
-  m_Name: Stone Cleaver
+  m_Name: Stone Sword
   m_EditorClassIdentifier:
-  itemId: stone_cleaver
-  displayName: Stone Cleaver
+  itemId: stone_sword
+  displayName: Stone Sword
   category: 1
   resourceTier: 1
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.6, b: 0.62, a: 1}
   icon: {fileID: 21300000, guid: 5999fe03f5094f8dadb9ceee061e2745, type: 3}
   worldDropSprite: {fileID: 21300000, guid: 5999fe03f5094f8dadb9ceee061e2745, type: 3}
-  description: A heavy early-game stone blade crafted from monster material.
+  description: The first real crafted weapon after Beginner Sword, assembled from Stone and a Simple Handle.
   droppedBy:
-  craftingUsage: First stronger Warrior mainhand weapon.
+  craftingUsage: First stronger Warrior mainhand weapon before Birch, Coal, and Copper routes.
   slot: 0
   rarity: 1
   stats:
@@ -38,8 +38,8 @@ MonoBehaviour:
   levelRequirement: 1
   visualSprite: {fileID: 21300000, guid: 630dc6e95275442f8e9a314cfd9de374, type: 3}
   visualLayer: 6
-  equipmentType: Heavy Blade
-  specialEffectsPlaceholder: Slower Warrior strike with stronger knockback.
+  equipmentType: Sword
+  specialEffectsPlaceholder: Heavier starter sword with stronger knockback than Beginner Sword.
   archetype: 2
   damage: 5
   attackRange: 1.55

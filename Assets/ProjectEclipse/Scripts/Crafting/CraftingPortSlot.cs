@@ -6,6 +6,12 @@ namespace ProjectEclipse.Crafting
         CauldronPort,
         ForgePort,
         AnvilPort,
-        UtilityPort
+        UtilityPort,
+        WorkbenchPort,
+        ArcanePort,
+        LeatherworkingPort,
+        LoomPort,
+        GemcuttingPort,
+        RunesmithPort
     }
 }
