@@ -14,6 +14,11 @@ namespace ProjectEclipse.Enemies
             public Vector3 Center;
             public readonly List<EnemyController> ActiveEnemies = new List<EnemyController>();
             public float NextSpawnTime;
+            public int MaxAliveOverride = -1;
+            public float RespawnSecondsOverride = -1f;
+            public float RespawnJitterOverride = -1f;
+            public float SpawnRadiusOverride = -1f;
+            public float EmptyRespawnMultiplier = 0.28f;
         }
 
         [SerializeField] private int earlyMaxPerPlatform = 5;
@@ -41,22 +46,22 @@ namespace ProjectEclipse.Enemies
             playerTarget = target;
             dropSpawner = spawner;
 
-            if (placedEnemies == null)
+            if (placedEnemies != null)
             {
-                return;
-            }
-
-            foreach (EnemyController enemy in placedEnemies)
-            {
-                if (enemy == null || enemy.Definition == null)
+                foreach (EnemyController enemy in placedEnemies)
                 {
-                    continue;
-                }
+                    if (enemy == null || enemy.Definition == null)
+                    {
+                        continue;
+                    }
 
-                enemy.Initialize(enemy.Definition, playerTarget, dropSpawner);
-                SpawnGroup group = GetOrCreateGroup(enemy.Definition, enemy.transform.position);
-                group.ActiveEnemies.Add(enemy);
+                    enemy.Initialize(enemy.Definition, playerTarget, dropSpawner);
+                    SpawnGroup group = GetOrCreateGroup(enemy.Definition, enemy.transform.position);
+                    group.ActiveEnemies.Add(enemy);
+                }
             }
+
+            RegisterAuthoredSpawnPoints();
         }
 
         private void Update()
@@ -75,18 +80,20 @@ namespace ProjectEclipse.Enemies
             }
 
             RemoveMissingEnemies(group);
-            if (group.ActiveEnemies.Count >= GetMaxFor(group.Definition) || Time.time < group.NextSpawnTime)
+            int maxAlive = GetMaxFor(group);
+            if (group.ActiveEnemies.Count >= maxAlive || Time.time < group.NextSpawnTime)
             {
                 return;
             }
 
+            int aliveBeforeSpawn = group.ActiveEnemies.Count;
             EnemyController spawned = SpawnEnemy(group);
             if (spawned != null)
             {
                 group.ActiveEnemies.Add(spawned);
             }
 
-            group.NextSpawnTime = Time.time + Mathf.Max(0.5f, respawnSeconds) + Random.Range(0f, Mathf.Max(0f, respawnJitterSeconds));
+            group.NextSpawnTime = Time.time + GetRespawnDelay(group, maxAlive, aliveBeforeSpawn);
         }
 
         private SpawnGroup GetOrCreateGroup(EnemyDefinition definition, Vector3 position)
@@ -114,7 +121,8 @@ namespace ProjectEclipse.Enemies
 
         private EnemyController SpawnEnemy(SpawnGroup group)
         {
-            Vector3 position = group.Center + new Vector3(Random.Range(-spawnRadius, spawnRadius), 0f, 0f);
+            float radius = group.SpawnRadiusOverride >= 0f ? group.SpawnRadiusOverride : spawnRadius;
+            Vector3 position = group.Center + new Vector3(Random.Range(-radius, radius), 0f, 0f);
             GameObject enemyObject = new GameObject(group.Definition.DisplayName);
             enemyObject.transform.position = position;
 
@@ -133,6 +141,31 @@ namespace ProjectEclipse.Enemies
             return enemy;
         }
 
+        private void RegisterAuthoredSpawnPoints()
+        {
+            EnemySpawnPoint2D[] spawnPoints = FindObjectsByType<EnemySpawnPoint2D>(FindObjectsSortMode.None);
+            for (int i = 0; i < spawnPoints.Length; i++)
+            {
+                EnemySpawnPoint2D point = spawnPoints[i];
+                if (point == null || point.Definition == null)
+                {
+                    continue;
+                }
+
+                SpawnGroup group = GetOrCreateGroup(point.Definition, point.transform.position);
+                group.Center = point.transform.position;
+                group.MaxAliveOverride = point.MaxAlive;
+                group.RespawnSecondsOverride = point.RespawnSeconds;
+                group.RespawnJitterOverride = point.RespawnJitterSeconds;
+                group.SpawnRadiusOverride = point.SpawnRadius;
+                group.EmptyRespawnMultiplier = point.EmptyRespawnMultiplier;
+                if (point.SpawnOnStartIfEmpty && group.ActiveEnemies.Count == 0)
+                {
+                    group.NextSpawnTime = Mathf.Min(group.NextSpawnTime, Time.time + Random.Range(0.2f, 0.85f));
+                }
+            }
+        }
+
         private void RemoveMissingEnemies(SpawnGroup group)
         {
             for (int i = group.ActiveEnemies.Count - 1; i >= 0; i--)
@@ -145,8 +178,28 @@ namespace ProjectEclipse.Enemies
             }
         }
 
-        private int GetMaxFor(EnemyDefinition definition)
+        private float GetRespawnDelay(SpawnGroup group, int maxAlive, int aliveCount)
         {
+            float baseSeconds = group.RespawnSecondsOverride >= 0f ? group.RespawnSecondsOverride : respawnSeconds;
+            float jitter = group.RespawnJitterOverride >= 0f ? group.RespawnJitterOverride : respawnJitterSeconds;
+            float fill = maxAlive > 0 ? Mathf.Clamp01(aliveCount / (float)maxAlive) : 1f;
+            float multiplier = Mathf.Lerp(Mathf.Clamp(group.EmptyRespawnMultiplier, 0.12f, 1f), 1f, fill);
+            return Mathf.Max(0.35f, baseSeconds * multiplier) + Random.Range(0f, Mathf.Max(0f, jitter) * multiplier);
+        }
+
+        private int GetMaxFor(SpawnGroup group)
+        {
+            if (group != null && group.MaxAliveOverride > 0)
+            {
+                return group.MaxAliveOverride;
+            }
+
+            EnemyDefinition definition = group != null ? group.Definition : null;
+            if (definition == null)
+            {
+                return Mathf.Max(1, earlyMaxPerPlatform);
+            }
+
             return IsEarlyTier(definition.ResourceTier)
                 ? Mathf.Max(1, earlyMaxPerPlatform)
                 : Mathf.Max(earlyMaxPerPlatform, laterMaxPerPlatform);

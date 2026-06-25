@@ -1,5 +1,6 @@
 using UnityEngine;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.UI;
 
 namespace ProjectEclipse.Combat
 {
@@ -157,12 +158,14 @@ namespace ProjectEclipse.Combat
 
         private static bool PressedMainhand()
         {
-            return Input.GetKeyDown(KeyCode.J) || Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.LeftControl);
+            return Input.GetKeyDown(KeyCode.J)
+                || (!MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(0))
+                || Input.GetKeyDown(KeyCode.LeftControl);
         }
 
         private static bool PressedOffhand()
         {
-            return Input.GetMouseButtonDown(1);
+            return !MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(1);
         }
 
         private void ShowFeedback(string message)

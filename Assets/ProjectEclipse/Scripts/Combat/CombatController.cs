@@ -121,6 +121,7 @@ namespace ProjectEclipse.Combat
                 visualState.TriggerAttack();
             }
 
+            SpawnRadialEffect(radius);
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, targetMask);
             List<IDamageable> damaged = new List<IDamageable>();
             bool hitSomething = false;
@@ -155,6 +156,22 @@ namespace ProjectEclipse.Combat
             }
 
             return hitSomething;
+        }
+
+        private void SpawnRadialEffect(float radius)
+        {
+            GameObject effect = new GameObject("Shout Wave");
+            effect.transform.position = new Vector3(transform.position.x, transform.position.y + 0.12f, transform.position.z - 0.04f);
+            float diameter = Mathf.Max(0.5f, radius * 2f);
+            effect.transform.localScale = new Vector3(diameter, diameter, 1f);
+
+            SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
+            renderer.sprite = SpriteFactory.GetShoutWaveSprite();
+            renderer.color = new Color(0.55f, 0.86f, 1f, 0.68f);
+            renderer.sortingOrder = slashSortingOrder;
+
+            SlashEffect slash = effect.AddComponent<SlashEffect>();
+            slash.Initialize(renderer.color, Mathf.Max(0.16f, slashDuration * 1.6f));
         }
 
         private Vector2 GetAttackCenter(float direction)

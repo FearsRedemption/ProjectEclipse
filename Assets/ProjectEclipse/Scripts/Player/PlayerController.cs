@@ -12,7 +12,7 @@ namespace ProjectEclipse.Player
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 7f;
-        [SerializeField] private float jumpForce = 13f;
+        [SerializeField] private float jumpForce = 15.2f;
         [SerializeField] private float acceleration = 58f;
         [SerializeField] private float deceleration = 72f;
         [SerializeField] private float airControl = 0.62f;

@@ -17,6 +17,6 @@ MonoBehaviour:
   archetype: 0
   startingMaxHealth: 24
   moveSpeed: 7
-  jumpForce: 13
+  jumpForce: 15.2
   startingWeapon: {fileID: 11400000, guid: 1b6747a720668a88629ad3b0b64b90a6, type: 2}
   classRole: Close-range weapon fighter with sturdy early-game melee progression.

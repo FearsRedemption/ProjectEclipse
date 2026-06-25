@@ -87,14 +87,19 @@ namespace ProjectEclipse.Combat
 
             if (gameObject.activeInHierarchy)
             {
-                StartCoroutine(InvulnerabilityRoutine());
+                StartCoroutine(InvulnerabilityRoutine(GetInvulnerabilitySeconds(damage)));
             }
         }
 
-        private IEnumerator InvulnerabilityRoutine()
+        private float GetInvulnerabilitySeconds(DamageInfo damage)
+        {
+            return damage.InvulnerabilitySeconds >= 0f ? damage.InvulnerabilitySeconds : invulnerabilitySeconds;
+        }
+
+        private IEnumerator InvulnerabilityRoutine(float seconds)
         {
             invulnerable = true;
-            yield return new WaitForSeconds(invulnerabilitySeconds);
+            yield return new WaitForSeconds(Mathf.Max(0f, seconds));
             invulnerable = false;
         }
 

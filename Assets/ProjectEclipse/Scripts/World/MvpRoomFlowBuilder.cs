@@ -8,6 +8,8 @@ namespace ProjectEclipse.World
 {
     public class MvpRoomFlowBuilder : MonoBehaviour
     {
+        private const string MapRootName = "Editable MVP Map";
+
         private struct RoomSpec
         {
             public string Name;
@@ -69,7 +71,7 @@ namespace ProjectEclipse.World
                 player = FindAnyObjectByType<PlayerController>();
             }
 
-            GameObject root = new GameObject("Runtime Room Flow");
+            GameObject root = new GameObject(MapRootName);
             RoomSpec[] specs = CreateRoomSpecs();
             for (int i = 0; i < specs.Length; i++)
             {
@@ -78,8 +80,10 @@ namespace ProjectEclipse.World
 
             for (int i = 0; i < specs.Length - 1; i++)
             {
-                CreatePortal(root.transform, specs[i], true, builtRooms[i + 1], builtSpawns[i + 1]);
-                CreatePortal(root.transform, specs[i + 1], false, builtRooms[i], builtSpawns[i]);
+                RoomPortal2D eastPortal = CreatePortal(root.transform, specs[i], true, builtRooms[i]);
+                RoomPortal2D westPortal = CreatePortal(root.transform, specs[i + 1], false, builtRooms[i + 1]);
+                eastPortal.LinkTo(westPortal);
+                westPortal.LinkTo(eastPortal);
             }
 
             DistributeExistingEnemies();
@@ -107,6 +111,8 @@ namespace ProjectEclipse.World
             roomObject.transform.position = new Vector3(spec.Center.x, spec.Center.y, 0f);
             RoomBounds2D bounds = roomObject.AddComponent<RoomBounds2D>();
             bounds.Configure(spec.Size);
+            MapArea2D mapArea = roomObject.AddComponent<MapArea2D>();
+            mapArea.Configure(spec.Name.ToLowerInvariant().Replace(" ", "-"), spec.Name, spec.Size);
             builtRooms.Add(bounds);
 
             Transform spawn = CreateSpawn(root, spec, index);
@@ -156,6 +162,8 @@ namespace ProjectEclipse.World
             BoxCollider2D collider = floor.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(spec.Size.x + 0.8f, 0.24f);
             floor.AddComponent<PlatformSurface>();
+            MapPlatform2D mapPlatform = floor.AddComponent<MapPlatform2D>();
+            mapPlatform.Configure(spec.Name.ToLowerInvariant().Replace(" ", "-") + "-floor", spec.Size.x + 0.8f, false);
         }
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
@@ -169,9 +177,11 @@ namespace ProjectEclipse.World
             collider.size = new Vector2(width, 0.08f);
             surface.AddComponent<OneWayPlatform>();
             surface.AddComponent<PlatformSurface>();
+            MapPlatform2D mapPlatform = surface.AddComponent<MapPlatform2D>();
+            mapPlatform.Configure(name.ToLowerInvariant().Replace(" ", "-"), width, true);
         }
 
-        private void CreatePortal(Transform root, RoomSpec spec, bool rightSide, RoomBounds2D targetRoom, Transform targetSpawn)
+        private RoomPortal2D CreatePortal(Transform root, RoomSpec spec, bool rightSide, RoomBounds2D owningRoom)
         {
             float x = rightSide ? spec.Center.x + spec.Size.x * 0.5f - 0.85f : spec.Center.x - spec.Size.x * 0.5f + 0.85f;
             GameObject portal = new GameObject(spec.Name + (rightSide ? " East Portal" : " West Portal"));
@@ -179,17 +189,20 @@ namespace ProjectEclipse.World
             portal.transform.position = new Vector3(x, floorSurfaceY + 0.75f, 0f);
             portal.transform.localScale = new Vector3(portalSize.x, portalSize.y, 1f);
 
-            SpriteRenderer renderer = portal.AddComponent<SpriteRenderer>();
-            renderer.sprite = SpriteFactory.GetPortalSprite();
-            renderer.color = spec.Portal;
-            renderer.sortingOrder = 2;
+            CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), SpriteFactory.GetPortalPadSprite(), spec.Portal, 1);
+            CreateLocalSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), SpriteFactory.GetPortalColumnSprite(), spec.Portal, 2);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
             trigger.size = Vector2.one;
 
+            GameObject arrival = new GameObject("Arrival Point");
+            arrival.transform.SetParent(portal.transform);
+            arrival.transform.localPosition = new Vector3(rightSide ? -1.15f : 1.15f, 0.16f, 0f);
+
             RoomPortal2D portalLink = portal.AddComponent<RoomPortal2D>();
-            portalLink.Configure(targetRoom, targetSpawn);
+            portalLink.Configure(owningRoom, arrival.transform, null);
+            return portalLink;
         }
 
         private static GameObject CreateSprite(Transform root, string name, Vector3 position, Vector3 scale, Sprite sprite, Color color, int sortingOrder)
@@ -203,6 +216,13 @@ namespace ProjectEclipse.World
             renderer.sprite = sprite;
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
+            return gameObject;
+        }
+
+        private static GameObject CreateLocalSprite(Transform root, string name, Vector3 localPosition, Vector3 scale, Sprite sprite, Color color, int sortingOrder)
+        {
+            GameObject gameObject = CreateSprite(root, name, Vector3.zero, scale, sprite, color, sortingOrder);
+            gameObject.transform.localPosition = localPosition;
             return gameObject;
         }
 

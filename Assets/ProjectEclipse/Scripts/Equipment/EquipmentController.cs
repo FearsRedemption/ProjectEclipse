@@ -52,6 +52,7 @@ namespace ProjectEclipse.Equipment
         public float TotalMoveSpeedBonus { get { return SumMovementStat(MovementStatKind.MoveSpeed); } }
         public float TotalJumpForceBonus { get { return SumMovementStat(MovementStatKind.JumpForce); } }
         public float TotalAirControlBonus { get { return SumMovementStat(MovementStatKind.AirControl); } }
+        public int TotalGearScore { get { return SumGearScore(); } }
 
         private enum MovementStatKind
         {
@@ -317,6 +318,37 @@ namespace ProjectEclipse.Equipment
                     total += equipmentItem.Stats.AirControlBonus;
                     break;
             }
+        }
+
+        private int SumGearScore()
+        {
+            int total = 0;
+            HashSet<EquipmentDefinition> counted = new HashSet<EquipmentDefinition>();
+            AddGearScore(equippedWeapon, counted, ref total);
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null)
+                {
+                    AddGearScore(slots[i].Item, counted, ref total);
+                }
+            }
+
+            return total;
+        }
+
+        private static void AddGearScore(EquipmentDefinition equipmentItem, HashSet<EquipmentDefinition> counted, ref int total)
+        {
+            if (equipmentItem == null || counted == null || !counted.Add(equipmentItem))
+            {
+                return;
+            }
+
+            total += equipmentItem.Stats.Attack;
+            total += equipmentItem.Stats.Defense;
+            total += equipmentItem.Stats.MaxHealth;
+            total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.MoveSpeedBonus) * 3f);
+            total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.JumpForceBonus) * 2f);
+            total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.AirControlBonus) * 3f);
         }
     }
 }

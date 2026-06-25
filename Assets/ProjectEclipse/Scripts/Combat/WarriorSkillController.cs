@@ -12,12 +12,13 @@ namespace ProjectEclipse.Combat
         [SerializeField] private float cleaveCooldown = 1.05f;
         [SerializeField] private float guardBreakCooldown = 1.35f;
         [SerializeField] private float leapStrikeCooldown = 2.2f;
-        [SerializeField] private float battleCryCooldown = 4.5f;
+        [SerializeField] private float battleCryCooldown = 6.5f;
         [SerializeField] private float leapImpulse = 5.2f;
         [SerializeField] private int cleaveMpCost = 12;
         [SerializeField] private int guardBreakMpCost = 14;
         [SerializeField] private int leapStrikeMpCost = 20;
-        [SerializeField] private int battleCryMpCost = 24;
+        [SerializeField] private int battleCryMpCost = 18;
+        [SerializeField] private float battleCryRadius = 2.75f;
 
         private Rigidbody2D body;
         private float nextCleaveTime;
@@ -118,7 +119,7 @@ namespace ProjectEclipse.Combat
                 return false;
             }
 
-            combatController.PerformRadialHit(1.9f, 1, 3.4f, 0.9f);
+            combatController.PerformRadialHit(battleCryRadius, Mathf.Max(1, BaseWeaponDamage()), 4.8f, 1.1f);
             return true;
         }
 

@@ -11,11 +11,18 @@ namespace ProjectEclipse.UI
         private const float SlotGap = 4f;
         private const float ScrollbarWidth = 16f;
         private const int MinimumVisibleRows = 6;
+        private const float DragThreshold = 7f;
 
         private Vector2 scroll;
+        private ItemDefinition dragItem;
+        private int dragQuantity;
+        private Vector2 dragStart;
+        private bool draggingItem;
 
         public int LastVisibleCount { get; private set; }
         public int LastTotalCount { get; private set; }
+        public bool IsDraggingItem { get { return draggingItem && dragItem != null; } }
+        public ItemDefinition DraggingItem { get { return IsDraggingItem ? dragItem : null; } }
 
         public ItemDefinition Draw(
             IReadOnlyList<InventoryStack> stacks,
@@ -70,6 +77,7 @@ namespace ProjectEclipse.UI
                     }
 
                     InventoryStack stack = visibleStacks[index];
+                    TrackDragCandidate(slotRect, stack);
                     ItemSlotClick slotClick = ItemSlotView.DrawClick(slotRect, stack.Item, stack.Quantity, hover, false);
                     if (slotClick != ItemSlotClick.None)
                     {
@@ -80,6 +88,7 @@ namespace ProjectEclipse.UI
             }
 
             GUI.EndScrollView();
+            UpdateDragState();
             if (visibleStacks.Count == 0)
             {
                 Rect messageRect = new Rect(outerRect.x + 12f, outerRect.y + 18f, outerRect.width - 24f, 24f);
@@ -87,6 +96,69 @@ namespace ProjectEclipse.UI
             }
 
             return clickedButton;
+        }
+
+        public bool TryTakeDraggedItem(out ItemDefinition item, out int quantity)
+        {
+            item = null;
+            quantity = 0;
+            if (dragItem == null)
+            {
+                return false;
+            }
+
+            item = dragItem;
+            quantity = Mathf.Max(1, dragQuantity);
+            ClearDrag();
+            return true;
+        }
+
+        public void CancelDrag()
+        {
+            ClearDrag();
+        }
+
+        private void TrackDragCandidate(Rect rect, InventoryStack stack)
+        {
+            Event current = Event.current;
+            if (current == null || current.type != EventType.MouseDown || current.button != 0 || stack == null || stack.Item == null || !rect.Contains(current.mousePosition))
+            {
+                return;
+            }
+
+            dragItem = stack.Item;
+            dragQuantity = stack.Quantity;
+            dragStart = current.mousePosition;
+            draggingItem = false;
+        }
+
+        private void UpdateDragState()
+        {
+            Event current = Event.current;
+            if (current == null || dragItem == null)
+            {
+                return;
+            }
+
+            if (current.rawType == EventType.MouseDrag && !draggingItem && Vector2.Distance(current.mousePosition, dragStart) >= DragThreshold)
+            {
+                draggingItem = true;
+                current.Use();
+                return;
+            }
+
+            if (current.rawType == EventType.MouseUp && !draggingItem)
+            {
+                ClearDrag();
+            }
+        }
+
+        private void ClearDrag()
+        {
+            dragItem = null;
+            dragQuantity = 0;
+            draggingItem = false;
+            dragStart = Vector2.zero;
         }
 
         private static List<InventoryStack> BuildVisibleStacks(IReadOnlyList<InventoryStack> stacks, System.Predicate<ItemDefinition> filter)

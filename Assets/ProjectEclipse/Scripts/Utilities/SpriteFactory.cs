@@ -9,8 +9,11 @@ namespace ProjectEclipse.Utilities
         private static readonly Dictionary<Color32, Sprite> SquareSprites = new Dictionary<Color32, Sprite>();
         private static readonly Dictionary<Color32, Sprite> ItemDropSprites = new Dictionary<Color32, Sprite>();
         private static Sprite slashSprite;
+        private static Sprite shoutWaveSprite;
         private static Sprite sparkleSprite;
         private static Sprite portalSprite;
+        private static Sprite portalColumnSprite;
+        private static Sprite portalPadSprite;
         private static Sprite creatureSilhouetteSprite;
         private static Sprite roomBackgroundSprite;
         private static Sprite groundFillSprite;
@@ -127,6 +130,44 @@ namespace ProjectEclipse.Utilities
             return slashSprite;
         }
 
+        public static Sprite GetShoutWaveSprite()
+        {
+            if (shoutWaveSprite != null)
+            {
+                return shoutWaveSprite;
+            }
+
+            int size = 96;
+            Texture2D texture = CreateTransparentTexture(size, size, "Runtime Shout Wave");
+            Color[] pixels = new Color[size * size];
+            Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), center) / (size * 0.5f);
+                    float ring = Mathf.Abs(distance - 0.72f);
+                    float innerRing = Mathf.Abs(distance - 0.38f);
+                    float alpha = 0f;
+                    if (ring < 0.08f)
+                    {
+                        alpha = Mathf.Clamp01(1f - ring / 0.08f) * 0.72f;
+                    }
+                    else if (innerRing < 0.04f)
+                    {
+                        alpha = Mathf.Clamp01(1f - innerRing / 0.04f) * 0.36f;
+                    }
+
+                    pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            shoutWaveSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 48f);
+            return shoutWaveSprite;
+        }
+
         public static Sprite GetSparkleSprite()
         {
             if (sparkleSprite != null)
@@ -197,6 +238,86 @@ namespace ProjectEclipse.Utilities
             texture.Apply();
             portalSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.42f), 64f);
             return portalSprite;
+        }
+
+        public static Sprite GetPortalColumnSprite()
+        {
+            if (portalColumnSprite != null)
+            {
+                return portalColumnSprite;
+            }
+
+            int width = 64;
+            int height = 112;
+            Texture2D texture = CreateTransparentTexture(width, height, "Runtime Portal Column");
+            Color[] pixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float nx = (x + 0.5f) / width * 2f - 1f;
+                    float vertical = (float)y / (height - 1);
+                    bool column = Mathf.Abs(nx) < 0.28f && y > 14 && y < 100;
+                    bool cap = (Mathf.Abs(nx) < 0.48f && ((y > 94 && y < 106) || (y > 8 && y < 20)));
+                    bool core = nx * nx * 1.7f + (vertical * 2f - 1.05f) * (vertical * 2f - 1.05f) < 0.52f;
+                    Color pixel = Color.clear;
+                    if (column || cap)
+                    {
+                        float light = Mathf.Lerp(0.42f, 0.84f, Mathf.Clamp01((nx + 1f) * 0.5f));
+                        pixel = new Color(light, light, light, 1f);
+                    }
+                    else if (core)
+                    {
+                        pixel = new Color(1f, 1f, 1f, 0.42f);
+                    }
+
+                    pixels[y * width + x] = pixel;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            portalColumnSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 64f);
+            return portalColumnSprite;
+        }
+
+        public static Sprite GetPortalPadSprite()
+        {
+            if (portalPadSprite != null)
+            {
+                return portalPadSprite;
+            }
+
+            int width = 96;
+            int height = 36;
+            Texture2D texture = CreateTransparentTexture(width, height, "Runtime Portal Pad");
+            Color[] pixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    float nx = (x + 0.5f) / width * 2f - 1f;
+                    float ny = (y + 0.5f) / height * 2f - 1f;
+                    float ellipse = nx * nx + ny * ny * 4.2f;
+                    Color pixel = Color.clear;
+                    if (ellipse <= 1f)
+                    {
+                        float rim = ellipse > 0.72f ? 0.88f : 0.54f;
+                        pixel = new Color(rim, rim, rim, 1f);
+                    }
+                    else if (ellipse <= 1.22f)
+                    {
+                        pixel = new Color(1f, 1f, 1f, 0.28f);
+                    }
+
+                    pixels[y * width + x] = pixel;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            portalPadSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 64f);
+            return portalPadSprite;
         }
 
         public static Sprite GetCreatureSilhouetteSprite()

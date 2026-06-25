@@ -30,6 +30,14 @@ namespace ProjectEclipse.Items
             dropCollider = GetComponent<Collider2D>();
         }
 
+        public void DelayPickup(float collectDelaySeconds, float magnetDelaySeconds)
+        {
+            collectDelay = Mathf.Max(collectDelay, collectDelaySeconds);
+            magnetDelay = Mathf.Max(magnetDelay, magnetDelaySeconds);
+            pickupTarget = null;
+            spawnTime = Time.time;
+        }
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();

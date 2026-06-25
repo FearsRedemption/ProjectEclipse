@@ -553,7 +553,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   moveSpeed: 7
-  jumpForce: 13
+  jumpForce: 15.2
   groundMask:
     serializedVersion: 2
     m_Bits: 4294967295
