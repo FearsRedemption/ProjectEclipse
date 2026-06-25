@@ -1,4 +1,5 @@
 using System.Collections;
+using ProjectEclipse.Progression;
 using ProjectEclipse.Combat;
 using ProjectEclipse.Items;
 using ProjectEclipse.Utilities;
@@ -16,6 +17,8 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private float wallProbeDistance = 0.18f;
         [SerializeField] private float patrolRadius = 4f;
         [SerializeField] private float returnHomeDistance = 6f;
+        [SerializeField] private float earlyDropChanceMultiplier = 1f;
+        [SerializeField] private int earlyMaxDropQuantityPerEntry = 2;
 
         private Transform target;
         private Rigidbody2D body;
@@ -49,8 +52,14 @@ namespace ProjectEclipse.Enemies
             target = playerTarget;
             dropSpawner = spawner;
             currentHealth = definition != null ? definition.MaxHealth : 1;
+            dead = false;
+            if (bodyCollider != null)
+            {
+                bodyCollider.enabled = true;
+            }
             homePosition = transform.position;
             ApplyDefinitionVisuals();
+            IgnoreOtherEnemyCollisions();
         }
 
         private void ApplyDefinitionVisuals()
@@ -77,6 +86,22 @@ namespace ProjectEclipse.Enemies
                 {
                     visualState.SetBaseColor(definition.PlaceholderColor);
                 }
+            }
+
+            transform.localScale = new Vector3(
+                Mathf.Abs(definition.VisualScale.x) * Mathf.Sign(transform.localScale.x == 0f ? 1f : transform.localScale.x),
+                Mathf.Abs(definition.VisualScale.y),
+                1f);
+
+            BoxCollider2D box = bodyCollider as BoxCollider2D;
+            if (box != null)
+            {
+                box.size = definition.ColliderSize;
+            }
+
+            if (visualState != null)
+            {
+                visualState.CaptureBaseState();
             }
         }
 
@@ -256,13 +281,63 @@ namespace ProjectEclipse.Enemies
 
         private void TrySpawnDrop(DropTableEntry drop)
         {
-            if (drop == null || drop.Item == null || UnityEngine.Random.value > drop.Chance)
+            if (drop == null || drop.Item == null || UnityEngine.Random.value > drop.Chance * GetDropChanceMultiplier())
             {
                 return;
             }
 
-            int quantity = UnityEngine.Random.Range(drop.MinQuantity, drop.MaxQuantity + 1);
+            int maxQuantity = Mathf.Min(drop.MaxQuantity, GetMaxDropQuantityPerEntry());
+            int minQuantity = Mathf.Min(drop.MinQuantity, maxQuantity);
+            int quantity = UnityEngine.Random.Range(minQuantity, maxQuantity + 1);
             dropSpawner.SpawnDrop(drop.Item, quantity, transform.position + Vector3.up * 0.35f);
+        }
+
+        private float GetDropChanceMultiplier()
+        {
+            if (definition == null)
+            {
+                return Mathf.Clamp01(earlyDropChanceMultiplier);
+            }
+
+            return IsEarlyTier(definition.ResourceTier) ? Mathf.Clamp01(earlyDropChanceMultiplier) : 0.75f;
+        }
+
+        private int GetMaxDropQuantityPerEntry()
+        {
+            if (definition == null || IsEarlyTier(definition.ResourceTier))
+            {
+                return Mathf.Max(1, earlyMaxDropQuantityPerEntry);
+            }
+
+            return 999;
+        }
+
+        private static bool IsEarlyTier(ResourceTier tier)
+        {
+            return tier == ResourceTier.Wood
+                || tier == ResourceTier.Stone
+                || tier == ResourceTier.Coal
+                || tier == ResourceTier.Copper;
+        }
+
+        private void IgnoreOtherEnemyCollisions()
+        {
+            if (bodyCollider == null)
+            {
+                return;
+            }
+
+            EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                EnemyController other = enemies[i];
+                if (other == null || other == this || other.bodyCollider == null)
+                {
+                    continue;
+                }
+
+                Physics2D.IgnoreCollision(bodyCollider, other.bodyCollider, true);
+            }
         }
 
         private IEnumerator DestroyAfterDeath()

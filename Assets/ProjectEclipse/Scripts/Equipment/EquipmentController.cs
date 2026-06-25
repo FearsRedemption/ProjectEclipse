@@ -72,6 +72,11 @@ namespace ProjectEclipse.Equipment
             {
                 characterVisuals = GetComponentInChildren<CharacterVisualController>();
             }
+            if (characterVisuals == null)
+            {
+                characterVisuals = gameObject.AddComponent<CharacterVisualController>();
+            }
+            characterVisuals.EnsureRuntimeLayers();
         }
 
         public void Initialize(CombatController combat, InventoryStore store)
@@ -86,6 +91,11 @@ namespace ProjectEclipse.Equipment
             {
                 characterVisuals = GetComponentInChildren<CharacterVisualController>();
             }
+            if (characterVisuals == null)
+            {
+                characterVisuals = gameObject.AddComponent<CharacterVisualController>();
+            }
+            characterVisuals.EnsureRuntimeLayers();
             ApplyWeaponVisual();
         }
 

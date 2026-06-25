@@ -104,9 +104,9 @@ namespace ProjectEclipse.UI
             TabButton(InventoryTab.Misc, "Misc");
             TabButton(InventoryTab.KeyItems, "Key Items");
             GUILayout.EndHorizontal();
-            if (selectedTab == InventoryTab.Misc)
+            if (selectedTab == InventoryTab.Equipment)
             {
-                GUILayout.Label("Crafting Trinkets", GameGuiStyles.MutedLabel);
+                GUILayout.Label("Gear, accessories, weapons, armor, and crafting trinkets", GameGuiStyles.MutedLabel);
             }
         }
 
@@ -147,14 +147,17 @@ namespace ProjectEclipse.UI
             switch (selectedTab)
             {
                 case InventoryTab.Equipment:
-                    return item is EquipmentDefinition || item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor;
+                    return item is EquipmentDefinition
+                        || item is CraftingPortDefinition
+                        || item.Category == ItemCategory.Weapon
+                        || item.Category == ItemCategory.Armor
+                        || item.Category == ItemCategory.CraftingPort;
                 case InventoryTab.Usable:
                     return item.Category == ItemCategory.Consumable;
                 case InventoryTab.Materials:
                     return item.Category == ItemCategory.Material;
                 case InventoryTab.Misc:
-                    return item.Category == ItemCategory.CraftingPort
-                        || (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade)
+                    return (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade)
                         || item.Category == ItemCategory.Furnace
                         || item.Category == ItemCategory.Placeholder;
                 case InventoryTab.KeyItems:

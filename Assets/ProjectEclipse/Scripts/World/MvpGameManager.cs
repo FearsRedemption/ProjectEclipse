@@ -29,6 +29,7 @@ namespace ProjectEclipse.World
         [SerializeField] private PlayerController player;
         [SerializeField] private PlayerClassDefinition playerClass;
         [SerializeField] private Health playerHealth;
+        [SerializeField] private PlayerResource playerResource;
         [SerializeField] private InventoryStore playerInventory;
         [SerializeField] private CombatController playerCombat;
         [SerializeField] private EquipmentController playerEquipment;
@@ -40,6 +41,7 @@ namespace ProjectEclipse.World
         [SerializeField] private FurnaceSystem furnaceSystem;
         [SerializeField] private MvpHud hud;
         [SerializeField] private MvpRoomFlowBuilder roomFlowBuilder;
+        [SerializeField] private EnemySpawnManager enemySpawnManager;
 
         [Header("Scene Content")]
         [SerializeField] private List<EnemyController> placedEnemies = new List<EnemyController>();
@@ -81,6 +83,11 @@ namespace ProjectEclipse.World
                     playerInventory = player.GetComponent<InventoryStore>();
                 }
 
+                if (playerResource == null)
+                {
+                    playerResource = player.GetComponent<PlayerResource>();
+                }
+
                 if (playerCombat == null)
                 {
                     playerCombat = player.GetComponent<CombatController>();
@@ -116,6 +123,11 @@ namespace ProjectEclipse.World
             {
                 roomFlowBuilder = FindAnyObjectByType<MvpRoomFlowBuilder>();
             }
+
+            if (enemySpawnManager == null)
+            {
+                enemySpawnManager = FindAnyObjectByType<EnemySpawnManager>();
+            }
         }
 
         private void WireRoomFlow()
@@ -133,6 +145,11 @@ namespace ProjectEclipse.World
             if (playerClass != null && playerHealth != null)
             {
                 playerHealth.SetMaxHealth(playerClass.StartingMaxHealth, true);
+            }
+
+            if (player != null && playerResource == null)
+            {
+                playerResource = player.gameObject.AddComponent<PlayerResource>();
             }
 
             WeaponDefinition weaponToEquip = starterWeapon;
@@ -197,21 +214,19 @@ namespace ProjectEclipse.World
         private void WireEnemies()
         {
             Transform playerTransform = player != null ? player.transform : null;
-            for (int i = 0; i < placedEnemies.Count; i++)
+            if (enemySpawnManager == null)
             {
-                EnemyController enemy = placedEnemies[i];
-                if (enemy != null)
-                {
-                    enemy.Initialize(enemy.Definition, playerTransform, dropSpawner);
-                }
+                enemySpawnManager = gameObject.AddComponent<EnemySpawnManager>();
             }
+
+            enemySpawnManager.Initialize(placedEnemies, playerTransform, dropSpawner);
         }
 
         private void WireHud()
         {
             if (hud != null)
             {
-                hud.Initialize(playerHealth, playerInventory, playerEquipment, playerCrafting, furnaceSystem);
+                hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, furnaceSystem);
             }
         }
     }

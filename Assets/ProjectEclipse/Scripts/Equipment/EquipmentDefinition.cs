@@ -29,6 +29,7 @@ namespace ProjectEclipse.Equipment
         public string RouteRequirement { get { return routeRequirement; } }
         public string UnlockRequirement { get { return unlockRequirement; } }
         public Sprite VisualSprite { get { return visualSprite != null ? visualSprite : WorldDropSprite; } }
+        public bool HasExplicitVisualSprite { get { return visualSprite != null; } }
         public EquippedVisualLayer VisualLayer { get { return visualLayer; } }
         public string EquipmentType { get { return equipmentType; } }
         public string SpecialEffectsPlaceholder { get { return specialEffectsPlaceholder; } }

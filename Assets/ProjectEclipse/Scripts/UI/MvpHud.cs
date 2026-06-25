@@ -10,6 +10,7 @@ namespace ProjectEclipse.UI
     public class MvpHud : MonoBehaviour
     {
         private Health playerHealth;
+        private PlayerResource playerResource;
         private InventoryStore inventory;
         private EquipmentController equipment;
         private CombatInputRouter combatInput;
@@ -26,12 +27,14 @@ namespace ProjectEclipse.UI
 
         public void Initialize(
             Health health,
+            PlayerResource resource,
             InventoryStore store,
             EquipmentController playerEquipment,
             CraftingSystem craftingSystem,
             FurnaceSystem furnaceSystem)
         {
             playerHealth = health;
+            playerResource = resource;
             inventory = store;
             equipment = playerEquipment;
             combatInput = playerEquipment != null ? playerEquipment.GetComponent<CombatInputRouter>() : null;
@@ -62,7 +65,7 @@ namespace ProjectEclipse.UI
         {
             GameGuiStyles.ApplySkin(GUI.skin);
 
-            GUILayout.Window(1, new Rect(12f, 12f, 280f, 126f), DrawStatusWindow, "Status", GameGuiStyles.Window);
+            GUILayout.Window(1, new Rect(12f, 12f, 280f, 150f), DrawStatusWindow, "Status", GameGuiStyles.Window);
             DrawCombatFeedback();
             DrawWorkOrderTracker();
             if (!inventoryOpen)
@@ -152,6 +155,13 @@ namespace ProjectEclipse.UI
                 Rect bar = GUILayoutUtility.GetRect(240f, 16f);
                 float fill = playerHealth.MaxHealth > 0 ? (float)playerHealth.CurrentHealth / playerHealth.MaxHealth : 0f;
                 GameGuiStyles.DrawProgressBar(bar, fill, new Color(0.8f, 0.18f, 0.14f, 1f));
+            }
+
+            if (playerResource != null)
+            {
+                GUILayout.Label("MP: " + playerResource.CurrentMp + " / " + playerResource.MaxMp);
+                Rect mpBar = GUILayoutUtility.GetRect(240f, 14f);
+                GameGuiStyles.DrawProgressBar(mpBar, playerResource.NormalizedMp, new Color(0.2f, 0.48f, 0.95f, 1f));
             }
 
             string weaponName = equipment != null && equipment.EquippedWeapon != null ? equipment.EquippedWeapon.DisplayName : "None";

@@ -15,7 +15,7 @@ MonoBehaviour:
   tableId: sapling_drops
   entries:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
-    minQuantity: 10
-    maxQuantity: 12
-    chance: 1
+    minQuantity: 1
+    maxQuantity: 2
+    chance: 0.65
   rareEntries: []

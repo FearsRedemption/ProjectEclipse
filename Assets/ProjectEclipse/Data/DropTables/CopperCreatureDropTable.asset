@@ -15,11 +15,11 @@ MonoBehaviour:
   tableId: copper_orelet_drops
   entries:
   - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
-    minQuantity: 11
-    maxQuantity: 13
-    chance: 1
+    minQuantity: 1
+    maxQuantity: 2
+    chance: 0.5
   - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     minQuantity: 1
     maxQuantity: 1
-    chance: 0.45
+    chance: 0.15
   rareEntries: []

@@ -65,6 +65,12 @@ namespace ProjectEclipse.Utilities
             }
         }
 
+        public void CaptureBaseState()
+        {
+            baseScale = transform.localScale;
+            baseColor = spriteRenderer != null ? spriteRenderer.color : baseColor;
+        }
+
         public void SetMoving(bool value)
         {
             moving = value;
