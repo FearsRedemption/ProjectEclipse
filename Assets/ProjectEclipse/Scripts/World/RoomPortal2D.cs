@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectEclipse.Player;
 using ProjectEclipse.Utilities;
 using UnityEngine;
@@ -13,7 +14,9 @@ namespace ProjectEclipse.World
         [SerializeField] private Transform arrivalPoint;
         [SerializeField] private RoomPortal2D linkedPortal;
         [SerializeField] private float reuseDelay = 0.45f;
+        [SerializeField] private float playerCooldownSeconds = 2.25f;
 
+        private static readonly Dictionary<int, float> PlayerCooldowns = new Dictionary<int, float>();
         private float nextUseTime;
         private PlayerController nearbyPlayer;
 
@@ -70,7 +73,7 @@ namespace ProjectEclipse.World
 
         private void Update()
         {
-            if (Time.time < nextUseTime || targetSpawn == null || nearbyPlayer == null || !WantsPortalUse())
+            if (Time.time < nextUseTime || !HasDestination() || nearbyPlayer == null || IsPlayerOnPortalCooldown(nearbyPlayer) || !WantsPortalUse())
             {
                 return;
             }
@@ -117,6 +120,7 @@ namespace ProjectEclipse.World
             }
 
             nextUseTime = Time.time + Mathf.Max(0.05f, reuseDelay);
+            SetPlayerPortalCooldown(player);
             if (destination != null)
             {
                 destination.SuppressUseFor(reuseDelay);
@@ -149,6 +153,44 @@ namespace ProjectEclipse.World
             return Input.GetKeyDown(KeyCode.W)
                 || Input.GetKeyDown(KeyCode.UpArrow)
                 || Input.GetKeyDown(KeyCode.Return);
+        }
+
+        private bool HasDestination()
+        {
+            return linkedPortal != null || targetSpawn != null;
+        }
+
+        private bool IsPlayerOnPortalCooldown(PlayerController player)
+        {
+            if (player == null)
+            {
+                return false;
+            }
+
+            float cooldownUntil;
+            int key = player.GetInstanceID();
+            if (!PlayerCooldowns.TryGetValue(key, out cooldownUntil))
+            {
+                return false;
+            }
+
+            if (Time.time < cooldownUntil)
+            {
+                return true;
+            }
+
+            PlayerCooldowns.Remove(key);
+            return false;
+        }
+
+        private void SetPlayerPortalCooldown(PlayerController player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            PlayerCooldowns[player.GetInstanceID()] = Time.time + Mathf.Max(0.1f, playerCooldownSeconds);
         }
 
         private void OnDrawGizmosSelected()

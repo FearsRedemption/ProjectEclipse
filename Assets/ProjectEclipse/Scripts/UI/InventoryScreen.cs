@@ -11,6 +11,10 @@ namespace ProjectEclipse.UI
 {
     public class InventoryScreen
     {
+        private const float ManualDropPickupLockoutSeconds = 4f;
+        private const float ManualDropMagnetLockoutSeconds = 5f;
+        private const float ManualDropLifetimeSeconds = 120f;
+
         private readonly InventoryStore inventory;
         private readonly EquipmentController equipment;
         private readonly InventoryCraftingController inventoryCrafting;
@@ -298,7 +302,7 @@ namespace ProjectEclipse.UI
             WorldItemDrop dropped = dropSpawner.SpawnDrop(item, quantity, GetManualDropPosition());
             if (dropped != null)
             {
-                dropped.DelayPickup(1.2f, 2.4f);
+                dropped.ConfigureManualDropSafety(inventory, ManualDropPickupLockoutSeconds, ManualDropMagnetLockoutSeconds, ManualDropLifetimeSeconds);
             }
 
             lastManualDropTime = Time.time;
