@@ -33,6 +33,8 @@ namespace ProjectEclipse.World
         [SerializeField] private PlayerRespawnController playerRespawn;
         [SerializeField] private InventoryStore playerInventory;
         [SerializeField] private CombatController playerCombat;
+        [SerializeField] private CombatInputRouter playerCombatInput;
+        [SerializeField] private WarriorSkillController warriorSkillController;
         [SerializeField] private EquipmentController playerEquipment;
         [SerializeField] private CraftingSystem playerCrafting;
         [SerializeField] private WeaponDefinition starterWeapon;
@@ -99,6 +101,16 @@ namespace ProjectEclipse.World
                     playerCombat = player.GetComponent<CombatController>();
                 }
 
+                if (playerCombatInput == null)
+                {
+                    playerCombatInput = player.GetComponent<CombatInputRouter>();
+                }
+
+                if (warriorSkillController == null)
+                {
+                    warriorSkillController = player.GetComponent<WarriorSkillController>();
+                }
+
                 if (playerEquipment == null)
                 {
                     playerEquipment = player.GetComponent<EquipmentController>();
@@ -156,6 +168,16 @@ namespace ProjectEclipse.World
             if (player != null && playerResource == null)
             {
                 playerResource = player.gameObject.AddComponent<PlayerResource>();
+            }
+
+            if (player != null && playerCombatInput == null)
+            {
+                playerCombatInput = player.gameObject.AddComponent<CombatInputRouter>();
+            }
+
+            if (player != null && warriorSkillController == null)
+            {
+                warriorSkillController = player.gameObject.AddComponent<WarriorSkillController>();
             }
 
             if (player != null && playerRespawn == null)

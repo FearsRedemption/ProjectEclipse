@@ -20,25 +20,30 @@ namespace ProjectEclipse.World
             platformId = string.IsNullOrEmpty(id) ? platformId : id;
             width = Mathf.Max(0.25f, platformWidth);
             oneWay = isOneWay;
-            SyncComponents();
+            SyncComponents(true);
         }
 
         private void Reset()
         {
-            SyncComponents();
+            SyncComponents(true);
         }
 
         private void OnValidate()
         {
-            SyncComponents();
+            SyncComponents(false);
         }
 
-        private void SyncComponents()
+        private void SyncComponents(bool syncOneWayComponent)
         {
             BoxCollider2D box = GetComponent<BoxCollider2D>();
             if (box != null)
             {
                 box.size = new Vector2(Width, Mathf.Max(0.02f, colliderHeight));
+            }
+
+            if (!syncOneWayComponent)
+            {
+                return;
             }
 
             OneWayPlatform oneWayPlatform = GetComponent<OneWayPlatform>();

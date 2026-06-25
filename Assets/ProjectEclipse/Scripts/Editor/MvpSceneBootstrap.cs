@@ -14,6 +14,7 @@ namespace ProjectEclipse.EditorTools
         static MvpSceneBootstrap()
         {
             EditorApplication.delayCall += EnsureMvpSceneConfigured;
+            EditorApplication.delayCall += CleanMissingScriptsInProjectEclipseScene;
         }
 
         [MenuItem("Project Eclipse/Open MVP Scene")]
@@ -98,6 +99,61 @@ namespace ProjectEclipse.EditorTools
             }
 
             EditorSceneManager.OpenScene(MvpScenePath);
+        }
+
+        private static void CleanMissingScriptsInProjectEclipseScene()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                return;
+            }
+
+            Scene activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.isLoaded)
+            {
+                return;
+            }
+
+            string scenePath = activeScene.path.Replace('\\', '/');
+            bool isProjectEclipseScene = scenePath == MvpScenePath || scenePath.Contains("Temp/__Backupscenes/");
+            if (!isProjectEclipseScene)
+            {
+                return;
+            }
+
+            GameObject[] roots = activeScene.GetRootGameObjects();
+            int missingCount = 0;
+            for (int i = 0; i < roots.Length; i++)
+            {
+                if (roots[i] != null)
+                {
+                    missingCount += GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(roots[i]);
+                }
+            }
+
+            if (missingCount <= 0)
+            {
+                return;
+            }
+
+            int removedCount = 0;
+            for (int i = 0; i < roots.Length; i++)
+            {
+                GameObject root = roots[i];
+                if (root == null)
+                {
+                    continue;
+                }
+
+                Undo.RegisterFullObjectHierarchyUndo(root, "Remove missing Project Eclipse scripts");
+                removedCount += GameObjectUtility.RemoveMonoBehavioursWithMissingScript(root);
+            }
+
+            if (removedCount > 0)
+            {
+                EditorSceneManager.MarkSceneDirty(activeScene);
+                Debug.LogWarning("Project Eclipse removed " + removedCount + " missing script component(s) from " + activeScene.name + ".");
+            }
         }
 
         private static bool LooksLikeUnityDefaultScene(Scene scene)

@@ -50,15 +50,14 @@ namespace ProjectEclipse.Enemies
             {
                 foreach (EnemyController enemy in placedEnemies)
                 {
-                    if (enemy == null || enemy.Definition == null)
-                    {
-                        continue;
-                    }
-
-                    enemy.Initialize(enemy.Definition, playerTarget, dropSpawner);
-                    SpawnGroup group = GetOrCreateGroup(enemy.Definition, enemy.transform.position);
-                    group.ActiveEnemies.Add(enemy);
+                    RegisterExistingEnemy(enemy);
                 }
+            }
+
+            EnemyController[] sceneEnemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            for (int i = 0; i < sceneEnemies.Length; i++)
+            {
+                RegisterExistingEnemy(sceneEnemies[i]);
             }
 
             RegisterAuthoredSpawnPoints();
@@ -79,8 +78,14 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
-            RemoveMissingEnemies(group);
+            int removed = RemoveMissingEnemies(group);
             int maxAlive = GetMaxFor(group);
+            if (removed > 0 && group.ActiveEnemies.Count < maxAlive)
+            {
+                float refillDelay = GetRespawnDelay(group, maxAlive, group.ActiveEnemies.Count);
+                group.NextSpawnTime = Mathf.Min(group.NextSpawnTime, Time.time + refillDelay);
+            }
+
             if (group.ActiveEnemies.Count >= maxAlive || Time.time < group.NextSpawnTime)
             {
                 return;
@@ -117,6 +122,21 @@ namespace ProjectEclipse.Enemies
             };
             groups.Add(created);
             return created;
+        }
+
+        private void RegisterExistingEnemy(EnemyController enemy)
+        {
+            if (enemy == null || enemy.Definition == null)
+            {
+                return;
+            }
+
+            enemy.Initialize(enemy.Definition, playerTarget, dropSpawner);
+            SpawnGroup group = GetOrCreateGroup(enemy.Definition, enemy.transform.position);
+            if (!group.ActiveEnemies.Contains(enemy))
+            {
+                group.ActiveEnemies.Add(enemy);
+            }
         }
 
         private EnemyController SpawnEnemy(SpawnGroup group)
@@ -166,16 +186,20 @@ namespace ProjectEclipse.Enemies
             }
         }
 
-        private void RemoveMissingEnemies(SpawnGroup group)
+        private int RemoveMissingEnemies(SpawnGroup group)
         {
+            int removed = 0;
             for (int i = group.ActiveEnemies.Count - 1; i >= 0; i--)
             {
                 EnemyController enemy = group.ActiveEnemies[i];
                 if (enemy == null || !enemy.IsAlive)
                 {
                     group.ActiveEnemies.RemoveAt(i);
+                    removed++;
                 }
             }
+
+            return removed;
         }
 
         private float GetRespawnDelay(SpawnGroup group, int maxAlive, int aliveCount)

@@ -58,6 +58,11 @@ namespace ProjectEclipse.Combat
 
         private void Awake()
         {
+            EnsureReferences();
+        }
+
+        private void EnsureReferences()
+        {
             if (combatController == null)
             {
                 combatController = GetComponent<CombatController>();
@@ -78,6 +83,7 @@ namespace ProjectEclipse.Combat
 
         public int PollActions(int facingDirection)
         {
+            EnsureReferences();
             int requestedFacingDirection = 0;
             SprintHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
@@ -101,9 +107,23 @@ namespace ProjectEclipse.Combat
 
             if (PressedOffhand())
             {
-                LastAction = SprintHeld ? CombatAction.ShiftOffhandModifier : CombatAction.OffhandAction;
-                if (combatController != null)
+                if (!SprintHeld && warriorSkills != null && warriorSkills.TryUseSkill(CombatAction.SkillF, facingDirection, false))
                 {
+                    LastAction = CombatAction.SkillF;
+                    ShowFeedback(GetActionLabel(CombatAction.SkillF));
+                    if (combatController != null)
+                    {
+                        requestedFacingDirection = combatController.LastAimFacingDirection;
+                    }
+                }
+                else if (!SprintHeld && warriorSkills != null && !string.IsNullOrEmpty(warriorSkills.LastFailureReason))
+                {
+                    LastAction = CombatAction.SkillF;
+                    ShowFeedback(warriorSkills.LastFailureReason);
+                }
+                else if (combatController != null)
+                {
+                    LastAction = SprintHeld ? CombatAction.ShiftOffhandModifier : CombatAction.OffhandAction;
                     EquipmentDefinition offhand = equipmentController != null ? equipmentController.Offhand : null;
                     bool acted = combatController.TryOffhandAction(offhand, facingDirection, SprintHeld);
                     requestedFacingDirection = combatController.LastAimFacingDirection;
@@ -158,9 +178,9 @@ namespace ProjectEclipse.Combat
 
         private static bool PressedMainhand()
         {
-            return Input.GetKeyDown(KeyCode.J)
+            return Input.GetKey(KeyCode.J)
                 || (!MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(0))
-                || Input.GetKeyDown(KeyCode.LeftControl);
+                || Input.GetKey(KeyCode.LeftControl);
         }
 
         private static bool PressedOffhand()
@@ -185,7 +205,7 @@ namespace ProjectEclipse.Combat
                 case CombatAction.SkillR:
                     return "Leap Strike";
                 case CombatAction.SkillF:
-                    return "Battle Cry";
+                    return "Shout";
                 default:
                     return "Skill";
             }
