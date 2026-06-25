@@ -89,6 +89,7 @@ namespace ProjectEclipse.UI
             DrawTabs();
             GUILayout.Space(6f);
             DrawInventoryGrid(hover);
+            DrawInventoryCount();
             GUILayout.Space(6f);
             DrawSelectedSummary();
             GUILayout.EndVertical();
@@ -146,14 +147,14 @@ namespace ProjectEclipse.UI
             switch (selectedTab)
             {
                 case InventoryTab.Equipment:
-                    return item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor;
+                    return item is EquipmentDefinition || item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor;
                 case InventoryTab.Usable:
                     return item.Category == ItemCategory.Consumable;
                 case InventoryTab.Materials:
                     return item.Category == ItemCategory.Material;
                 case InventoryTab.Misc:
                     return item.Category == ItemCategory.CraftingPort
-                        || item.Category == ItemCategory.Upgrade
+                        || (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade)
                         || item.Category == ItemCategory.Furnace
                         || item.Category == ItemCategory.Placeholder;
                 case InventoryTab.KeyItems:
@@ -187,6 +188,12 @@ namespace ProjectEclipse.UI
             }
 
             feedback = item.DisplayName + " selected.";
+        }
+
+        private void DrawInventoryCount()
+        {
+            string label = "Visible: " + inventoryGrid.LastVisibleCount + " / Total: " + inventoryGrid.LastTotalCount;
+            GUILayout.Label(label, GameGuiStyles.MutedLabel);
         }
 
         private void DrawSelectedSummary()

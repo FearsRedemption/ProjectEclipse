@@ -14,6 +14,9 @@ namespace ProjectEclipse.UI
 
         private Vector2 scroll;
 
+        public int LastVisibleCount { get; private set; }
+        public int LastTotalCount { get; private set; }
+
         public ItemDefinition Draw(
             IReadOnlyList<InventoryStack> stacks,
             ItemHoverState hover,
@@ -36,6 +39,8 @@ namespace ProjectEclipse.UI
             clicked = null;
             ItemSlotClick clickedButton = ItemSlotClick.None;
             List<InventoryStack> visibleStacks = BuildVisibleStacks(stacks, filter);
+            LastVisibleCount = visibleStacks.Count;
+            LastTotalCount = CountNonEmptyStacks(stacks);
             int rows = Mathf.Max(MinimumVisibleRows, Mathf.CeilToInt(visibleStacks.Count / (float)Columns));
             float gridWidth = Columns * ItemSlotView.SlotSize + (Columns - 1) * SlotGap;
             float contentHeight = rows * ItemSlotView.SlotSize + Mathf.Max(0, rows - 1) * SlotGap;
@@ -65,7 +70,7 @@ namespace ProjectEclipse.UI
                     }
 
                     InventoryStack stack = visibleStacks[index];
-                    ItemSlotClick slotClick = ItemSlotView.DrawClick(stack.Item, stack.Quantity, hover, stack.Item == selectedItem);
+                    ItemSlotClick slotClick = ItemSlotView.DrawClick(slotRect, stack.Item, stack.Quantity, hover, stack.Item == selectedItem);
                     if (slotClick != ItemSlotClick.None)
                     {
                         clicked = stack.Item;
@@ -75,6 +80,12 @@ namespace ProjectEclipse.UI
             }
 
             GUI.EndScrollView();
+            if (visibleStacks.Count == 0)
+            {
+                Rect messageRect = new Rect(outerRect.x + 12f, outerRect.y + 18f, outerRect.width - 24f, 24f);
+                GUI.Label(messageRect, LastTotalCount > 0 ? "No items in this tab" : "Inventory is empty", GameGuiStyles.CenterLabel);
+            }
+
             return clickedButton;
         }
 
@@ -103,6 +114,25 @@ namespace ProjectEclipse.UI
             }
 
             return visibleStacks;
+        }
+
+        private static int CountNonEmptyStacks(IReadOnlyList<InventoryStack> stacks)
+        {
+            if (stacks == null)
+            {
+                return 0;
+            }
+
+            int count = 0;
+            for (int i = 0; i < stacks.Count; i++)
+            {
+                if (stacks[i] != null && stacks[i].Item != null && stacks[i].Quantity > 0)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

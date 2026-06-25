@@ -8,6 +8,7 @@ namespace ProjectEclipse.UI
     {
         public static void Draw(CraftingFeedbackMessage feedback)
         {
+            GameGuiStyles.ApplySkin(GUI.skin);
             if (feedback == null)
             {
                 return;
@@ -23,6 +24,27 @@ namespace ProjectEclipse.UI
                 GUILayout.Label(feedback.Detail);
             }
             DrawLines(feedback.Lines);
+            GUILayout.EndVertical();
+            GUI.color = oldColor;
+        }
+
+        public static void DrawCompact(CraftingFeedbackMessage feedback)
+        {
+            GameGuiStyles.ApplySkin(GUI.skin);
+            if (feedback == null)
+            {
+                return;
+            }
+
+            Color oldColor = GUI.color;
+            GUI.color = feedback.IsSuccess ? new Color(0.65f, 1f, 0.65f, 1f) : feedback.IsError ? new Color(1f, 0.65f, 0.65f, 1f) : new Color(1f, 0.92f, 0.45f, 1f);
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel);
+            GUILayout.Label(feedback.Header, GameGuiStyles.SmallLabel);
+            GUI.color = oldColor;
+            if (!string.IsNullOrEmpty(feedback.Detail))
+            {
+                GUILayout.Label(feedback.Detail, GameGuiStyles.MutedLabel);
+            }
             GUILayout.EndVertical();
             GUI.color = oldColor;
         }
@@ -58,13 +80,13 @@ namespace ProjectEclipse.UI
             }
             else
             {
-                GUI.Box(iconRect, "!");
+                GameGuiStyles.DrawBox(iconRect, new Color(0.13f, 0.16f, 0.16f, 1f), new Color(0.38f, 0.45f, 0.44f, 1f), 1f);
             }
 
             string count = line.RequiredQuantity > 0 ? " " + line.OwnedQuantity + "/" + line.RequiredQuantity : string.Empty;
             string reserved = line.ReservedQuantity > 0 ? " reserved " + line.ReservedQuantity : string.Empty;
             string detail = string.IsNullOrEmpty(line.Detail) ? string.Empty : " - " + line.Detail;
-            GUILayout.Label(StatusPrefix(line.Status) + " " + line.Label + count + reserved + detail);
+            GUILayout.Label(StatusPrefix(line.Status) + " " + line.Label + count + reserved + detail, GameGuiStyles.MutedLabel);
             GUILayout.EndHorizontal();
             GUI.color = oldColor;
         }

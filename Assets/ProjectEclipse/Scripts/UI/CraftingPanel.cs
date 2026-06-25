@@ -29,6 +29,7 @@ namespace ProjectEclipse.UI
         private bool customAmountSelected;
         private string customAmountText = "1";
         private bool showRequirementDetails;
+        private Vector2 detailsScroll;
 
         private const int MaxCraftAmount = 9999;
 
@@ -58,20 +59,37 @@ namespace ProjectEclipse.UI
 
         public void DrawIntegrated(float height)
         {
+            GameGuiStyles.ApplySkin(GUI.skin);
             if (crafting == null)
             {
                 GUILayout.Label("Crafting missing.");
                 return;
             }
 
-            CraftingFeedbackView.Draw(crafting.Feedback);
-            DrawSelectedRecipeControls();
             DrawFilters();
-            search = GUILayout.TextField(search);
-            availableOnly = GUILayout.Toggle(availableOnly, "Available Only");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search", GameGuiStyles.SmallLabel, GUILayout.Width(48f));
+            search = GUILayout.TextField(search, GUILayout.Width(170f));
+            availableOnly = GUILayout.Toggle(availableOnly, "Available Only", GUILayout.Width(130f));
+            GUILayout.EndHorizontal();
 
+            CraftingFeedbackView.DrawCompact(crafting.Feedback);
+
+            float panelHeight = Mathf.Max(140f, height);
+            GUILayout.BeginHorizontal(GUILayout.Height(panelHeight));
+            DrawRecipeList(panelHeight);
+            GUILayout.Space(6f);
+            DrawSelectedRecipeDetails(panelHeight);
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawRecipeList(float height)
+        {
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(220f), GUILayout.Height(height));
+            GUILayout.Label("Recipes", GameGuiStyles.HeaderLabel);
             IReadOnlyList<CraftingRecipe> recipes = crafting.Recipes;
-            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(height));
+            int visibleCount = 0;
+            scroll = GUILayout.BeginScrollView(scroll, GUILayout.Height(Mathf.Max(60f, height - 28f)));
             for (int i = 0; i < recipes.Count; i++)
             {
                 CraftingRecipe recipe = recipes[i];
@@ -80,50 +98,78 @@ namespace ProjectEclipse.UI
                     continue;
                 }
 
+                visibleCount++;
                 bool isSelected = recipe == selectedRecipe;
-                Color oldColor = GUI.color;
-                GUI.color = isSelected ? new Color(1f, 0.94f, 0.62f, 1f) : Color.white;
-                if (GUILayout.Button(recipe.DisplayName))
+                GUIStyle style = isSelected ? GameGuiStyles.SelectedButton : GameGuiStyles.Button;
+                if (GUILayout.Button(recipe.DisplayName, style, GUILayout.Height(26f)))
                 {
                     SelectRecipe(recipe);
                 }
-                GUI.color = oldColor;
-                GUILayout.Label(DescribeRecipe(recipe));
-                string missing = DescribeMissing(recipe);
-                if (!string.IsNullOrEmpty(missing))
-                {
-                    GUILayout.Label(missing);
-                }
-                GUILayout.Space(5f);
             }
+
+            if (visibleCount == 0)
+            {
+                GUILayout.Label("No matching recipes", GameGuiStyles.MutedLabel);
+            }
+
             GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+        }
+
+        private void DrawSelectedRecipeDetails(float height)
+        {
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(264f), GUILayout.Height(height));
+            if (selectedRecipe == null)
+            {
+                GUILayout.Label("Select a recipe", GameGuiStyles.HeaderLabel);
+                GUILayout.Label("Recipe details and requirements appear here.", GameGuiStyles.MutedLabel);
+                GUILayout.EndVertical();
+                return;
+            }
+
+            GUILayout.Label(selectedRecipe.DisplayName, GameGuiStyles.HeaderLabel);
+            string output = selectedRecipe.OutputItem != null ? selectedRecipe.OutputItem.DisplayName + " x" + selectedRecipe.OutputQuantity : "Unknown Output";
+            GUILayout.Label("Output: " + output, GameGuiStyles.SmallLabel);
+            GUILayout.Label("Station: " + CraftingTerminology.GetStationDisplayName(selectedRecipe.StationType), GameGuiStyles.SmallLabel);
+            DrawAmountSelector();
+
+            if (GUILayout.Button("Start Work Order", GameGuiStyles.Button, GUILayout.Height(28f)))
+            {
+                crafting.TryStartWorkOrder(selectedRecipe, GetCraftAmount());
+                ResetCraftAmount();
+            }
+
+            GUILayout.Label("Requirements", GameGuiStyles.SmallLabel);
+            showRequirementDetails = GUILayout.Toggle(showRequirementDetails, "Show dependency details");
+            List<CraftingRequirementLine> preview = crafting.GetRecipePreview(selectedRecipe, GetCraftAmount(), showRequirementDetails);
+            detailsScroll = GUILayout.BeginScrollView(detailsScroll, GUILayout.Height(Mathf.Max(54f, height - 140f)));
+            CraftingFeedbackView.DrawLines(preview);
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
         }
 
         private void DrawFilters()
         {
             GUILayout.BeginHorizontal();
             FilterButton(CraftingFilter.All, "All");
-            FilterButton(CraftingFilter.Handcrafted, "Handcrafted");
+            FilterButton(CraftingFilter.Handcrafted, "Hand");
             FilterButton(CraftingFilter.Weapons, "Weapons");
             FilterButton(CraftingFilter.Armor, "Armor");
             FilterButton(CraftingFilter.CraftingPorts, "Trinkets");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
             FilterButton(CraftingFilter.Materials, "Materials");
-            FilterButton(CraftingFilter.Consumables, "Consumables");
+            FilterButton(CraftingFilter.Consumables, "Usable");
             FilterButton(CraftingFilter.Upgrades, "Upgrades");
             GUILayout.EndHorizontal();
         }
 
         private void FilterButton(CraftingFilter filter, string label)
         {
-            GUI.enabled = selectedFilter != filter;
-            if (GUILayout.Button(label, GUILayout.Height(24f)))
+            GUIStyle style = selectedFilter == filter ? GameGuiStyles.SelectedButton : GameGuiStyles.Button;
+            if (GUILayout.Button(label, style, GUILayout.Height(24f)))
             {
                 selectedFilter = filter;
                 ResetCraftAmount();
             }
-            GUI.enabled = true;
         }
 
         private void DrawSelectedRecipeControls()
@@ -157,17 +203,19 @@ namespace ProjectEclipse.UI
             AmountButton(1);
             AmountButton(5);
             AmountButton(10);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
             AmountButton(50);
             AmountButton(100);
             GUI.enabled = !customAmountSelected;
-            if (GUILayout.Button("Custom", GUILayout.Width(72f)))
+            if (GUILayout.Button("Custom", GUILayout.Width(62f)))
             {
                 customAmountSelected = true;
                 customAmountText = craftAmount.ToString();
             }
             GUI.enabled = true;
             GUILayout.Label("x", GUILayout.Width(12f));
-            string nextCustom = GUILayout.TextField(customAmountText, GUILayout.Width(72f));
+            string nextCustom = GUILayout.TextField(customAmountText, GUILayout.Width(50f));
             if (nextCustom != customAmountText)
             {
                 customAmountSelected = true;

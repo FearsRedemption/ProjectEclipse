@@ -18,6 +18,11 @@ namespace ProjectEclipse.UI
         private FurnaceSystem furnace;
         private InventoryScreen inventoryScreen;
         private bool inventoryOpen;
+        private WorkOrder trackedWorkOrder;
+        private float workOrderCompletedAt = -1f;
+
+        [SerializeField] private float workOrderCompletionHoldSeconds = 2f;
+        [SerializeField] private float workOrderCompletionFadeSeconds = 1.4f;
 
         public void Initialize(
             Health health,
@@ -90,16 +95,53 @@ namespace ProjectEclipse.UI
         {
             if (crafting == null || crafting.ActiveWorkOrder == null)
             {
+                trackedWorkOrder = null;
+                workOrderCompletedAt = -1f;
                 return;
+            }
+
+            WorkOrder order = crafting.ActiveWorkOrder;
+            if (trackedWorkOrder != order)
+            {
+                trackedWorkOrder = order;
+                workOrderCompletedAt = -1f;
+            }
+
+            float alpha = 1f;
+            if (order.IsComplete)
+            {
+                if (workOrderCompletedAt < 0f)
+                {
+                    workOrderCompletedAt = Time.time;
+                }
+
+                float elapsed = Time.time - workOrderCompletedAt;
+                float hold = Mathf.Max(0f, workOrderCompletionHoldSeconds);
+                float fade = Mathf.Max(0.1f, workOrderCompletionFadeSeconds);
+                if (elapsed >= hold + fade)
+                {
+                    crafting.ClearActiveWorkOrder();
+                    trackedWorkOrder = null;
+                    workOrderCompletedAt = -1f;
+                    return;
+                }
+
+                if (elapsed > hold)
+                {
+                    alpha = 1f - Mathf.Clamp01((elapsed - hold) / fade);
+                }
             }
 
             float width = 360f;
             float x = Mathf.Max(304f, Screen.width - width - 12f);
+            Color oldColor = GUI.color;
+            GUI.color = new Color(oldColor.r, oldColor.g, oldColor.b, oldColor.a * alpha);
             GUILayout.Window(5, new Rect(x, 12f, width, 300f), id =>
             {
-                WorkOrderTrackerPanel.Draw(crafting);
+                WorkOrderTrackerPanel.Draw(crafting, true, true);
                 GUI.DragWindow();
             }, "Work Order", GameGuiStyles.Window);
+            GUI.color = oldColor;
         }
 
         private void DrawStatusWindow(int windowId)
