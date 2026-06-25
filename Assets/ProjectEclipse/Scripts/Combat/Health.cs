@@ -9,11 +9,15 @@ namespace ProjectEclipse.Combat
     {
         [SerializeField] private int maxHealth = 10;
         [SerializeField] private float invulnerabilitySeconds = 0.25f;
+        [SerializeField] private float baseRegenPerSecond = 0.35f;
+        [SerializeField] private float regenDelayAfterDamage = 3f;
 
         private int currentHealth;
         private bool invulnerable;
         private bool dead;
         private VisualStateAnimator visualState;
+        private float lastDamageTime = -999f;
+        private float regenAccumulator;
 
         public event Action<int, int> Damaged;
         public event Action Died;
@@ -26,6 +30,11 @@ namespace ProjectEclipse.Combat
         {
             currentHealth = MaxHealth;
             visualState = GetComponent<VisualStateAnimator>();
+        }
+
+        private void Update()
+        {
+            TickRegeneration();
         }
 
         public void SetMaxHealth(int value, bool refill)
@@ -49,6 +58,8 @@ namespace ProjectEclipse.Combat
             }
 
             currentHealth = Mathf.Max(0, currentHealth - damage.Amount);
+            lastDamageTime = Time.time;
+            regenAccumulator = 0f;
             Damaged?.Invoke(currentHealth, MaxHealth);
 
             Rigidbody2D body = GetComponent<Rigidbody2D>();
@@ -86,6 +97,29 @@ namespace ProjectEclipse.Combat
             yield return new WaitForSeconds(invulnerabilitySeconds);
             invulnerable = false;
         }
+
+        private void TickRegeneration()
+        {
+            if (dead || currentHealth >= MaxHealth || baseRegenPerSecond <= 0f)
+            {
+                return;
+            }
+
+            if (Time.time - lastDamageTime < Mathf.Max(0f, regenDelayAfterDamage))
+            {
+                return;
+            }
+
+            regenAccumulator += baseRegenPerSecond * Time.deltaTime;
+            int healAmount = Mathf.FloorToInt(regenAccumulator);
+            if (healAmount <= 0)
+            {
+                return;
+            }
+
+            regenAccumulator -= healAmount;
+            currentHealth = Mathf.Min(MaxHealth, currentHealth + healAmount);
+            Damaged?.Invoke(currentHealth, MaxHealth);
+        }
     }
 }
-

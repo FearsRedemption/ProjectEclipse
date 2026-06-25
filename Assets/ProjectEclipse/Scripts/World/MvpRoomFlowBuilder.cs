@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ProjectEclipse.Enemies;
 using ProjectEclipse.Player;
 using ProjectEclipse.Utilities;
 using UnityEngine;
@@ -81,6 +82,7 @@ namespace ProjectEclipse.World
                 CreatePortal(root.transform, specs[i + 1], false, builtRooms[i], builtSpawns[i]);
             }
 
+            DistributeExistingEnemies();
             MarkExistingOneWaySurfaces();
             ApplyInitialCameraBounds();
         }
@@ -89,12 +91,12 @@ namespace ProjectEclipse.World
         {
             return new RoomSpec[]
             {
-                new RoomSpec("Starter Safe Room", new Vector2(-17f, 0f), new Vector2(9.5f, 7f), new Color(0.36f, 0.58f, 0.58f), new Color(0.28f, 0.38f, 0.24f), new Color(0.34f, 0.28f, 0.18f), new Color(0.75f, 0.86f, 0.58f)),
-                new RoomSpec("Sapling Grove", new Vector2(-7f, 0.1f), new Vector2(10.5f, 7.2f), new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f)),
-                new RoomSpec("Rock Passage", new Vector2(4f, 0f), new Vector2(10.5f, 7f), new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f)),
-                new RoomSpec("Crafting Pocket", new Vector2(15f, 0.1f), new Vector2(9f, 7f), new Color(0.28f, 0.45f, 0.42f), new Color(0.29f, 0.34f, 0.22f), new Color(0.44f, 0.31f, 0.18f), new Color(0.97f, 0.72f, 0.34f)),
-                new RoomSpec("Birchling Canopy", new Vector2(25f, 0.2f), new Vector2(10.5f, 7.4f), new Color(0.32f, 0.56f, 0.52f), new Color(0.25f, 0.38f, 0.21f), new Color(0.68f, 0.6f, 0.44f), new Color(0.9f, 0.86f, 0.64f)),
-                new RoomSpec("Copper Coal Teaser", new Vector2(36f, 0f), new Vector2(10.5f, 7f), new Color(0.29f, 0.33f, 0.36f), new Color(0.23f, 0.22f, 0.21f), new Color(0.55f, 0.36f, 0.22f), new Color(0.95f, 0.55f, 0.28f)),
+                new RoomSpec("Starter Safe Room", new Vector2(120f, 0f), new Vector2(24f, 11.5f), new Color(0.36f, 0.58f, 0.58f), new Color(0.28f, 0.38f, 0.24f), new Color(0.34f, 0.28f, 0.18f), new Color(0.75f, 0.86f, 0.58f)),
+                new RoomSpec("Sapling Grove", new Vector2(200f, 0.1f), new Vector2(24f, 11.5f), new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f)),
+                new RoomSpec("Rock Passage", new Vector2(280f, 0f), new Vector2(24f, 11.5f), new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f)),
+                new RoomSpec("Crafting Pocket", new Vector2(360f, 0.1f), new Vector2(24f, 11.5f), new Color(0.28f, 0.45f, 0.42f), new Color(0.29f, 0.34f, 0.22f), new Color(0.44f, 0.31f, 0.18f), new Color(0.97f, 0.72f, 0.34f)),
+                new RoomSpec("Birchling Canopy", new Vector2(440f, 0.2f), new Vector2(24f, 11.5f), new Color(0.32f, 0.56f, 0.52f), new Color(0.25f, 0.38f, 0.21f), new Color(0.68f, 0.6f, 0.44f), new Color(0.9f, 0.86f, 0.64f)),
+                new RoomSpec("Copper Coal Teaser", new Vector2(520f, 0f), new Vector2(24f, 11.5f), new Color(0.29f, 0.33f, 0.36f), new Color(0.23f, 0.22f, 0.21f), new Color(0.55f, 0.36f, 0.22f), new Color(0.95f, 0.55f, 0.28f)),
             };
         }
 
@@ -204,6 +206,63 @@ namespace ProjectEclipse.World
             return gameObject;
         }
 
+        private void DistributeExistingEnemies()
+        {
+            EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            Dictionary<int, int> roomCounts = new Dictionary<int, int>();
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                EnemyController enemy = enemies[i];
+                if (enemy == null)
+                {
+                    continue;
+                }
+
+                int roomIndex = GetRoomIndexForEnemy(enemy);
+                if (roomIndex < 0 || roomIndex >= builtRooms.Count || builtRooms[roomIndex] == null)
+                {
+                    continue;
+                }
+
+                int count;
+                roomCounts.TryGetValue(roomIndex, out count);
+                roomCounts[roomIndex] = count + 1;
+                enemy.transform.position = GetEnemyPositionInRoom(builtRooms[roomIndex], count);
+            }
+        }
+
+        private int GetRoomIndexForEnemy(EnemyController enemy)
+        {
+            string id = enemy != null && enemy.Definition != null ? enemy.Definition.EnemyId.ToLowerInvariant() : string.Empty;
+            string label = enemy != null && enemy.Definition != null ? enemy.Definition.DisplayName.ToLowerInvariant() : string.Empty;
+            string haystack = id + " " + label;
+            if (haystack.Contains("stone") || haystack.Contains("rock"))
+            {
+                return 2;
+            }
+
+            if (haystack.Contains("birch"))
+            {
+                return 4;
+            }
+
+            if (haystack.Contains("copper") || haystack.Contains("coal"))
+            {
+                return 5;
+            }
+
+            return 1;
+        }
+
+        private Vector3 GetEnemyPositionInRoom(RoomBounds2D room, int index)
+        {
+            Bounds bounds = room.Bounds;
+            float[] offsets = { -4.4f, -1.4f, 1.8f, 4.8f };
+            float offset = offsets[Mathf.Abs(index) % offsets.Length];
+            int row = Mathf.Abs(index) / offsets.Length;
+            return new Vector3(bounds.center.x + offset, floorSurfaceY + 0.95f + row * 0.05f, 0f);
+        }
+
         private void MarkExistingOneWaySurfaces()
         {
             OneWayPlatform[] oneWayPlatforms = FindObjectsByType<OneWayPlatform>(FindObjectsSortMode.None);
@@ -227,6 +286,12 @@ namespace ProjectEclipse.World
 
             follow.SetTarget(player.transform);
             RoomBounds2D room = FindRoomForPosition(player.transform.position);
+            if (room == null && builtSpawns.Count > 0 && builtSpawns[0] != null)
+            {
+                MovePlayerToSpawn(builtSpawns[0]);
+                room = builtRooms.Count > 0 ? builtRooms[0] : null;
+            }
+
             if (room == null && builtRooms.Count > 0)
             {
                 room = builtRooms[0];
@@ -236,6 +301,21 @@ namespace ProjectEclipse.World
             {
                 follow.SetBounds(room.Bounds);
                 follow.SnapToTarget();
+            }
+        }
+
+        private void MovePlayerToSpawn(Transform spawn)
+        {
+            if (player == null || spawn == null)
+            {
+                return;
+            }
+
+            player.transform.position = spawn.position;
+            Rigidbody2D body = player.GetComponent<Rigidbody2D>();
+            if (body != null)
+            {
+                body.linearVelocity = Vector2.zero;
             }
         }
 
