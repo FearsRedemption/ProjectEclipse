@@ -11,7 +11,7 @@ namespace ProjectEclipse.Player
         [SerializeField] private PlayerClassArchetype archetype = PlayerClassArchetype.Warrior;
         [SerializeField] private int startingMaxHealth = 24;
         [SerializeField] private float moveSpeed = 7f;
-        [SerializeField] private float jumpForce = 13f;
+        [SerializeField] private float jumpForce = 15.2f;
         [SerializeField] private WeaponDefinition startingWeapon;
         [SerializeField] private string classRole = "Close-range weapon fighter";
 

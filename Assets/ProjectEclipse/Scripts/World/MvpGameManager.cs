@@ -226,7 +226,7 @@ namespace ProjectEclipse.World
         {
             if (hud != null)
             {
-                hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, furnaceSystem);
+                hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, furnaceSystem, dropSpawner);
             }
         }
     }

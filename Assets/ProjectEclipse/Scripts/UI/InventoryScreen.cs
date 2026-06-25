@@ -4,6 +4,7 @@ using ProjectEclipse.Equipment;
 using ProjectEclipse.Furnace;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
+using ProjectEclipse.Player;
 using UnityEngine;
 
 namespace ProjectEclipse.UI
@@ -16,22 +17,26 @@ namespace ProjectEclipse.UI
         private readonly EquipmentPanel equipmentPanel;
         private readonly CraftingPortPanel craftingPortPanel;
         private readonly CraftingPanel craftingPanel;
+        private DropSpawner dropSpawner;
         private readonly ItemGridView inventoryGrid = new ItemGridView();
 
         private InventoryTab selectedTab = InventoryTab.Equipment;
         private ItemDefinition selectedItem;
         private string feedback = string.Empty;
+        private float lastManualDropTime;
 
         public InventoryScreen(
             InventoryStore inventory,
             EquipmentController equipment,
             InventoryCraftingController inventoryCrafting,
             CraftingSystem crafting,
-            FurnaceSystem furnace)
+            FurnaceSystem furnace,
+            DropSpawner dropSpawner = null)
         {
             this.inventory = inventory;
             this.equipment = equipment;
             this.inventoryCrafting = inventoryCrafting;
+            this.dropSpawner = dropSpawner;
             equipmentPanel = new EquipmentPanel(equipment);
             craftingPortPanel = new CraftingPortPanel(inventoryCrafting, furnace);
             craftingPanel = new CraftingPanel(crafting);
@@ -93,6 +98,38 @@ namespace ProjectEclipse.UI
             GUILayout.Space(6f);
             DrawSelectedSummary();
             GUILayout.EndVertical();
+        }
+
+        public void HandlePendingDragDrop(Rect inventoryWindowRect)
+        {
+            if (!inventoryGrid.IsDraggingItem)
+            {
+                return;
+            }
+
+            DrawDraggedItemPreview();
+            Event current = Event.current;
+            if (current == null || current.rawType != EventType.MouseUp)
+            {
+                return;
+            }
+
+            Vector2 pointer = GetPointerGuiPosition();
+            ItemDefinition item;
+            int quantity;
+            if (!inventoryGrid.TryTakeDraggedItem(out item, out quantity))
+            {
+                return;
+            }
+
+            if (inventoryWindowRect.Contains(pointer))
+            {
+                selectedItem = item;
+                return;
+            }
+
+            DropDraggedItem(item, quantity);
+            current.Use();
         }
 
         private void DrawTabs()
@@ -217,6 +254,83 @@ namespace ProjectEclipse.UI
                 detail = "No additional item notes.";
             }
             GUI.Label(new Rect(summary.x + 10f, summary.y + 49f, summary.width - 20f, 20f), detail, GameGuiStyles.MutedLabel);
+        }
+
+        private void DrawDraggedItemPreview()
+        {
+            ItemDefinition item = inventoryGrid.DraggingItem;
+            if (item == null)
+            {
+                return;
+            }
+
+            Vector2 pointer = GetPointerGuiPosition();
+            Rect rect = new Rect(pointer.x + 12f, pointer.y + 12f, ItemSlotView.SlotSize, ItemSlotView.SlotSize);
+            ItemSlotView.DrawClick(rect, item, 1, null, false);
+        }
+
+        private void DropDraggedItem(ItemDefinition item, int visibleStackQuantity)
+        {
+            if (item == null || inventory == null || Time.time - lastManualDropTime < 0.08f)
+            {
+                return;
+            }
+
+            int quantity = Event.current != null && Event.current.shift ? Mathf.Max(1, visibleStackQuantity) : 1;
+            if (!inventory.RemoveItem(item, quantity))
+            {
+                feedback = "Could not drop " + item.DisplayName + ".";
+                return;
+            }
+
+            if (dropSpawner == null)
+            {
+                dropSpawner = Object.FindAnyObjectByType<DropSpawner>();
+            }
+
+            if (dropSpawner == null)
+            {
+                inventory.AddItem(item, quantity);
+                feedback = "Could not find a world drop spawner.";
+                return;
+            }
+
+            WorldItemDrop dropped = dropSpawner.SpawnDrop(item, quantity, GetManualDropPosition());
+            if (dropped != null)
+            {
+                dropped.DelayPickup(1.2f, 2.4f);
+            }
+
+            lastManualDropTime = Time.time;
+            feedback = "Dropped " + item.DisplayName + (quantity > 1 ? " x" + quantity : string.Empty) + ".";
+        }
+
+        private Vector3 GetManualDropPosition()
+        {
+            Transform origin = inventory != null ? inventory.transform : null;
+            if (origin == null)
+            {
+                return Vector3.zero;
+            }
+
+            int direction = 1;
+            PlayerController player = origin.GetComponentInParent<PlayerController>();
+            if (player != null)
+            {
+                direction = player.FacingDirection;
+            }
+            else if (Mathf.Abs(origin.lossyScale.x) > 0.001f)
+            {
+                direction = origin.lossyScale.x >= 0f ? 1 : -1;
+            }
+
+            return origin.position + new Vector3(direction * 0.9f, 0.65f, 0f);
+        }
+
+        private static Vector2 GetPointerGuiPosition()
+        {
+            Vector3 mouse = Input.mousePosition;
+            return new Vector2(mouse.x, Screen.height - mouse.y);
         }
     }
 }

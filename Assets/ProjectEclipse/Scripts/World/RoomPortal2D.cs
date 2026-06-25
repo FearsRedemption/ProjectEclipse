@@ -9,15 +9,45 @@ namespace ProjectEclipse.World
     {
         [SerializeField] private RoomBounds2D targetRoom;
         [SerializeField] private Transform targetSpawn;
+        [SerializeField] private RoomBounds2D owningRoom;
+        [SerializeField] private Transform arrivalPoint;
+        [SerializeField] private RoomPortal2D linkedPortal;
         [SerializeField] private float reuseDelay = 0.45f;
 
         private float nextUseTime;
         private PlayerController nearbyPlayer;
 
+        public RoomBounds2D OwningRoom { get { return owningRoom; } }
+        public Transform ArrivalPoint { get { return arrivalPoint != null ? arrivalPoint : transform; } }
+        public RoomPortal2D LinkedPortal { get { return linkedPortal; } }
+
         public void Configure(RoomBounds2D room, Transform spawn)
         {
             targetRoom = room;
             targetSpawn = spawn;
+        }
+
+        public void Configure(RoomBounds2D ownerRoom, Transform arrival, RoomPortal2D destination)
+        {
+            owningRoom = ownerRoom;
+            arrivalPoint = arrival;
+            LinkTo(destination);
+        }
+
+        public void LinkTo(RoomPortal2D destination)
+        {
+            linkedPortal = destination;
+            if (linkedPortal != null)
+            {
+                targetRoom = linkedPortal.OwningRoom;
+                targetSpawn = linkedPortal.ArrivalPoint;
+            }
+        }
+
+        public void SuppressUseFor(float seconds)
+        {
+            nextUseTime = Mathf.Max(nextUseTime, Time.time + Mathf.Max(0.05f, seconds));
+            nearbyPlayer = null;
         }
 
         private void Reset()
@@ -78,9 +108,22 @@ namespace ProjectEclipse.World
 
         private void Transfer(PlayerController player)
         {
+            RoomPortal2D destination = linkedPortal;
+            Transform destinationSpawn = destination != null ? destination.ArrivalPoint : targetSpawn;
+            RoomBounds2D destinationRoom = destination != null ? destination.OwningRoom : targetRoom;
+            if (destinationSpawn == null)
+            {
+                return;
+            }
+
             nextUseTime = Time.time + Mathf.Max(0.05f, reuseDelay);
+            if (destination != null)
+            {
+                destination.SuppressUseFor(reuseDelay);
+            }
+
             nearbyPlayer = null;
-            player.transform.position = targetSpawn.position;
+            player.transform.position = destinationSpawn.position;
 
             Rigidbody2D body = player.GetComponent<Rigidbody2D>();
             if (body != null)
@@ -93,9 +136,9 @@ namespace ProjectEclipse.World
             if (follow != null)
             {
                 follow.SetTarget(player.transform);
-                if (targetRoom != null)
+                if (destinationRoom != null)
                 {
-                    follow.SetBounds(targetRoom.Bounds);
+                    follow.SetBounds(destinationRoom.Bounds);
                 }
                 follow.SnapToTarget();
             }
@@ -106,6 +149,23 @@ namespace ProjectEclipse.World
             return Input.GetKeyDown(KeyCode.W)
                 || Input.GetKeyDown(KeyCode.UpArrow)
                 || Input.GetKeyDown(KeyCode.Return);
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Gizmos.color = new Color(0.35f, 0.85f, 1f, 0.85f);
+            Gizmos.DrawWireCube(transform.position, new Vector3(0.9f, 1.55f, 0.1f));
+            if (linkedPortal != null)
+            {
+                Gizmos.DrawLine(transform.position, linkedPortal.transform.position);
+            }
+
+            Transform arrival = ArrivalPoint;
+            if (arrival != null)
+            {
+                Gizmos.color = new Color(0.4f, 1f, 0.55f, 0.85f);
+                Gizmos.DrawWireSphere(arrival.position, 0.18f);
+            }
         }
     }
 }

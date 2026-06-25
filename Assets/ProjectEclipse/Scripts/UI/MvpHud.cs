@@ -3,6 +3,7 @@ using ProjectEclipse.Crafting;
 using ProjectEclipse.Equipment;
 using ProjectEclipse.Furnace;
 using ProjectEclipse.Inventory;
+using ProjectEclipse.Items;
 using UnityEngine;
 
 namespace ProjectEclipse.UI
@@ -17,13 +18,17 @@ namespace ProjectEclipse.UI
         private CraftingSystem crafting;
         private InventoryCraftingController inventoryCrafting;
         private FurnaceSystem furnace;
+        private DropSpawner dropSpawner;
         private InventoryScreen inventoryScreen;
         private bool inventoryOpen;
         private WorkOrder trackedWorkOrder;
         private float workOrderCompletedAt = -1f;
+        private Rect inventoryWindowRect;
 
         [SerializeField] private float workOrderCompletionHoldSeconds = 2f;
         [SerializeField] private float workOrderCompletionFadeSeconds = 1.4f;
+
+        public static bool PointerBlocksGameplayInput { get; private set; }
 
         public void Initialize(
             Health health,
@@ -31,12 +36,14 @@ namespace ProjectEclipse.UI
             InventoryStore store,
             EquipmentController playerEquipment,
             CraftingSystem craftingSystem,
-            FurnaceSystem furnaceSystem)
+            FurnaceSystem furnaceSystem,
+            DropSpawner worldDropSpawner = null)
         {
             playerHealth = health;
             playerResource = resource;
             inventory = store;
             equipment = playerEquipment;
+            dropSpawner = worldDropSpawner != null ? worldDropSpawner : FindAnyObjectByType<DropSpawner>();
             combatInput = playerEquipment != null ? playerEquipment.GetComponent<CombatInputRouter>() : null;
             if (combatInput == null && health != null)
             {
@@ -46,7 +53,7 @@ namespace ProjectEclipse.UI
             inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
             furnace = furnaceSystem;
 
-            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace);
+            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace, dropSpawner);
         }
 
         private void Update()
@@ -70,6 +77,7 @@ namespace ProjectEclipse.UI
             DrawWorkOrderTracker();
             if (!inventoryOpen)
             {
+                PointerBlocksGameplayInput = false;
                 return;
             }
 
@@ -86,12 +94,20 @@ namespace ProjectEclipse.UI
             ItemHoverState hover = new ItemHoverState();
             float width = Mathf.Max(720f, Mathf.Min(1040f, Screen.width - 24f));
             float height = Mathf.Max(420f, Mathf.Min(650f, Screen.height - 152f));
-            GUILayout.Window(2, new Rect(12f, 146f, width, height), id => inventoryScreen.Draw(id, hover), "Inventory / Equipment / Crafting", GameGuiStyles.Window);
+            inventoryWindowRect = GUILayout.Window(2, new Rect(12f, 146f, width, height), id => inventoryScreen.Draw(id, hover), "Inventory / Equipment / Crafting", GameGuiStyles.Window);
+            PointerBlocksGameplayInput = inventoryOpen && inventoryWindowRect.Contains(GetPointerGuiPosition());
+            inventoryScreen.HandlePendingDragDrop(inventoryWindowRect);
 
             if (hover.HasHover)
             {
                 ItemTooltipView.Draw(hover, equipment, inventoryCrafting);
             }
+        }
+
+        private static Vector2 GetPointerGuiPosition()
+        {
+            Vector3 mouse = Input.mousePosition;
+            return new Vector2(mouse.x, Screen.height - mouse.y);
         }
 
         private void DrawWorkOrderTracker()

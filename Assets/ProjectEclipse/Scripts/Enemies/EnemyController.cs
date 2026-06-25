@@ -1,6 +1,7 @@
 using System.Collections;
 using ProjectEclipse.Progression;
 using ProjectEclipse.Combat;
+using ProjectEclipse.Equipment;
 using ProjectEclipse.Items;
 using ProjectEclipse.Utilities;
 using UnityEngine;
@@ -17,10 +18,18 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private float wallProbeDistance = 0.18f;
         [SerializeField] private float patrolRadius = 4f;
         [SerializeField] private float returnHomeDistance = 6f;
+        [SerializeField] private Vector2 idleWanderSeconds = new Vector2(1.1f, 2.8f);
+        [SerializeField] private Vector2 idlePauseSeconds = new Vector2(0.35f, 1.15f);
+        [SerializeField] private float bumpCooldown = 1.1f;
+        [SerializeField] private float bumpInvulnerabilitySeconds = 1.45f;
+        [SerializeField] private float bumpAggroSeconds = 4.5f;
+        [SerializeField] private float bumpKnockback = 2.65f;
         [SerializeField] private float earlyDropChanceMultiplier = 1f;
         [SerializeField] private int earlyMaxDropQuantityPerEntry = 2;
 
         private Transform target;
+        private Collider2D targetCollider;
+        private EquipmentController targetEquipment;
         private Rigidbody2D body;
         private Collider2D bodyCollider;
         private SpriteRenderer spriteRenderer;
@@ -31,6 +40,11 @@ namespace ProjectEclipse.Enemies
         private float nextAttackTime;
         private int facingDirection = -1;
         private Vector2 homePosition;
+        private float nextWanderDecisionTime;
+        private float idlePauseUntil;
+        private int idleWanderDirection = -1;
+        private float nextBumpTime;
+        private float forcedAggroUntil;
         private bool dead;
 
         public bool IsAlive { get { return !dead; } }
@@ -51,6 +65,8 @@ namespace ProjectEclipse.Enemies
             definition = enemyDefinition != null ? enemyDefinition : definition;
             target = playerTarget;
             dropSpawner = spawner;
+            targetCollider = FindTargetCollider(target);
+            targetEquipment = target != null ? target.GetComponentInParent<EquipmentController>() : null;
             currentHealth = definition != null ? definition.MaxHealth : 1;
             dead = false;
             if (bodyCollider != null)
@@ -60,6 +76,7 @@ namespace ProjectEclipse.Enemies
             homePosition = transform.position;
             ApplyDefinitionVisuals();
             IgnoreOtherEnemyCollisions();
+            IgnorePlayerCollision();
         }
 
         private void ApplyDefinitionVisuals()
@@ -112,10 +129,12 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
+            ApplyBumpContact();
             Vector2 toTarget = (Vector2)(target.position - transform.position);
             float distance = Mathf.Abs(toTarget.x);
+            bool canAggroTarget = CanAggroTarget();
 
-            if (distance <= definition.AttackRange && Mathf.Abs(toTarget.y) < 1.3f)
+            if (canAggroTarget && distance <= definition.AttackRange && Mathf.Abs(toTarget.y) < 1.3f)
             {
                 body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
                 AttackIfReady();
@@ -131,20 +150,25 @@ namespace ProjectEclipse.Enemies
             {
                 MoveToward(homePosition.x);
             }
-            else if (distance <= definition.ChaseRange && Mathf.Abs(transform.position.x - homePosition.x) <= patrolRadius)
+            else if (canAggroTarget && distance <= definition.ChaseRange && Mathf.Abs(transform.position.x - homePosition.x) <= patrolRadius)
             {
                 MoveToward(target.position.x);
             }
-            else if (visualState != null)
+            else
             {
-                body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
-                visualState.SetMoving(false);
+                WanderAimlessly();
             }
         }
 
         private void MoveToward(float targetX)
         {
             facingDirection = targetX >= transform.position.x ? 1 : -1;
+            MoveInDirection(facingDirection);
+        }
+
+        private void MoveInDirection(int direction)
+        {
+            facingDirection = direction >= 0 ? 1 : -1;
             float horizontalSpeed = CanMoveInDirection(facingDirection) ? facingDirection * definition.MoveSpeed : 0f;
             body.linearVelocity = new Vector2(horizontalSpeed, body.linearVelocity.y);
             Vector3 scale = transform.localScale;
@@ -153,6 +177,47 @@ namespace ProjectEclipse.Enemies
             if (visualState != null)
             {
                 visualState.SetMoving(Mathf.Abs(horizontalSpeed) > 0.01f);
+            }
+        }
+
+        private void StopMoving()
+        {
+            body.linearVelocity = new Vector2(0f, body.linearVelocity.y);
+            if (visualState != null)
+            {
+                visualState.SetMoving(false);
+            }
+        }
+
+        private void WanderAimlessly()
+        {
+            if (Time.time >= nextWanderDecisionTime)
+            {
+                bool shouldPause = Random.value < 0.34f;
+                if (shouldPause)
+                {
+                    idlePauseUntil = Time.time + Random.Range(idlePauseSeconds.x, idlePauseSeconds.y);
+                }
+                else
+                {
+                    idleWanderDirection = Random.value < 0.5f ? -1 : 1;
+                    idlePauseUntil = 0f;
+                }
+
+                nextWanderDecisionTime = Time.time + Random.Range(idleWanderSeconds.x, idleWanderSeconds.y);
+            }
+
+            if (Time.time < idlePauseUntil)
+            {
+                StopMoving();
+                return;
+            }
+
+            MoveInDirection(idleWanderDirection);
+            if (Mathf.Abs(body.linearVelocity.x) < 0.01f)
+            {
+                idleWanderDirection *= -1;
+                nextWanderDecisionTime = Time.time + 0.25f;
             }
         }
 
@@ -200,6 +265,44 @@ namespace ProjectEclipse.Enemies
                 Vector2 knockback = new Vector2(facingDirection * definition.AttackKnockback, 1.2f);
                 damageable.TakeDamage(new DamageInfo(definition.ContactDamage, gameObject, (Vector2)transform.position, knockback));
             }
+        }
+
+        private void ApplyBumpContact()
+        {
+            if (Time.time < nextBumpTime || target == null || bodyCollider == null)
+            {
+                return;
+            }
+
+            if (targetCollider == null)
+            {
+                targetCollider = FindTargetCollider(target);
+                IgnorePlayerCollision();
+            }
+
+            if (targetCollider == null || !IsTouchingTarget())
+            {
+                return;
+            }
+
+            IDamageable damageable = target.GetComponentInParent<IDamageable>();
+            if (damageable == null || !damageable.IsAlive)
+            {
+                return;
+            }
+
+            int damage = Mathf.Max(1, Mathf.CeilToInt(definition.ContactDamage * 0.5f));
+            Vector2 away = (Vector2)(target.position - transform.position);
+            if (away.sqrMagnitude < 0.0001f)
+            {
+                away = Vector2.right * facingDirection;
+            }
+            away.Normalize();
+
+            Vector2 knockback = away * bumpKnockback + Vector2.up * 1.35f;
+            damageable.TakeDamage(new DamageInfo(damage, gameObject, transform.position, knockback, bumpInvulnerabilitySeconds));
+            forcedAggroUntil = Time.time + Mathf.Max(0.1f, bumpAggroSeconds);
+            nextBumpTime = Time.time + Mathf.Max(0.1f, bumpCooldown);
         }
 
         private void Die()
@@ -338,6 +441,71 @@ namespace ProjectEclipse.Enemies
 
                 Physics2D.IgnoreCollision(bodyCollider, other.bodyCollider, true);
             }
+        }
+
+        private void IgnorePlayerCollision()
+        {
+            if (bodyCollider == null || target == null)
+            {
+                return;
+            }
+
+            Collider2D[] colliders = target.GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                Collider2D playerCollider = colliders[i];
+                if (playerCollider == null || playerCollider.isTrigger)
+                {
+                    continue;
+                }
+
+                Physics2D.IgnoreCollision(bodyCollider, playerCollider, true);
+            }
+        }
+
+        private bool IsTouchingTarget()
+        {
+            if (targetCollider == null || bodyCollider == null)
+            {
+                return false;
+            }
+
+            ColliderDistance2D distance = bodyCollider.Distance(targetCollider);
+            return distance.isOverlapped || distance.distance <= 0.05f;
+        }
+
+        private bool CanAggroTarget()
+        {
+            if (definition == null || definition.IgnorePlayerAboveGearScore < 0 || Time.time < forcedAggroUntil)
+            {
+                return true;
+            }
+
+            if (targetEquipment == null)
+            {
+                targetEquipment = target != null ? target.GetComponentInParent<EquipmentController>() : null;
+            }
+
+            return targetEquipment == null || targetEquipment.TotalGearScore < definition.IgnorePlayerAboveGearScore;
+        }
+
+        private static Collider2D FindTargetCollider(Transform targetTransform)
+        {
+            if (targetTransform == null)
+            {
+                return null;
+            }
+
+            Collider2D[] colliders = targetTransform.GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i] != null && !colliders[i].isTrigger)
+                {
+                    return colliders[i];
+                }
+            }
+
+            return null;
         }
 
         private IEnumerator DestroyAfterDeath()
