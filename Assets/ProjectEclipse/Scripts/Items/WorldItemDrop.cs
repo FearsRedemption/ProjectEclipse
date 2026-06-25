@@ -198,6 +198,7 @@ namespace ProjectEclipse.Items
             }
 
             collected = true;
+            PickupSparkle.Spawn(transform.position, item != null ? item.PlaceholderColor : Color.white);
             Destroy(gameObject);
         }
     }

@@ -71,6 +71,7 @@ namespace ProjectEclipse.Enemies
             }
             else
             {
+                spriteRenderer.sprite = SpriteFactory.GetCreatureSilhouetteSprite();
                 spriteRenderer.color = definition.PlaceholderColor;
                 if (visualState != null)
                 {

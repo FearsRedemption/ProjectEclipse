@@ -37,6 +37,7 @@ namespace ProjectEclipse.Combat
         [SerializeField] private EquipmentController equipmentController;
         [SerializeField] private WarriorSkillController warriorSkills;
         [SerializeField] private float sprintSpeedMultiplier = 1.35f;
+        [SerializeField] private float feedbackSeconds = 1.15f;
         [SerializeField] private ActionBinding[] actionBindings =
         {
             new ActionBinding(KeyCode.Q, CombatAction.SkillQ, 1f),
@@ -48,6 +49,11 @@ namespace ProjectEclipse.Combat
         public bool SprintHeld { get; private set; }
         public float SprintSpeedMultiplier { get { return Mathf.Max(1f, sprintSpeedMultiplier); } }
         public CombatAction LastAction { get; private set; }
+        public bool HasFeedback { get { return Time.time < feedbackUntil && !string.IsNullOrEmpty(feedbackText); } }
+        public string FeedbackText { get { return HasFeedback ? feedbackText : string.Empty; } }
+
+        private string feedbackText = string.Empty;
+        private float feedbackUntil;
 
         private void Awake()
         {
@@ -79,8 +85,16 @@ namespace ProjectEclipse.Combat
                 LastAction = SprintHeld ? CombatAction.ShiftMainhandModifier : CombatAction.MainhandAttack;
                 if (combatController != null)
                 {
-                    combatController.TryAttack(facingDirection);
+                    bool attacked = combatController.TryAttack(facingDirection);
                     requestedFacingDirection = combatController.LastAimFacingDirection;
+                    if (!attacked)
+                    {
+                        ShowFeedback(combatController.EquippedWeapon == null ? "No mainhand equipped" : "Mainhand not ready");
+                    }
+                }
+                else
+                {
+                    ShowFeedback("Mainhand unavailable");
                 }
             }
 
@@ -89,8 +103,29 @@ namespace ProjectEclipse.Combat
                 LastAction = SprintHeld ? CombatAction.ShiftOffhandModifier : CombatAction.OffhandAction;
                 if (combatController != null)
                 {
-                    combatController.TryOffhandAction(equipmentController != null ? equipmentController.Offhand : null, facingDirection, SprintHeld);
+                    EquipmentDefinition offhand = equipmentController != null ? equipmentController.Offhand : null;
+                    bool acted = combatController.TryOffhandAction(offhand, facingDirection, SprintHeld);
                     requestedFacingDirection = combatController.LastAimFacingDirection;
+                    if (acted)
+                    {
+                        ShowFeedback(SprintHeld ? "Heavy offhand shove" : "Offhand shove");
+                    }
+                    else if (offhand == null)
+                    {
+                        ShowFeedback("No offhand action equipped");
+                    }
+                    else if (offhand.EquipmentType == "Runic Ammo")
+                    {
+                        ShowFeedback("Runic ammo action locked");
+                    }
+                    else
+                    {
+                        ShowFeedback("Offhand not ready");
+                    }
+                }
+                else
+                {
+                    ShowFeedback("Offhand unavailable");
                 }
             }
 
@@ -101,10 +136,15 @@ namespace ProjectEclipse.Combat
                     if (warriorSkills != null && warriorSkills.TryUseSkill(actionBindings[i].Action, facingDirection, SprintHeld))
                     {
                         LastAction = actionBindings[i].Action;
+                        ShowFeedback(GetActionLabel(actionBindings[i].Action));
                         if (combatController != null)
                         {
                             requestedFacingDirection = combatController.LastAimFacingDirection;
                         }
+                    }
+                    else
+                    {
+                        ShowFeedback(GetActionLabel(actionBindings[i].Action) + " not ready");
                     }
                 }
             }
@@ -120,6 +160,29 @@ namespace ProjectEclipse.Combat
         private static bool PressedOffhand()
         {
             return Input.GetMouseButtonDown(1);
+        }
+
+        private void ShowFeedback(string message)
+        {
+            feedbackText = message;
+            feedbackUntil = Time.time + Mathf.Max(0.1f, feedbackSeconds);
+        }
+
+        private static string GetActionLabel(CombatAction action)
+        {
+            switch (action)
+            {
+                case CombatAction.SkillQ:
+                    return "Cleave";
+                case CombatAction.SkillE:
+                    return "Guard Break";
+                case CombatAction.SkillR:
+                    return "Leap Strike";
+                case CombatAction.SkillF:
+                    return "Battle Cry";
+                default:
+                    return "Skill";
+            }
         }
     }
 }

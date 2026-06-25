@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using ProjectEclipse.Items;
 using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
+using ProjectEclipse.World;
 using UnityEngine;
 
 namespace ProjectEclipse.Combat
@@ -12,6 +13,9 @@ namespace ProjectEclipse.Combat
         [SerializeField] private LayerMask targetMask = ~0;
         [SerializeField] private LayerMask obstructionMask = ~0;
         [SerializeField] private Vector2 attackOriginOffset = new Vector2(0f, 0.1f);
+        [SerializeField] private Color slashColor = new Color(1f, 0.88f, 0.45f, 0.82f);
+        [SerializeField] private float slashDuration = 0.14f;
+        [SerializeField] private int slashSortingOrder = 12;
 
         private float nextAttackTime;
         private float nextOffhandTime;
@@ -185,6 +189,7 @@ namespace ProjectEclipse.Combat
             Vector2 center = origin + aim * Mathf.Max(0.1f, range) * 0.5f;
             Vector2 size = new Vector2(Mathf.Max(0.1f, range), Mathf.Max(0.1f, height));
             float angle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
+            SpawnSlashEffect(center, angle, range, height);
             Collider2D[] hits = Physics2D.OverlapBoxAll(center, size, angle, targetMask);
             List<IDamageable> damaged = new List<IDamageable>();
 
@@ -234,6 +239,11 @@ namespace ProjectEclipse.Combat
                     continue;
                 }
 
+                if (blocker.GetComponent<OneWayPlatform>() != null)
+                {
+                    continue;
+                }
+
                 if (blocker == targetCollider || blocker.GetComponentInParent<IDamageable>() == targetDamageable)
                 {
                     return false;
@@ -243,6 +253,22 @@ namespace ProjectEclipse.Combat
             }
 
             return false;
+        }
+
+        private void SpawnSlashEffect(Vector2 center, float angle, float range, float height)
+        {
+            GameObject effect = new GameObject("Attack Slash");
+            effect.transform.position = new Vector3(center.x, center.y, transform.position.z - 0.05f);
+            effect.transform.rotation = Quaternion.Euler(0f, 0f, angle);
+            effect.transform.localScale = new Vector3(Mathf.Max(0.75f, range * 0.9f), Mathf.Max(0.55f, height * 0.72f), 1f);
+
+            SpriteRenderer renderer = effect.AddComponent<SpriteRenderer>();
+            renderer.sprite = SpriteFactory.GetSlashSprite();
+            renderer.color = slashColor;
+            renderer.sortingOrder = slashSortingOrder;
+
+            SlashEffect slash = effect.AddComponent<SlashEffect>();
+            slash.Initialize(slashColor, slashDuration);
         }
 
         private void OnDrawGizmosSelected()

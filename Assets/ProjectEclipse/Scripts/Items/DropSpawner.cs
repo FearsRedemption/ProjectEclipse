@@ -31,8 +31,8 @@ namespace ProjectEclipse.Items
             }
             else
             {
-                Debug.LogWarning("World drop is missing art for " + (item != null ? item.DisplayName : "Unknown Item") + ". Assign a real WorldDropSprite before accepting the asset.");
-                renderer.sprite = SpriteFactory.GetSquareSprite(Color.magenta);
+                Debug.LogWarning("World drop is using generated temporary art for " + (item != null ? item.DisplayName : "Unknown Item") + ". Assign a real WorldDropSprite before final art lock.");
+                renderer.sprite = SpriteFactory.GetItemDropSprite(item != null ? item.PlaceholderColor : Color.white);
             }
             renderer.color = Color.white;
             renderer.sortingOrder = 6;
