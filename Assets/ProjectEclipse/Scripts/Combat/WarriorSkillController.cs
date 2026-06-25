@@ -8,17 +8,24 @@ namespace ProjectEclipse.Combat
     {
         [SerializeField] private CombatController combatController;
         [SerializeField] private EquipmentController equipmentController;
+        [SerializeField] private PlayerResource resource;
         [SerializeField] private float cleaveCooldown = 1.05f;
         [SerializeField] private float guardBreakCooldown = 1.35f;
         [SerializeField] private float leapStrikeCooldown = 2.2f;
         [SerializeField] private float battleCryCooldown = 4.5f;
         [SerializeField] private float leapImpulse = 5.2f;
+        [SerializeField] private int cleaveMpCost = 12;
+        [SerializeField] private int guardBreakMpCost = 14;
+        [SerializeField] private int leapStrikeMpCost = 20;
+        [SerializeField] private int battleCryMpCost = 24;
 
         private Rigidbody2D body;
         private float nextCleaveTime;
         private float nextGuardBreakTime;
         private float nextLeapStrikeTime;
         private float nextBattleCryTime;
+
+        public string LastFailureReason { get; private set; }
 
         private void Awake()
         {
@@ -30,11 +37,16 @@ namespace ProjectEclipse.Combat
             {
                 equipmentController = GetComponent<EquipmentController>();
             }
+            if (resource == null)
+            {
+                resource = GetComponent<PlayerResource>();
+            }
             body = GetComponent<Rigidbody2D>();
         }
 
         public bool TryUseSkill(CombatAction action, int facingDirection, bool modified)
         {
+            LastFailureReason = string.Empty;
             switch (action)
             {
                 case CombatAction.SkillQ:
@@ -52,7 +64,7 @@ namespace ProjectEclipse.Combat
 
         private bool TryCleave(int facingDirection)
         {
-            if (!TryConsumeCooldown(ref nextCleaveTime, cleaveCooldown) || combatController == null)
+            if (combatController == null || !TryConsumeSkill(ref nextCleaveTime, cleaveCooldown, cleaveMpCost))
             {
                 return false;
             }
@@ -64,7 +76,7 @@ namespace ProjectEclipse.Combat
 
         private bool TryGuardBreak(int facingDirection, bool modified)
         {
-            if (!TryConsumeCooldown(ref nextGuardBreakTime, guardBreakCooldown) || combatController == null)
+            if (combatController == null || !TryConsumeSkill(ref nextGuardBreakTime, guardBreakCooldown, guardBreakMpCost))
             {
                 return false;
             }
@@ -83,7 +95,7 @@ namespace ProjectEclipse.Combat
 
         private bool TryLeapStrike(int facingDirection)
         {
-            if (!TryConsumeCooldown(ref nextLeapStrikeTime, leapStrikeCooldown) || combatController == null)
+            if (combatController == null || !TryConsumeSkill(ref nextLeapStrikeTime, leapStrikeCooldown, leapStrikeMpCost))
             {
                 return false;
             }
@@ -101,7 +113,7 @@ namespace ProjectEclipse.Combat
 
         private bool TryBattleCry()
         {
-            if (!TryConsumeCooldown(ref nextBattleCryTime, battleCryCooldown) || combatController == null)
+            if (combatController == null || !TryConsumeSkill(ref nextBattleCryTime, battleCryCooldown, battleCryMpCost))
             {
                 return false;
             }
@@ -116,10 +128,22 @@ namespace ProjectEclipse.Combat
             return weapon != null ? weapon.Damage : 1;
         }
 
-        private static bool TryConsumeCooldown(ref float nextUseTime, float cooldown)
+        private bool TryConsumeSkill(ref float nextUseTime, float cooldown, int mpCost)
         {
             if (Time.time < nextUseTime)
             {
+                LastFailureReason = "Skill cooling down";
+                return false;
+            }
+
+            if (resource == null)
+            {
+                resource = GetComponent<PlayerResource>();
+            }
+
+            if (resource != null && !resource.TrySpend(mpCost))
+            {
+                LastFailureReason = "Not enough MP";
                 return false;
             }
 

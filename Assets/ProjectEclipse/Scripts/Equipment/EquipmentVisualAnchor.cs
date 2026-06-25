@@ -1,4 +1,5 @@
 using UnityEngine;
+using ProjectEclipse.Utilities;
 
 namespace ProjectEclipse.Equipment
 {
@@ -15,6 +16,23 @@ namespace ProjectEclipse.Equipment
 
         public EquipmentSlot Slot { get { return slot; } }
         public EquippedVisualLayer Layer { get { return layer; } }
+
+        public void Configure(
+            EquipmentSlot equipmentSlot,
+            EquippedVisualLayer visualLayer,
+            SpriteRenderer renderer,
+            Vector2 offset,
+            float rotation,
+            Vector2 scale)
+        {
+            slot = equipmentSlot;
+            layer = visualLayer;
+            rendererOverride = renderer;
+            localOffset = offset;
+            localRotation = rotation;
+            localScale = scale == Vector2.zero ? Vector2.one : scale;
+            ApplyTransform();
+        }
 
         private void Awake()
         {
@@ -37,9 +55,21 @@ namespace ProjectEclipse.Equipment
                 return;
             }
 
-            rendererOverride.sprite = equipment != null ? equipment.VisualSprite : null;
+            rendererOverride.sprite = GetSprite(equipment);
             rendererOverride.enabled = rendererOverride.sprite != null;
             ApplyTransform();
+        }
+
+        private static Sprite GetSprite(EquipmentDefinition equipment)
+        {
+            if (equipment == null)
+            {
+                return null;
+            }
+
+            return equipment.HasExplicitVisualSprite
+                ? equipment.VisualSprite
+                : SpriteFactory.GetEquipmentOverlaySprite(equipment.Slot, equipment.PlaceholderColor);
         }
 
         private void ApplyTransform()

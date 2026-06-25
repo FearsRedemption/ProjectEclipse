@@ -79,7 +79,7 @@ namespace ProjectEclipse.UI
             GUI.Label(new Rect(row.x + 7f, row.y + 26f, 88f, 24f), itemName, GameGuiStyles.MutedLabel);
 
             Rect slotRect = new Rect(row.x + row.width - ItemSlotView.SlotSize - 5f, row.y + 5f, ItemSlotView.SlotSize, ItemSlotView.SlotSize);
-            ItemSlotClick click = ItemSlotView.DrawEquipmentSlot(slotRect, item, item != null ? 1 : 0, hover, slot, label, item != null);
+            ItemSlotClick click = ItemSlotView.DrawEquipmentSlot(slotRect, item, item != null ? 1 : 0, hover, slot, label, false);
             if (click == ItemSlotClick.Right && item != null && equipment != null)
             {
                 equipment.TryUnequipToStorage(slot);
@@ -94,7 +94,7 @@ namespace ProjectEclipse.UI
 
             ItemDefinition item = equipment != null ? equipment.GetEquippedItem(slot) : null;
             Rect slotRect = new Rect(cell.x + (cell.width - ItemSlotView.SlotSize) * 0.5f, cell.y + 17f, ItemSlotView.SlotSize, ItemSlotView.SlotSize);
-            ItemSlotClick click = ItemSlotView.DrawEquipmentSlot(slotRect, item, item != null ? 1 : 0, hover, slot, label, item != null);
+            ItemSlotClick click = ItemSlotView.DrawEquipmentSlot(slotRect, item, item != null ? 1 : 0, hover, slot, label, false);
             if (click == ItemSlotClick.Right && item != null && equipment != null)
             {
                 equipment.TryUnequipToStorage(slot);

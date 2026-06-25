@@ -70,7 +70,7 @@ namespace ProjectEclipse.UI
                     }
 
                     InventoryStack stack = visibleStacks[index];
-                    ItemSlotClick slotClick = ItemSlotView.DrawClick(slotRect, stack.Item, stack.Quantity, hover, stack.Item == selectedItem);
+                    ItemSlotClick slotClick = ItemSlotView.DrawClick(slotRect, stack.Item, stack.Quantity, hover, false);
                     if (slotClick != ItemSlotClick.None)
                     {
                         clicked = stack.Item;

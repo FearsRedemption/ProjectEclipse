@@ -55,7 +55,7 @@ namespace ProjectEclipse.UI
                     DrawGrid(hover, item => item.Category == ItemCategory.Consumable);
                     break;
                 case InventoryTab.Misc:
-                    DrawGrid(hover, item => item.Category == ItemCategory.Upgrade || item.Category == ItemCategory.CraftingPort || item.Category == ItemCategory.Furnace || item.Category == ItemCategory.Placeholder);
+                    DrawGrid(hover, item => (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade) || item.Category == ItemCategory.Furnace || item.Category == ItemCategory.Placeholder);
                     break;
                 case InventoryTab.KeyItems:
                     DrawGrid(hover, item => item.Category == ItemCategory.KeyItem || item.Category == ItemCategory.Quest);
@@ -89,7 +89,7 @@ namespace ProjectEclipse.UI
         private void DrawCarriedEquipment(ItemHoverState hover)
         {
             GUILayout.Label("Carried Equipment");
-            DrawGrid(hover, item => item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor, 90f);
+            DrawGrid(hover, item => item is EquipmentDefinition || item is CraftingPortDefinition || item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor || item.Category == ItemCategory.CraftingPort, 90f);
         }
 
         private void DrawGrid(ItemHoverState hover, System.Predicate<ItemDefinition> filter, float height = 255f)
@@ -111,7 +111,7 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            if ((item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor) && equipment != null)
+            if ((item is EquipmentDefinition || item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor) && equipment != null)
             {
                 equipment.TryEquipFromStorage(item);
                 return;

@@ -16,10 +16,10 @@ MonoBehaviour:
   entries:
   - item: {fileID: 11400000, guid: 8abaaff861b074fe9e7bcd810a3ff445, type: 2}
     minQuantity: 1
-    maxQuantity: 3
-    chance: 1
+    maxQuantity: 2
+    chance: 0.55
   - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
     minQuantity: 1
-    maxQuantity: 2
-    chance: 0.35
+    maxQuantity: 1
+    chance: 0.15
   rareEntries: []

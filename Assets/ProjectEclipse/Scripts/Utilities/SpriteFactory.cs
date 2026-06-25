@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ProjectEclipse.Equipment;
 using UnityEngine;
 
 namespace ProjectEclipse.Utilities
@@ -14,6 +15,11 @@ namespace ProjectEclipse.Utilities
         private static Sprite roomBackgroundSprite;
         private static Sprite groundFillSprite;
         private static Sprite platformStripSprite;
+        private static Sprite playerBaseBodySprite;
+        private static Sprite playerUndershirtSprite;
+        private static Sprite playerShortsSprite;
+        private static Sprite playerHairFaceSprite;
+        private static readonly Dictionary<string, Sprite> EquipmentOverlaySprites = new Dictionary<string, Sprite>();
 
         public static Sprite GetSquareSprite(Color color)
         {
@@ -322,6 +328,61 @@ namespace ProjectEclipse.Utilities
             return platformStripSprite;
         }
 
+        public static Sprite GetPlayerBaseBodySprite()
+        {
+            if (playerBaseBodySprite == null)
+            {
+                playerBaseBodySprite = CreatePlayerLayerSprite("Runtime Player Base Body", DrawPlayerBaseBody);
+            }
+
+            return playerBaseBodySprite;
+        }
+
+        public static Sprite GetPlayerUndershirtSprite()
+        {
+            if (playerUndershirtSprite == null)
+            {
+                playerUndershirtSprite = CreatePlayerLayerSprite("Runtime Player Undershirt", DrawPlayerUndershirt);
+            }
+
+            return playerUndershirtSprite;
+        }
+
+        public static Sprite GetPlayerShortsSprite()
+        {
+            if (playerShortsSprite == null)
+            {
+                playerShortsSprite = CreatePlayerLayerSprite("Runtime Player Shorts", DrawPlayerShorts);
+            }
+
+            return playerShortsSprite;
+        }
+
+        public static Sprite GetPlayerHairFaceSprite()
+        {
+            if (playerHairFaceSprite == null)
+            {
+                playerHairFaceSprite = CreatePlayerLayerSprite("Runtime Player Hair Face", DrawPlayerHairFace);
+            }
+
+            return playerHairFaceSprite;
+        }
+
+        public static Sprite GetEquipmentOverlaySprite(EquipmentSlot slot, Color color)
+        {
+            Color32 keyColor = color;
+            string key = slot + "_" + keyColor.r + "_" + keyColor.g + "_" + keyColor.b + "_" + keyColor.a;
+            Sprite sprite;
+            if (EquipmentOverlaySprites.TryGetValue(key, out sprite))
+            {
+                return sprite;
+            }
+
+            sprite = CreatePlayerLayerSprite("Runtime " + slot + " Overlay", pixels => DrawEquipmentOverlay(pixels, slot, color));
+            EquipmentOverlaySprites[key] = sprite;
+            return sprite;
+        }
+
         private static Texture2D CreateTransparentTexture(int width, int height, string name)
         {
             Texture2D texture = new Texture2D(width, height);
@@ -329,6 +390,169 @@ namespace ProjectEclipse.Utilities
             texture.hideFlags = HideFlags.HideAndDontSave;
             texture.filterMode = FilterMode.Bilinear;
             return texture;
+        }
+
+        private delegate void PlayerLayerPainter(Color[] pixels);
+
+        private static Sprite CreatePlayerLayerSprite(string name, PlayerLayerPainter painter)
+        {
+            int width = 96;
+            int height = 96;
+            Texture2D texture = CreateTransparentTexture(width, height, name);
+            Color[] pixels = new Color[width * height];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = Color.clear;
+            }
+
+            painter(pixels);
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 96f);
+        }
+
+        private static void DrawPlayerBaseBody(Color[] pixels)
+        {
+            Color skin = new Color(0.78f, 0.57f, 0.42f, 1f);
+            Color skinShade = new Color(0.61f, 0.39f, 0.29f, 1f);
+            FillEllipse(pixels, 48, 69, 12, 14, skin);
+            FillRect(pixels, 44, 52, 52, 59, skin);
+            FillEllipse(pixels, 48, 43, 10, 16, skin);
+            FillEllipse(pixels, 37, 43, 5, 19, skinShade);
+            FillEllipse(pixels, 59, 43, 5, 19, skinShade);
+            FillEllipse(pixels, 42, 24, 5, 18, skin);
+            FillEllipse(pixels, 54, 24, 5, 18, skin);
+            FillEllipse(pixels, 42, 8, 5, 4, skinShade);
+            FillEllipse(pixels, 54, 8, 5, 4, skinShade);
+        }
+
+        private static void DrawPlayerUndershirt(Color[] pixels)
+        {
+            Color cloth = new Color(0.92f, 0.94f, 0.88f, 1f);
+            Color trim = new Color(0.62f, 0.7f, 0.66f, 1f);
+            FillEllipse(pixels, 48, 45, 11, 13, cloth);
+            FillRect(pixels, 40, 34, 56, 49, cloth);
+            FillRect(pixels, 41, 50, 55, 52, trim);
+            FillRect(pixels, 40, 33, 56, 35, trim);
+        }
+
+        private static void DrawPlayerShorts(Color[] pixels)
+        {
+            Color cloth = new Color(0.36f, 0.45f, 0.49f, 1f);
+            Color trim = new Color(0.18f, 0.25f, 0.28f, 1f);
+            FillRect(pixels, 38, 25, 58, 34, cloth);
+            FillEllipse(pixels, 43, 24, 6, 8, cloth);
+            FillEllipse(pixels, 53, 24, 6, 8, cloth);
+            FillRect(pixels, 39, 33, 57, 35, trim);
+        }
+
+        private static void DrawPlayerHairFace(Color[] pixels)
+        {
+            Color hair = new Color(0.34f, 0.16f, 0.08f, 1f);
+            Color eye = new Color(0.08f, 0.1f, 0.12f, 1f);
+            FillEllipse(pixels, 48, 76, 13, 8, hair);
+            FillEllipse(pixels, 39, 70, 5, 7, hair);
+            FillEllipse(pixels, 57, 70, 5, 7, hair);
+            FillRect(pixels, 43, 69, 45, 71, eye);
+            FillRect(pixels, 51, 69, 53, 71, eye);
+        }
+
+        private static void DrawEquipmentOverlay(Color[] pixels, EquipmentSlot slot, Color color)
+        {
+            Color fill = Color.Lerp(color, Color.white, 0.18f);
+            Color shade = Color.Lerp(color, Color.black, 0.28f);
+            switch (slot)
+            {
+                case EquipmentSlot.Helmet:
+                    FillEllipse(pixels, 48, 75, 13, 7, fill);
+                    FillRect(pixels, 36, 68, 60, 74, fill);
+                    FillRect(pixels, 38, 67, 58, 69, shade);
+                    break;
+                case EquipmentSlot.Chest:
+                    FillEllipse(pixels, 48, 43, 13, 15, fill);
+                    FillRect(pixels, 37, 31, 59, 47, fill);
+                    FillRect(pixels, 39, 45, 57, 48, shade);
+                    break;
+                case EquipmentSlot.Gloves:
+                    FillEllipse(pixels, 36, 25, 5, 6, fill);
+                    FillEllipse(pixels, 60, 25, 5, 6, fill);
+                    break;
+                case EquipmentSlot.Boots:
+                    FillEllipse(pixels, 41, 7, 6, 4, fill);
+                    FillEllipse(pixels, 55, 7, 6, 4, fill);
+                    FillRect(pixels, 37, 9, 45, 14, shade);
+                    FillRect(pixels, 51, 9, 59, 14, shade);
+                    break;
+                case EquipmentSlot.Offhand:
+                    FillEllipse(pixels, 64, 40, 8, 15, fill);
+                    FillRect(pixels, 63, 29, 66, 51, shade);
+                    break;
+                case EquipmentSlot.Back:
+                    FillEllipse(pixels, 48, 36, 17, 28, fill);
+                    FillRect(pixels, 37, 50, 59, 55, shade);
+                    break;
+                case EquipmentSlot.Necklace:
+                case EquipmentSlot.Belt:
+                case EquipmentSlot.Ring1:
+                case EquipmentSlot.Ring2:
+                case EquipmentSlot.Earring1:
+                case EquipmentSlot.Earring2:
+                    FillRect(pixels, 39, 53, 57, 55, fill);
+                    FillRect(pixels, 46, 50, 50, 54, shade);
+                    break;
+                case EquipmentSlot.Mainhand:
+                    FillRotatedBlade(pixels, fill, shade);
+                    break;
+            }
+        }
+
+        private static void FillRotatedBlade(Color[] pixels, Color fill, Color shade)
+        {
+            for (int y = 20; y < 70; y++)
+            {
+                int x = 63 + (y - 20) / 8;
+                FillRect(pixels, x, y, x + 3, y + 2, fill);
+            }
+
+            FillRect(pixels, 59, 28, 69, 31, shade);
+            FillRect(pixels, 60, 22, 64, 29, shade);
+        }
+
+        private static void FillEllipse(Color[] pixels, int centerX, int centerY, int radiusX, int radiusY, Color color)
+        {
+            int width = 96;
+            int minX = Mathf.Max(0, centerX - radiusX);
+            int maxX = Mathf.Min(width - 1, centerX + radiusX);
+            int minY = Mathf.Max(0, centerY - radiusY);
+            int maxY = Mathf.Min(width - 1, centerY + radiusY);
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
+                {
+                    float nx = (x - centerX) / Mathf.Max(1f, radiusX);
+                    float ny = (y - centerY) / Mathf.Max(1f, radiusY);
+                    if (nx * nx + ny * ny <= 1f)
+                    {
+                        pixels[y * width + x] = color;
+                    }
+                }
+            }
+        }
+
+        private static void FillRect(Color[] pixels, int minX, int minY, int maxX, int maxY, Color color)
+        {
+            int width = 96;
+            int x0 = Mathf.Clamp(minX, 0, width - 1);
+            int x1 = Mathf.Clamp(maxX, 0, width - 1);
+            int y0 = Mathf.Clamp(minY, 0, width - 1);
+            int y1 = Mathf.Clamp(maxY, 0, width - 1);
+            for (int y = y0; y <= y1; y++)
+            {
+                for (int x = x0; x <= x1; x++)
+                {
+                    pixels[y * width + x] = color;
+                }
+            }
         }
 
         private static bool IsBackgroundTrunk(int x, int y)

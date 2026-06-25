@@ -144,7 +144,10 @@ namespace ProjectEclipse.Combat
                     }
                     else
                     {
-                        ShowFeedback(GetActionLabel(actionBindings[i].Action) + " not ready");
+                        string reason = warriorSkills != null && !string.IsNullOrEmpty(warriorSkills.LastFailureReason)
+                            ? warriorSkills.LastFailureReason
+                            : GetActionLabel(actionBindings[i].Action) + " not ready";
+                        ShowFeedback(reason);
                     }
                 }
             }
