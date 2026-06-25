@@ -39,6 +39,7 @@ namespace ProjectEclipse.World
         [SerializeField] private DropSpawner dropSpawner;
         [SerializeField] private FurnaceSystem furnaceSystem;
         [SerializeField] private MvpHud hud;
+        [SerializeField] private MvpRoomFlowBuilder roomFlowBuilder;
 
         [Header("Scene Content")]
         [SerializeField] private List<EnemyController> placedEnemies = new List<EnemyController>();
@@ -53,6 +54,7 @@ namespace ProjectEclipse.World
         {
             Physics2D.gravity = new Vector2(0f, -24f);
             ResolveMissingReferences();
+            WireRoomFlow();
             WirePlayer();
             ApplyDebugInventorySeeds();
             WireCraftingAndFurnace();
@@ -109,6 +111,21 @@ namespace ProjectEclipse.World
             {
                 hud = FindAnyObjectByType<MvpHud>();
             }
+
+            if (roomFlowBuilder == null)
+            {
+                roomFlowBuilder = FindAnyObjectByType<MvpRoomFlowBuilder>();
+            }
+        }
+
+        private void WireRoomFlow()
+        {
+            if (roomFlowBuilder == null)
+            {
+                roomFlowBuilder = gameObject.AddComponent<MvpRoomFlowBuilder>();
+            }
+
+            roomFlowBuilder.Initialize(player);
         }
 
         private void WirePlayer()

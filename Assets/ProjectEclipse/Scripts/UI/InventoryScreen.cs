@@ -39,6 +39,7 @@ namespace ProjectEclipse.UI
 
         public void Draw(int windowId, ItemHoverState hover)
         {
+            GameGuiStyles.ApplySkin(GUI.skin);
             if (inventory == null)
             {
                 GUILayout.Label("Inventory missing.");
@@ -71,20 +72,20 @@ namespace ProjectEclipse.UI
 
         private void DrawLeftSide(ItemHoverState hover)
         {
-            GUILayout.BeginVertical(GUILayout.Width(510f));
-            GUILayout.Label("Character Equipment");
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(510f));
+            GUILayout.Label("Character Equipment", GameGuiStyles.HeaderLabel);
             equipmentPanel.Draw(hover);
             GUILayout.Space(8f);
             craftingPortPanel.DrawEquipmentSlots(hover);
             GUILayout.Space(8f);
-            GUILayout.Label("Inventory Crafting");
+            GUILayout.Label("Inventory Crafting", GameGuiStyles.HeaderLabel);
             craftingPanel.DrawIntegrated(185f);
             GUILayout.EndVertical();
         }
 
         private void DrawRightSide(ItemHoverState hover)
         {
-            GUILayout.BeginVertical(GUILayout.Width(470f));
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(500f));
             DrawTabs();
             GUILayout.Space(6f);
             DrawInventoryGrid(hover);
@@ -97,21 +98,24 @@ namespace ProjectEclipse.UI
         {
             GUILayout.BeginHorizontal();
             TabButton(InventoryTab.Equipment, "Equipment");
-            TabButton(InventoryTab.Usable, "Usable");
+            TabButton(InventoryTab.Usable, "Usable / Consum.");
             TabButton(InventoryTab.Materials, "Materials");
             TabButton(InventoryTab.Misc, "Misc");
             TabButton(InventoryTab.KeyItems, "Key Items");
             GUILayout.EndHorizontal();
+            if (selectedTab == InventoryTab.Misc)
+            {
+                GUILayout.Label("Crafting Trinkets", GameGuiStyles.MutedLabel);
+            }
         }
 
         private void TabButton(InventoryTab tab, string label)
         {
-            GUI.enabled = selectedTab != tab;
-            if (GUILayout.Button(label, GUILayout.Height(28f)))
+            GUIStyle style = selectedTab == tab ? GameGuiStyles.SelectedButton : GameGuiStyles.Button;
+            if (GUILayout.Button(label, style, GUILayout.Height(28f)))
             {
                 selectedTab = tab;
             }
-            GUI.enabled = true;
         }
 
         private void DrawInventoryGrid(ItemHoverState hover)
@@ -119,7 +123,7 @@ namespace ProjectEclipse.UI
             List<InventoryStack> stacks = inventory.GetSnapshot();
             ItemDefinition clicked;
             bool shiftHeld = Event.current != null && Event.current.shift;
-            ItemSlotClick click = inventoryGrid.DrawClickable(stacks, hover, ItemMatchesSelectedTab, 430f, selectedItem, out clicked);
+            ItemSlotClick click = inventoryGrid.DrawClickable(stacks, hover, ItemMatchesSelectedTab, 390f, selectedItem, out clicked);
             if (click == ItemSlotClick.None || clicked == null)
             {
                 return;
@@ -187,13 +191,22 @@ namespace ProjectEclipse.UI
 
         private void DrawSelectedSummary()
         {
+            Rect summary = GUILayoutUtility.GetRect(480f, 76f, GUILayout.Width(480f), GUILayout.Height(76f));
+            GameGuiStyles.DrawBox(summary, new Color(0.1f, 0.13f, 0.14f, 0.96f), new Color(0.33f, 0.4f, 0.39f, 1f), 1f);
             if (selectedItem == null)
             {
-                GUILayout.Label("Selected: None");
+                GUI.Label(new Rect(summary.x + 10f, summary.y + 8f, summary.width - 20f, 20f), "Selected: None", GameGuiStyles.HeaderLabel);
                 return;
             }
 
-            GUILayout.Label("Selected: " + selectedItem.DisplayName);
+            GUI.Label(new Rect(summary.x + 10f, summary.y + 7f, summary.width - 20f, 20f), selectedItem.DisplayName, GameGuiStyles.HeaderLabel);
+            GUI.Label(new Rect(summary.x + 10f, summary.y + 30f, summary.width - 20f, 17f), selectedItem.Category + " / " + selectedItem.ResourceTier, GameGuiStyles.SmallLabel);
+            string detail = !string.IsNullOrEmpty(selectedItem.CraftingUsage) ? selectedItem.CraftingUsage : selectedItem.Description;
+            if (string.IsNullOrEmpty(detail))
+            {
+                detail = "No additional item notes.";
+            }
+            GUI.Label(new Rect(summary.x + 10f, summary.y + 49f, summary.width - 20f, 20f), detail, GameGuiStyles.MutedLabel);
         }
     }
 }
