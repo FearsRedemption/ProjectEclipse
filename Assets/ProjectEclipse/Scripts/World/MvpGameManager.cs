@@ -64,7 +64,7 @@ namespace ProjectEclipse.World
         {
             if (player == null)
             {
-                player = FindFirstObjectByType<PlayerController>();
+                player = FindAnyObjectByType<PlayerController>();
             }
 
             if (player != null)
@@ -97,17 +97,17 @@ namespace ProjectEclipse.World
 
             if (dropSpawner == null)
             {
-                dropSpawner = FindFirstObjectByType<DropSpawner>();
+                dropSpawner = FindAnyObjectByType<DropSpawner>();
             }
 
             if (furnaceSystem == null)
             {
-                furnaceSystem = FindFirstObjectByType<FurnaceSystem>();
+                furnaceSystem = FindAnyObjectByType<FurnaceSystem>();
             }
 
             if (hud == null)
             {
-                hud = FindFirstObjectByType<MvpHud>();
+                hud = FindAnyObjectByType<MvpHud>();
             }
         }
 
