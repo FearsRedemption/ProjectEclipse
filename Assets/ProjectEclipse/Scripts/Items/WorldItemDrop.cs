@@ -14,8 +14,12 @@ namespace ProjectEclipse.Items
         [SerializeField] private float magnetRadius = 4.5f;
         [SerializeField] private float collectRadius = 0.42f;
         [SerializeField] private float magnetSpeed = 11f;
+        [SerializeField] private float despawnAfterSeconds = -1f;
 
         private float spawnTime;
+        private float despawnAt = -1f;
+        private float sourceInventoryBlockedUntil;
+        private InventoryStore sourceInventory;
         private InventoryStore pickupTarget;
         private Rigidbody2D body;
         private Collider2D dropCollider;
@@ -26,6 +30,7 @@ namespace ProjectEclipse.Items
             item = definition;
             quantity = Mathf.Max(1, amount);
             spawnTime = Time.time;
+            despawnAt = despawnAfterSeconds > 0f ? spawnTime + despawnAfterSeconds : -1f;
             body = GetComponent<Rigidbody2D>();
             dropCollider = GetComponent<Collider2D>();
         }
@@ -38,6 +43,16 @@ namespace ProjectEclipse.Items
             spawnTime = Time.time;
         }
 
+        public void ConfigureManualDropSafety(InventoryStore source, float pickupLockoutSeconds, float magnetLockoutSeconds, float lifetimeSeconds)
+        {
+            sourceInventory = source;
+            pickupTarget = null;
+            collectDelay = Mathf.Max(collectDelay, pickupLockoutSeconds);
+            magnetDelay = Mathf.Max(magnetDelay, magnetLockoutSeconds);
+            sourceInventoryBlockedUntil = Time.time + Mathf.Max(0f, pickupLockoutSeconds);
+            despawnAt = Time.time + Mathf.Max(5f, lifetimeSeconds);
+        }
+
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
@@ -46,7 +61,18 @@ namespace ProjectEclipse.Items
 
         private void Update()
         {
-            if (collected || item == null || Time.time - spawnTime < collectDelay)
+            if (collected || item == null)
+            {
+                return;
+            }
+
+            if (despawnAt > 0f && Time.time >= despawnAt)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            if (Time.time - spawnTime < collectDelay)
             {
                 return;
             }
@@ -114,7 +140,7 @@ namespace ProjectEclipse.Items
             }
 
             InventoryStore inventory = other.GetComponentInParent<InventoryStore>();
-            if (inventory == null)
+            if (inventory == null || IsInventoryTemporarilyBlocked(inventory))
             {
                 return;
             }
@@ -131,7 +157,7 @@ namespace ProjectEclipse.Items
             for (int i = 0; i < hits.Length; i++)
             {
                 InventoryStore inventory = hits[i] != null ? hits[i].GetComponentInParent<InventoryStore>() : null;
-                if (inventory != null && IsTargetWithinMagnetRange(inventory))
+                if (inventory != null && !IsInventoryTemporarilyBlocked(inventory) && IsTargetWithinMagnetRange(inventory))
                 {
                     return inventory;
                 }
@@ -191,6 +217,11 @@ namespace ProjectEclipse.Items
             }
 
             return bestPoint;
+        }
+
+        private bool IsInventoryTemporarilyBlocked(InventoryStore inventory)
+        {
+            return inventory != null && inventory == sourceInventory && Time.time < sourceInventoryBlockedUntil;
         }
 
         private void Collect(InventoryStore inventory)
