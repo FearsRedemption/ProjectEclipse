@@ -30,7 +30,7 @@ namespace ProjectEclipse.Combat
 
             public bool TryUse()
             {
-                return Input.GetKeyDown(key);
+                return Input.GetKey(key);
             }
         }
 

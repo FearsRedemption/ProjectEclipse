@@ -38,6 +38,7 @@ namespace ProjectEclipse.Player
         private CombatInputRouter combatInput;
         private EquipmentController equipment;
         private VisualStateAnimator visualState;
+        private PlayerRespawnController respawnController;
         private int facingDirection = 1;
         private bool grounded;
         private Collider2D groundedCollider;
@@ -57,6 +58,7 @@ namespace ProjectEclipse.Player
             combatInput = GetComponent<CombatInputRouter>();
             equipment = GetComponent<EquipmentController>();
             visualState = GetComponent<VisualStateAnimator>();
+            respawnController = GetComponent<PlayerRespawnController>();
             ApplyClassMovementDefaults();
         }
 
@@ -64,6 +66,20 @@ namespace ProjectEclipse.Player
         {
             ExpireIgnoredPlatforms();
             grounded = CheckGrounded(out groundedCollider);
+            if (IsInputBlocked())
+            {
+                horizontalInput = 0f;
+                jumpBufferExpiresAt = 0f;
+                jumpHeld = false;
+                if (visualState != null)
+                {
+                    visualState.SetMoving(false);
+                    visualState.SetGrounded(grounded);
+                }
+
+                return;
+            }
+
             if (grounded)
             {
                 lastGroundedTime = Time.time;
@@ -107,6 +123,16 @@ namespace ProjectEclipse.Player
         private void FixedUpdate()
         {
             ExpireIgnoredPlatforms();
+            if (IsInputBlocked())
+            {
+                if (body != null && body.simulated)
+                {
+                    body.linearVelocity = Vector2.zero;
+                }
+
+                return;
+            }
+
             Vector2 velocity = body.linearVelocity;
             float speedMultiplier = combatInput != null && combatInput.SprintHeld ? combatInput.SprintSpeedMultiplier : 1f;
             float targetSpeed = horizontalInput * GetEffectiveMoveSpeed() * speedMultiplier;
@@ -131,6 +157,16 @@ namespace ProjectEclipse.Player
             {
                 SetFacingDirection(horizontal > 0f ? 1 : -1);
             }
+        }
+
+        private bool IsInputBlocked()
+        {
+            if (respawnController == null)
+            {
+                respawnController = GetComponent<PlayerRespawnController>();
+            }
+
+            return respawnController != null && respawnController.BlocksPlayerInput;
         }
 
         private void SetFacingDirection(int direction)

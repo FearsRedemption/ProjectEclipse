@@ -4,6 +4,7 @@ using ProjectEclipse.Equipment;
 using ProjectEclipse.Furnace;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
+using ProjectEclipse.Player;
 using UnityEngine;
 
 namespace ProjectEclipse.UI
@@ -19,8 +20,10 @@ namespace ProjectEclipse.UI
         private InventoryCraftingController inventoryCrafting;
         private FurnaceSystem furnace;
         private DropSpawner dropSpawner;
+        private PlayerRespawnController respawnController;
         private InventoryScreen inventoryScreen;
         private bool inventoryOpen;
+        private bool initialized;
         private WorkOrder trackedWorkOrder;
         private float workOrderCompletedAt = -1f;
         private Rect inventoryWindowRect;
@@ -44,6 +47,7 @@ namespace ProjectEclipse.UI
             inventory = store;
             equipment = playerEquipment;
             dropSpawner = worldDropSpawner != null ? worldDropSpawner : FindAnyObjectByType<DropSpawner>();
+            respawnController = health != null ? health.GetComponent<PlayerRespawnController>() : null;
             combatInput = playerEquipment != null ? playerEquipment.GetComponent<CombatInputRouter>() : null;
             if (combatInput == null && health != null)
             {
@@ -53,11 +57,25 @@ namespace ProjectEclipse.UI
             inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
             furnace = furnaceSystem;
 
-            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace, dropSpawner);
+            BuildInventoryScreen();
+            initialized = true;
+        }
+
+        public void SetRespawnController(PlayerRespawnController playerRespawn)
+        {
+            respawnController = playerRespawn != null ? playerRespawn : respawnController;
         }
 
         private void Update()
         {
+            EnsureInitialized();
+            if (respawnController != null && respawnController.IsRespawning)
+            {
+                inventoryOpen = false;
+                PointerBlocksGameplayInput = true;
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.Tab))
             {
                 inventoryOpen = !inventoryOpen;
@@ -71,13 +89,22 @@ namespace ProjectEclipse.UI
         private void OnGUI()
         {
             GameGuiStyles.ApplySkin(GUI.skin);
+            EnsureInitialized();
 
             GUILayout.Window(1, new Rect(12f, 12f, 280f, 150f), DrawStatusWindow, "Status", GameGuiStyles.Window);
             DrawCombatFeedback();
             DrawWorkOrderTracker();
+            DrawDeathRespawnOverlay();
+            if (respawnController != null && respawnController.IsRespawning)
+            {
+                inventoryOpen = false;
+                PointerBlocksGameplayInput = true;
+                return;
+            }
+
             if (!inventoryOpen)
             {
-                PointerBlocksGameplayInput = false;
+                PointerBlocksGameplayInput = respawnController != null && respawnController.IsRespawning;
                 return;
             }
 
@@ -108,6 +135,79 @@ namespace ProjectEclipse.UI
         {
             Vector3 mouse = Input.mousePosition;
             return new Vector2(mouse.x, Screen.height - mouse.y);
+        }
+
+        private void EnsureInitialized()
+        {
+            if (initialized && inventoryScreen != null)
+            {
+                return;
+            }
+
+            if (playerHealth == null)
+            {
+                playerHealth = FindAnyObjectByType<Health>();
+            }
+
+            if (inventory == null)
+            {
+                inventory = FindAnyObjectByType<InventoryStore>();
+            }
+
+            if (playerResource == null && playerHealth != null)
+            {
+                playerResource = playerHealth.GetComponent<PlayerResource>();
+            }
+            if (playerResource == null && inventory != null)
+            {
+                playerResource = inventory.GetComponent<PlayerResource>();
+            }
+
+            if (equipment == null && inventory != null)
+            {
+                equipment = inventory.GetComponent<EquipmentController>();
+            }
+
+            if (crafting == null && inventory != null)
+            {
+                crafting = inventory.GetComponent<CraftingSystem>();
+            }
+
+            if (inventoryCrafting == null && inventory != null)
+            {
+                inventoryCrafting = inventory.GetComponent<InventoryCraftingController>();
+            }
+
+            if (furnace == null)
+            {
+                furnace = FindAnyObjectByType<FurnaceSystem>();
+            }
+
+            if (dropSpawner == null)
+            {
+                dropSpawner = FindAnyObjectByType<DropSpawner>();
+            }
+
+            if (respawnController == null)
+            {
+                respawnController = playerHealth != null ? playerHealth.GetComponent<PlayerRespawnController>() : FindAnyObjectByType<PlayerRespawnController>();
+            }
+
+            if (combatInput == null)
+            {
+                combatInput = playerHealth != null ? playerHealth.GetComponent<CombatInputRouter>() : null;
+            }
+
+            if (inventory != null)
+            {
+                BuildInventoryScreen();
+                initialized = true;
+            }
+        }
+
+        private void BuildInventoryScreen()
+        {
+            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace, dropSpawner);
         }
 
         private void DrawWorkOrderTracker()
@@ -197,6 +297,23 @@ namespace ProjectEclipse.UI
             float width = 360f;
             Rect rect = new Rect((Screen.width - width) * 0.5f, 78f, width, 32f);
             GUI.Label(rect, combatInput.FeedbackText, GameGuiStyles.FeedbackLabel);
+        }
+
+        private void DrawDeathRespawnOverlay()
+        {
+            if (respawnController == null || !respawnController.IsRespawning)
+            {
+                return;
+            }
+
+            PointerBlocksGameplayInput = true;
+            float width = Mathf.Min(420f, Screen.width - 48f);
+            float height = 124f;
+            Rect rect = new Rect((Screen.width - width) * 0.5f, (Screen.height - height) * 0.5f, width, height);
+            GameGuiStyles.DrawBox(rect, new Color(0.04f, 0.05f, 0.06f, 0.94f), new Color(0.55f, 0.08f, 0.08f, 1f), 2f);
+            GUI.Label(new Rect(rect.x + 16f, rect.y + 22f, rect.width - 32f, 34f), "You Died", GameGuiStyles.HeaderLabel);
+            int seconds = Mathf.CeilToInt(respawnController.RemainingSeconds);
+            GUI.Label(new Rect(rect.x + 16f, rect.y + 62f, rect.width - 32f, 28f), "Respawning in " + seconds + "...", GameGuiStyles.CenterLabel);
         }
     }
 }

@@ -41,6 +41,42 @@ namespace ProjectEclipse.World
         private PlayerController player;
         private bool built;
 
+        public Vector3 GetSafeRespawnPosition()
+        {
+            RoomSpec safeRoom = CreateRoomSpecs()[0];
+            if (builtRooms.Count > 0 && builtRooms[0] != null)
+            {
+                Bounds bounds = builtRooms[0].Bounds;
+                return new Vector3(bounds.center.x, floorSurfaceY + 0.95f, 0f);
+            }
+
+            return new Vector3(safeRoom.Center.x, floorSurfaceY + 0.95f, 0f);
+        }
+
+        public void ApplyCameraBoundsForPlayer(Transform playerTransform)
+        {
+            Camera camera = Camera.main;
+            CameraFollow2D follow = camera != null ? camera.GetComponent<CameraFollow2D>() : null;
+            if (follow == null || playerTransform == null)
+            {
+                return;
+            }
+
+            follow.SetTarget(playerTransform);
+            RoomBounds2D room = FindRoomForPosition(playerTransform.position);
+            if (room == null && builtRooms.Count > 0)
+            {
+                room = builtRooms[0];
+            }
+
+            if (room != null)
+            {
+                follow.SetBounds(room.Bounds);
+            }
+
+            follow.SnapToTarget();
+        }
+
         public void Initialize(PlayerController playerController)
         {
             player = playerController;
