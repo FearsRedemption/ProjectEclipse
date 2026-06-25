@@ -50,6 +50,16 @@ namespace ProjectEclipse.Combat
             }
         }
 
+        public void ReviveToFull()
+        {
+            dead = false;
+            invulnerable = false;
+            currentHealth = MaxHealth;
+            lastDamageTime = -999f;
+            regenAccumulator = 0f;
+            Damaged?.Invoke(currentHealth, MaxHealth);
+        }
+
         public void TakeDamage(DamageInfo damage)
         {
             if (dead || invulnerable || damage.Amount <= 0)

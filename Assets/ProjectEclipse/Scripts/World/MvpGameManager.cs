@@ -30,6 +30,7 @@ namespace ProjectEclipse.World
         [SerializeField] private PlayerClassDefinition playerClass;
         [SerializeField] private Health playerHealth;
         [SerializeField] private PlayerResource playerResource;
+        [SerializeField] private PlayerRespawnController playerRespawn;
         [SerializeField] private InventoryStore playerInventory;
         [SerializeField] private CombatController playerCombat;
         [SerializeField] private EquipmentController playerEquipment;
@@ -86,6 +87,11 @@ namespace ProjectEclipse.World
                 if (playerResource == null)
                 {
                     playerResource = player.GetComponent<PlayerResource>();
+                }
+
+                if (playerRespawn == null)
+                {
+                    playerRespawn = player.GetComponent<PlayerRespawnController>();
                 }
 
                 if (playerCombat == null)
@@ -150,6 +156,16 @@ namespace ProjectEclipse.World
             if (player != null && playerResource == null)
             {
                 playerResource = player.gameObject.AddComponent<PlayerResource>();
+            }
+
+            if (player != null && playerRespawn == null)
+            {
+                playerRespawn = player.gameObject.AddComponent<PlayerRespawnController>();
+            }
+
+            if (playerRespawn != null)
+            {
+                playerRespawn.Initialize(playerHealth, playerResource, roomFlowBuilder);
             }
 
             WeaponDefinition weaponToEquip = starterWeapon;
@@ -227,6 +243,7 @@ namespace ProjectEclipse.World
             if (hud != null)
             {
                 hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, furnaceSystem, dropSpawner);
+                hud.SetRespawnController(playerRespawn);
             }
         }
     }

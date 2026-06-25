@@ -36,6 +36,14 @@ namespace ProjectEclipse.Combat
             Changed?.Invoke(currentMp, MaxMp);
         }
 
+        public void RestoreToFull()
+        {
+            currentMp = MaxMp;
+            regenAccumulator = 0f;
+            lastSpendTime = -999f;
+            Changed?.Invoke(currentMp, MaxMp);
+        }
+
         public bool CanSpend(int amount)
         {
             return amount <= 0 || currentMp >= amount;
