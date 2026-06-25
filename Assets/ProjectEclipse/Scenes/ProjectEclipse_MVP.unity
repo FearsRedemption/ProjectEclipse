@@ -225,15 +225,22 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   player: {fileID: 200011}
+  playerClass: {fileID: 0}
   playerHealth: {fileID: 200007}
+  playerResource: {fileID: 200013}
+  playerRespawn: {fileID: 200016}
   playerInventory: {fileID: 200008}
   playerCombat: {fileID: 200009}
+  playerCombatInput: {fileID: 200014}
+  warriorSkillController: {fileID: 200015}
   playerEquipment: {fileID: 200010}
   playerCrafting: {fileID: 200012}
   starterWeapon: {fileID: 11400000, guid: 1b6747a720668a88629ad3b0b64b90a6, type: 2}
   dropSpawner: {fileID: 260003}
   furnaceSystem: {fileID: 210004}
   hud: {fileID: 250002}
+  roomFlowBuilder: {fileID: 0}
+  enemySpawnManager: {fileID: 0}
   placedEnemies:
   - {fileID: 230007}
   - {fileID: 231007}
@@ -291,6 +298,10 @@ GameObject:
   - component: {fileID: 200010}
   - component: {fileID: 200011}
   - component: {fileID: 200012}
+  - component: {fileID: 200013}
+  - component: {fileID: 200014}
+  - component: {fileID: 200015}
+  - component: {fileID: 200016}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -570,6 +581,92 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   recipes: []
+--- !u!114 &200013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6529664090a1c1b48a98e7e85dfdbc52, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  maxMp: 100
+  mpRegenPerSecond: 8
+  regenDelayAfterSpend: 0.45
+--- !u!114 &200014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e9f1904644048a7aae7b27bee59b0f3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  combatController: {fileID: 200009}
+  equipmentController: {fileID: 200010}
+  warriorSkills: {fileID: 200015}
+  sprintSpeedMultiplier: 1.35
+  feedbackSeconds: 1.15
+  actionBindings:
+  - key: 113
+    action: 2
+    cooldown: 1
+  - key: 101
+    action: 3
+    cooldown: 1
+  - key: 114
+    action: 4
+    cooldown: 1.25
+  - key: 102
+    action: 5
+    cooldown: 1.25
+--- !u!114 &200015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dcb95e0523a4ca889076f34da7aa915, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  combatController: {fileID: 200009}
+  equipmentController: {fileID: 200010}
+  resource: {fileID: 200013}
+  cleaveCooldown: 1.05
+  guardBreakCooldown: 1.35
+  leapStrikeCooldown: 2.2
+  battleCryCooldown: 6.5
+  leapImpulse: 5.2
+  cleaveMpCost: 12
+  guardBreakMpCost: 14
+  leapStrikeMpCost: 20
+  battleCryMpCost: 18
+  battleCryRadius: 2.75
+--- !u!114 &200016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2409603567bd4f21bd8e21fd4f8c68bb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  health: {fileID: 200007}
+  resource: {fileID: 200013}
+  roomFlowBuilder: {fileID: 0}
+  respawnDelaySeconds: 10
 --- !u!1 &210000
 GameObject:
   m_ObjectHideFlags: 0

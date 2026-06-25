@@ -20,6 +20,10 @@ GameObject:
   - component: {fileID: 100010}
   - component: {fileID: 100011}
   - component: {fileID: 100012}
+  - component: {fileID: 100013}
+  - component: {fileID: 100014}
+  - component: {fileID: 100015}
+  - component: {fileID: 100016}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -299,3 +303,89 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   recipes: []
+--- !u!114 &100013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6529664090a1c1b48a98e7e85dfdbc52, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  maxMp: 100
+  mpRegenPerSecond: 8
+  regenDelayAfterSpend: 0.45
+--- !u!114 &100014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e9f1904644048a7aae7b27bee59b0f3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  combatController: {fileID: 100009}
+  equipmentController: {fileID: 100010}
+  warriorSkills: {fileID: 100015}
+  sprintSpeedMultiplier: 1.35
+  feedbackSeconds: 1.15
+  actionBindings:
+  - key: 113
+    action: 2
+    cooldown: 1
+  - key: 101
+    action: 3
+    cooldown: 1
+  - key: 114
+    action: 4
+    cooldown: 1.25
+  - key: 102
+    action: 5
+    cooldown: 1.25
+--- !u!114 &100015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dcb95e0523a4ca889076f34da7aa915, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  combatController: {fileID: 100009}
+  equipmentController: {fileID: 100010}
+  resource: {fileID: 100013}
+  cleaveCooldown: 1.05
+  guardBreakCooldown: 1.35
+  leapStrikeCooldown: 2.2
+  battleCryCooldown: 6.5
+  leapImpulse: 5.2
+  cleaveMpCost: 12
+  guardBreakMpCost: 14
+  leapStrikeMpCost: 20
+  battleCryMpCost: 18
+  battleCryRadius: 2.75
+--- !u!114 &100016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2409603567bd4f21bd8e21fd4f8c68bb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  health: {fileID: 100007}
+  resource: {fileID: 100013}
+  roomFlowBuilder: {fileID: 0}
+  respawnDelaySeconds: 10

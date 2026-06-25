@@ -1,5 +1,6 @@
 using ProjectEclipse.Combat;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.UI;
 using ProjectEclipse.Utilities;
 using ProjectEclipse.World;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ namespace ProjectEclipse.Player
 {
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(CombatInputRouter))]
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 7f;
@@ -55,7 +57,7 @@ namespace ProjectEclipse.Player
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
             combat = GetComponent<CombatController>();
-            combatInput = GetComponent<CombatInputRouter>();
+            combatInput = GetOrAddCombatInputRouter();
             equipment = GetComponent<EquipmentController>();
             visualState = GetComponent<VisualStateAnimator>();
             respawnController = GetComponent<PlayerRespawnController>();
@@ -100,9 +102,10 @@ namespace ProjectEclipse.Player
 
             UpdateFacing(horizontalInput);
 
-            if (combatInput != null)
+            CombatInputRouter router = GetOrAddCombatInputRouter();
+            if (router != null)
             {
-                int requestedFacing = combatInput.PollActions(facingDirection);
+                int requestedFacing = router.PollActions(facingDirection);
                 if (requestedFacing != 0)
                 {
                     SetFacingDirection(requestedFacing);
@@ -167,6 +170,21 @@ namespace ProjectEclipse.Player
             }
 
             return respawnController != null && respawnController.BlocksPlayerInput;
+        }
+
+        private CombatInputRouter GetOrAddCombatInputRouter()
+        {
+            if (combatInput == null)
+            {
+                combatInput = GetComponent<CombatInputRouter>();
+            }
+
+            if (combatInput == null && gameObject.activeInHierarchy)
+            {
+                combatInput = gameObject.AddComponent<CombatInputRouter>();
+            }
+
+            return combatInput;
         }
 
         private void SetFacingDirection(int direction)
@@ -265,7 +283,9 @@ namespace ProjectEclipse.Player
 
         private bool WantsAttack()
         {
-            return Input.GetKeyDown(KeyCode.J) || Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.LeftControl);
+            return Input.GetKey(KeyCode.J)
+                || (!MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(0))
+                || Input.GetKey(KeyCode.LeftControl);
         }
 
         private bool CheckGrounded(out Collider2D groundCollider)
