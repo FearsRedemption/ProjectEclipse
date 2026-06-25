@@ -10,6 +10,7 @@ namespace ProjectEclipse.Utilities
         private static readonly Dictionary<Color32, Sprite> ItemDropSprites = new Dictionary<Color32, Sprite>();
         private static Sprite slashSprite;
         private static Sprite shoutWaveSprite;
+        private static Sprite enemyProjectileSprite;
         private static Sprite sparkleSprite;
         private static Sprite portalSprite;
         private static Sprite portalColumnSprite;
@@ -166,6 +167,44 @@ namespace ProjectEclipse.Utilities
             texture.Apply();
             shoutWaveSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 48f);
             return shoutWaveSprite;
+        }
+
+        public static Sprite GetEnemyProjectileSprite()
+        {
+            if (enemyProjectileSprite != null)
+            {
+                return enemyProjectileSprite;
+            }
+
+            int size = 48;
+            Texture2D texture = CreateTransparentTexture(size, size, "Runtime Enemy Projectile");
+            Color[] pixels = new Color[size * size];
+            Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    Vector2 offset = new Vector2(x, y) - center;
+                    float distance = offset.magnitude / (size * 0.5f);
+                    float tail = Mathf.Clamp01((center.x - x) / (size * 0.48f));
+                    Color pixel = Color.clear;
+                    if (distance < 0.42f)
+                    {
+                        pixel = new Color(1f, 1f, 1f, Mathf.Clamp01(1f - distance * 1.3f));
+                    }
+                    else if (y > size * 0.38f && y < size * 0.62f && x < center.x && tail > 0.1f)
+                    {
+                        pixel = new Color(1f, 1f, 1f, tail * 0.45f);
+                    }
+
+                    pixels[y * size + x] = pixel;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            enemyProjectileSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 48f);
+            return enemyProjectileSprite;
         }
 
         public static Sprite GetSparkleSprite()

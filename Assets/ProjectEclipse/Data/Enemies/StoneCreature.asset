@@ -24,6 +24,12 @@ MonoBehaviour:
   attackCooldown: 1.35
   attackLungeForce: 0.8
   attackKnockback: 4.2
+  rangedCastRange: 5.2
+  rangedCastDamage: 2
+  rangedCastCooldown: 6.8
+  rangedCastChance: 0.35
+  rangedProjectileSpeed: 4.9
+  rangedProjectileLifetime: 2.8
   visualScale: {x: 1.05, y: 1.05}
   colliderSize: {x: 0.9, y: 0.82}
   spriteSheet: {fileID: 2800000, guid: 849cdb47d1ad3fd44bfc06f93bc91f50, type: 3}

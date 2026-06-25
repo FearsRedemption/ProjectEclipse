@@ -261,9 +261,15 @@ namespace ProjectEclipse.Combat
                     continue;
                 }
 
-                if (blocker == targetCollider || blocker.GetComponentInParent<IDamageable>() == targetDamageable)
+                IDamageable blockingDamageable = blocker.GetComponentInParent<IDamageable>();
+                if (blocker == targetCollider || blockingDamageable == targetDamageable)
                 {
                     return false;
+                }
+
+                if (blockingDamageable != null)
+                {
+                    continue;
                 }
 
                 return true;

@@ -4,6 +4,7 @@ using ProjectEclipse.Combat;
 using ProjectEclipse.Equipment;
 using ProjectEclipse.Items;
 using ProjectEclipse.Utilities;
+using ProjectEclipse.World;
 using UnityEngine;
 
 namespace ProjectEclipse.Enemies
@@ -38,6 +39,7 @@ namespace ProjectEclipse.Enemies
         private DropSpawner dropSpawner;
         private int currentHealth;
         private float nextAttackTime;
+        private float nextRangedCastTime;
         private int facingDirection = -1;
         private Vector2 homePosition;
         private float nextWanderDecisionTime;
@@ -68,6 +70,7 @@ namespace ProjectEclipse.Enemies
             targetCollider = FindTargetCollider(target);
             targetEquipment = target != null ? target.GetComponentInParent<EquipmentController>() : null;
             currentHealth = definition != null ? definition.MaxHealth : 1;
+            nextRangedCastTime = Time.time + Random.Range(1.25f, 3.25f);
             dead = false;
             if (bodyCollider != null)
             {
@@ -145,6 +148,11 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
+            if (canAggroTarget && TryRangedCast(toTarget, distance))
+            {
+                return;
+            }
+
             bool shouldReturnHome = Mathf.Abs(transform.position.x - homePosition.x) > returnHomeDistance;
             if (shouldReturnHome)
             {
@@ -158,6 +166,84 @@ namespace ProjectEclipse.Enemies
             {
                 WanderAimlessly();
             }
+        }
+
+        private bool TryRangedCast(Vector2 toTarget, float horizontalDistance)
+        {
+            if (definition.RangedCastRange <= 0f
+                || horizontalDistance <= definition.AttackRange + 0.25f
+                || horizontalDistance > definition.RangedCastRange
+                || Mathf.Abs(toTarget.y) > 2.4f
+                || Time.time < nextRangedCastTime)
+            {
+                return false;
+            }
+
+            nextRangedCastTime = Time.time + definition.RangedCastCooldown;
+            if (Random.value > definition.RangedCastChance || HasBlockingTerrainBetween(GetCastOrigin(), target.position))
+            {
+                return false;
+            }
+
+            StopMoving();
+            facingDirection = toTarget.x >= 0f ? 1 : -1;
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Abs(scale.x) * facingDirection;
+            transform.localScale = scale;
+            if (visualState != null)
+            {
+                visualState.TriggerAttack();
+            }
+
+            Vector2 origin = GetCastOrigin();
+            Vector2 direction = ((Vector2)target.position + Vector2.up * 0.25f) - origin;
+            if (direction.sqrMagnitude < 0.0001f)
+            {
+                direction = Vector2.right * facingDirection;
+            }
+
+            GameObject projectileObject = new GameObject(definition.DisplayName + " Cast");
+            projectileObject.transform.position = origin;
+            projectileObject.AddComponent<SpriteRenderer>();
+            projectileObject.AddComponent<Rigidbody2D>();
+            CircleCollider2D collider = projectileObject.AddComponent<CircleCollider2D>();
+            collider.radius = 0.16f;
+            EnemyProjectile2D projectile = projectileObject.AddComponent<EnemyProjectile2D>();
+            projectile.Initialize(gameObject, target, direction.normalized, definition.RangedCastDamage, definition.RangedProjectileSpeed, definition.AttackKnockback * 0.75f, definition.RangedProjectileLifetime, definition.PlaceholderColor);
+            return true;
+        }
+
+        private Vector2 GetCastOrigin()
+        {
+            if (bodyCollider == null)
+            {
+                return transform.position + Vector3.up * 0.45f;
+            }
+
+            Bounds bounds = bodyCollider.bounds;
+            return new Vector2(bounds.center.x + facingDirection * bounds.extents.x * 0.65f, bounds.center.y + bounds.extents.y * 0.18f);
+        }
+
+        private bool HasBlockingTerrainBetween(Vector2 origin, Vector2 destination)
+        {
+            RaycastHit2D[] hits = Physics2D.LinecastAll(origin, destination, platformMask);
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Collider2D hitCollider = hits[i].collider;
+                if (hitCollider == null
+                    || hitCollider == bodyCollider
+                    || hitCollider == targetCollider
+                    || hitCollider.isTrigger
+                    || hitCollider.GetComponent<OneWayPlatform>() != null
+                    || hitCollider.GetComponentInParent<IDamageable>() != null)
+                {
+                    continue;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         private void MoveToward(float targetX)
