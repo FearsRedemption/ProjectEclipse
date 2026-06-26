@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace ProjectEclipse.EditorTools
     public static class MvpSceneBootstrap
     {
         private const string MvpScenePath = "Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity";
+        private const string RecoverySceneRoot = "Assets/_Recovery/";
 
         static MvpSceneBootstrap()
         {
@@ -55,6 +57,7 @@ namespace ProjectEclipse.EditorTools
             }
 
             OpenMvpIfUnityRestoredDefaultScene();
+            OpenMvpIfUnityRestoredRecoveryScene();
         }
 
         private static void EnsureBuildSettingsScene()
@@ -101,6 +104,29 @@ namespace ProjectEclipse.EditorTools
             EditorSceneManager.OpenScene(MvpScenePath);
         }
 
+        private static void OpenMvpIfUnityRestoredRecoveryScene()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                return;
+            }
+
+            Scene activeScene = SceneManager.GetActiveScene();
+            string scenePath = NormalizeScenePath(activeScene.path);
+            if (!IsUnityRecoveryScene(scenePath))
+            {
+                return;
+            }
+
+            if (activeScene.isDirty && !EditorSceneManager.SaveScene(activeScene))
+            {
+                return;
+            }
+
+            EditorSceneManager.OpenScene(MvpScenePath);
+            Debug.Log("Project Eclipse reopened the MVP scene after Unity restored a recovery scene.");
+        }
+
         private static void CleanMissingScriptsInProjectEclipseScene()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -114,8 +140,10 @@ namespace ProjectEclipse.EditorTools
                 return;
             }
 
-            string scenePath = activeScene.path.Replace('\\', '/');
-            bool isProjectEclipseScene = scenePath == MvpScenePath || scenePath.Contains("Temp/__Backupscenes/");
+            string scenePath = NormalizeScenePath(activeScene.path);
+            bool isProjectEclipseScene = scenePath == MvpScenePath
+                || scenePath.Contains("Temp/__Backupscenes/")
+                || IsUnityRecoveryScene(scenePath);
             if (!isProjectEclipseScene)
             {
                 return;
@@ -163,8 +191,19 @@ namespace ProjectEclipse.EditorTools
                 return scene.name == "Untitled";
             }
 
-            string normalizedPath = scene.path.Replace('\\', '/');
+            string normalizedPath = NormalizeScenePath(scene.path);
             return normalizedPath.Contains("Temp/__Backupscenes/");
+        }
+
+        private static string NormalizeScenePath(string scenePath)
+        {
+            return string.IsNullOrEmpty(scenePath) ? string.Empty : scenePath.Replace('\\', '/');
+        }
+
+        private static bool IsUnityRecoveryScene(string scenePath)
+        {
+            return !string.IsNullOrEmpty(scenePath)
+                && scenePath.StartsWith(RecoverySceneRoot, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool HasOnlyDefaultCameraAndLight(GameObject[] roots)
