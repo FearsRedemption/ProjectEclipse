@@ -32,6 +32,10 @@ namespace ProjectEclipse.Player
         [SerializeField] private LayerMask groundMask = ~0;
         [SerializeField] private PlayerClassDefinition classDefinition;
 
+        private const float PaperDollColliderWidth = 0.5f;
+        private const float PaperDollColliderHeight = 1f;
+        private const float PaperDollColliderOffsetY = 0.45f;
+
         private class IgnoredPlatformCollision
         {
             public Collider2D Collider;
@@ -61,6 +65,7 @@ namespace ProjectEclipse.Player
         {
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
+            NormalizeColliderForVisualFooting();
             body.gravityScale = Mathf.Max(0.1f, runtimeGravityScale);
             body.interpolation = RigidbodyInterpolation2D.Interpolate;
             body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
@@ -70,6 +75,24 @@ namespace ProjectEclipse.Player
             visualState = GetComponent<VisualStateAnimator>();
             respawnController = GetComponent<PlayerRespawnController>();
             ApplyClassMovementDefaults();
+        }
+
+        public void NormalizeColliderForVisualFooting()
+        {
+            BoxCollider2D box = bodyCollider as BoxCollider2D;
+            if (box == null)
+            {
+                box = GetComponent<BoxCollider2D>();
+            }
+
+            if (box == null)
+            {
+                return;
+            }
+
+            box.size = new Vector2(PaperDollColliderWidth, PaperDollColliderHeight);
+            box.offset = new Vector2(0f, PaperDollColliderOffsetY);
+            bodyCollider = box;
         }
 
         private void Update()

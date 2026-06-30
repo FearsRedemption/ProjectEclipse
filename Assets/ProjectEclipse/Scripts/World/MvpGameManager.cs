@@ -149,6 +149,11 @@ namespace ProjectEclipse.World
                 roomFlowBuilder = gameObject.AddComponent<MvpRoomFlowBuilder>();
             }
 
+            if (player != null)
+            {
+                player.NormalizeColliderForVisualFooting();
+            }
+
             roomFlowBuilder.ConfigureEnemyDefinitions(GetRouteEnemyDefinitions());
             roomFlowBuilder.Initialize(player);
         }

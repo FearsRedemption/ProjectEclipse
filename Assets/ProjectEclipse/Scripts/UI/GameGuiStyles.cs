@@ -16,6 +16,8 @@ namespace ProjectEclipse.UI
         private static bool initialized;
 
         public static GUIStyle Window { get; private set; }
+        public static GUIStyle InventoryWindow { get; private set; }
+        public static GUIStyle InventorySurface { get; private set; }
         public static GUIStyle Panel { get; private set; }
         public static GUIStyle SubPanel { get; private set; }
         public static GUIStyle HeaderLabel { get; private set; }
@@ -88,6 +90,21 @@ namespace ProjectEclipse.UI
             GUI.DrawTexture(fillRect, GetTexture(fill));
         }
 
+        public static void DrawInventoryBackdrop(Rect modalRect)
+        {
+            EnsureInitialized(GUI.skin);
+            Rect screen = new Rect(0f, 0f, Screen.width, Screen.height);
+            GUI.DrawTexture(screen, GetTexture(new Color(0.01f, 0.015f, 0.018f, 0.72f)));
+
+            Rect halo = new Rect(modalRect.x - 14f, modalRect.y - 14f, modalRect.width + 28f, modalRect.height + 28f);
+            DrawBox(halo, new Color(0.2f, 0.16f, 0.09f, 0.12f), new Color(0.72f, 0.55f, 0.26f, 0.34f), 1f);
+
+            Rect topBand = new Rect(modalRect.x, modalRect.y, modalRect.width, 36f);
+            GUI.DrawTexture(topBand, GetTexture(new Color(0.25f, 0.19f, 0.1f, 0.36f)));
+            Rect bottomBand = new Rect(modalRect.x, modalRect.yMax - 18f, modalRect.width, 18f);
+            GUI.DrawTexture(bottomBand, GetTexture(new Color(0.05f, 0.16f, 0.14f, 0.32f)));
+        }
+
         private static void EnsureInitialized(GUISkin skin)
         {
             if (initialized)
@@ -105,6 +122,17 @@ namespace ProjectEclipse.UI
             Window.padding = new RectOffset(12, 12, 24, 12);
             Window.border = new RectOffset(1, 1, 1, 1);
             Window.fontSize = 14;
+
+            InventoryWindow = new GUIStyle(Window);
+            InventoryWindow.normal.background = GetTexture(new Color(0.055f, 0.065f, 0.062f, 0.99f));
+            InventoryWindow.padding = new RectOffset(14, 14, 28, 14);
+            InventoryWindow.fontSize = 15;
+
+            InventorySurface = new GUIStyle(baseWindow);
+            InventorySurface.normal.background = GetTexture(new Color(0.075f, 0.088f, 0.083f, 0.98f));
+            InventorySurface.normal.textColor = Color.white;
+            InventorySurface.padding = new RectOffset(12, 12, 12, 12);
+            InventorySurface.margin = new RectOffset(0, 0, 0, 0);
 
             Panel = new GUIStyle(baseWindow);
             Panel.normal.background = GetTexture(PanelColor);

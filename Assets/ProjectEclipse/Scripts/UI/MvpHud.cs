@@ -24,6 +24,10 @@ namespace ProjectEclipse.UI
         private bool inventoryOpen;
         private bool initialized;
         private Rect inventoryWindowRect;
+        private const float InventoryModalMaxWidth = 1180f;
+        private const float InventoryModalMaxHeight = 780f;
+        private const float InventoryModalMinWidth = 1128f;
+        private const float InventoryModalMinHeight = 720f;
 
         public static bool PointerBlocksGameplayInput { get; private set; }
 
@@ -61,6 +65,7 @@ namespace ProjectEclipse.UI
         private void Update()
         {
             EnsureInitialized();
+            WorkOrderTrackerPanel.DismissExpiredCompletedOrders(crafting);
             if (respawnController != null && respawnController.IsRespawning)
             {
                 inventoryOpen = false;
@@ -83,9 +88,6 @@ namespace ProjectEclipse.UI
             GameGuiStyles.ApplySkin(GUI.skin);
             EnsureInitialized();
 
-            GUILayout.Window(1, new Rect(12f, 12f, 280f, 150f), DrawStatusWindow, "Status", GameGuiStyles.Window);
-            DrawCombatFeedback();
-            DrawWorkOrderTracker();
             DrawDeathRespawnOverlay();
             if (respawnController != null && respawnController.IsRespawning)
             {
@@ -94,33 +96,61 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            if (!inventoryOpen)
+            if (inventoryOpen)
             {
-                PointerBlocksGameplayInput = respawnController != null && respawnController.IsRespawning;
+                DrawInventoryModal();
                 return;
             }
 
+            GUILayout.Window(1, new Rect(12f, 12f, 280f, 150f), DrawStatusWindow, "Status", GameGuiStyles.Window);
+            DrawCombatFeedback();
+            DrawWorkOrderTracker();
+            PointerBlocksGameplayInput = false;
+        }
+
+        private void DrawInventoryModal()
+        {
             if (inventoryScreen == null)
             {
-                GUILayout.Window(2, new Rect(12f, 140f, 300f, 90f), id =>
+                Rect fallback = GetInventoryModalRect();
+                GameGuiStyles.DrawInventoryBackdrop(fallback);
+                GUILayout.Window(2, fallback, id =>
                 {
                     GUILayout.Label("HUD systems not initialized.");
-                    GUI.DragWindow();
-                }, "Inventory");
+                }, "Inventory / Equipment / Crafting", GameGuiStyles.InventoryWindow);
+                PointerBlocksGameplayInput = true;
                 return;
             }
 
             ItemHoverState hover = new ItemHoverState();
-            float width = Mathf.Max(720f, Mathf.Min(1040f, Screen.width - 24f));
-            float height = Mathf.Max(420f, Mathf.Min(650f, Screen.height - 152f));
-            inventoryWindowRect = GUILayout.Window(2, new Rect(12f, 146f, width, height), id => inventoryScreen.Draw(id, hover), "Inventory / Equipment / Crafting", GameGuiStyles.Window);
-            PointerBlocksGameplayInput = inventoryOpen && inventoryWindowRect.Contains(GetPointerGuiPosition());
+            Rect modal = GetInventoryModalRect();
+            GameGuiStyles.DrawInventoryBackdrop(modal);
+            inventoryWindowRect = GUILayout.Window(
+                2,
+                modal,
+                id => inventoryScreen.Draw(id, hover, modal.width - 32f, modal.height - 54f),
+                "Inventory / Equipment / Crafting",
+                GameGuiStyles.InventoryWindow);
+            PointerBlocksGameplayInput = true;
             inventoryScreen.HandlePendingDragDrop(inventoryWindowRect);
 
             if (hover.HasHover)
             {
                 ItemTooltipView.Draw(hover, equipment, inventoryCrafting);
             }
+        }
+
+        private static Rect GetInventoryModalRect()
+        {
+            float horizontalMargin = Screen.width >= 1280 ? 48f : 16f;
+            float verticalMargin = Screen.height >= 800 ? 42f : 16f;
+            float maxWidth = Mathf.Max(320f, Screen.width - horizontalMargin * 2f);
+            float maxHeight = Mathf.Max(320f, Screen.height - verticalMargin * 2f);
+            float width = Mathf.Min(InventoryModalMaxWidth, maxWidth);
+            float height = Mathf.Min(InventoryModalMaxHeight, maxHeight);
+            width = Mathf.Max(Mathf.Min(InventoryModalMinWidth, maxWidth), width);
+            height = Mathf.Max(Mathf.Min(InventoryModalMinHeight, maxHeight), height);
+            return new Rect((Screen.width - width) * 0.5f, (Screen.height - height) * 0.5f, width, height);
         }
 
         private static Vector2 GetPointerGuiPosition()

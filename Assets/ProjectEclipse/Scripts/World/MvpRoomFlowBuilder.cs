@@ -15,6 +15,10 @@ namespace ProjectEclipse.World
         private const float VerticalRoomSpacing = 18f;
         private const float UpperPlatformSurfaceOffset = 3.15f;
         private const float SolidFloorThickness = 0.6f;
+        private const float GroundFillVisualHeight = 0.56f;
+        private const float OneWayPlatformVisualHeight = 0.24f;
+        private const float StandingSurfaceClearance = 0.01f;
+        private const float SidePortalInset = 2.8f;
         private const int RouteDepthCount = 5;
 
         private static readonly string[] HorizontalBaseOrder =
@@ -153,7 +157,7 @@ namespace ProjectEclipse.World
             }
 
             RoomSpec fallbackSafeRoom = CreateRoomSpecs()[0];
-            return new Vector3(fallbackSafeRoom.Center.x - 1.8f, floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            return new Vector3(fallbackSafeRoom.Center.x - 1.8f, floorSurfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
         }
 
         public void ApplyCameraBoundsForPlayer(Transform playerTransform)
@@ -364,7 +368,7 @@ namespace ProjectEclipse.World
             builtSpawns.Add(spawn);
 
             CreateSprite(root, spec.Name + " Background", new Vector3(spec.Center.x, spec.Center.y, 2.5f), new Vector3((spec.Size.x + 1.4f) * 0.5f, (spec.Size.y + 1f) * 0.34f, 1f), SpriteFactory.GetRoomBackgroundSprite(), spec.Sky, -40);
-            CreateTiledSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 1.08f, 1.8f), new Vector2(spec.Size.x + 0.8f, 1.35f), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
+            CreateTiledSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(spec.Size.x + 0.8f, GroundFillVisualHeight), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
             CreateSolidFloor(root, spec);
 
             CreateRoomPlatforms(root, spec);
@@ -380,7 +384,7 @@ namespace ProjectEclipse.World
             {
                 x = spec.Center.x - 1.8f;
             }
-            spawn.transform.position = new Vector3(x, spec.Center.y + floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            spawn.transform.position = new Vector3(x, spec.Center.y + floorSurfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
             return spawn.transform;
         }
 
@@ -414,7 +418,7 @@ namespace ProjectEclipse.World
 
                 GameObject spawn = new GameObject(spec.Name + " " + definition.DisplayName + " Spawn");
                 spawn.transform.SetParent(root);
-                spawn.transform.position = new Vector3(spec.Center.x + spawnSpec.Offset.x, spec.Center.y + floorSurfaceY + GetEnemyFeetOffset(definition) + spawnSpec.Offset.y + 0.03f, 0f);
+                spawn.transform.position = new Vector3(spec.Center.x + spawnSpec.Offset.x, spec.Center.y + floorSurfaceY + GetEnemyFeetOffset(definition) + spawnSpec.Offset.y + StandingSurfaceClearance, 0f);
                 EnemySpawnPoint2D spawnPoint = spawn.AddComponent<EnemySpawnPoint2D>();
                 spawnPoint.Configure(definition, spawnSpec.MaxAlive, spawnSpec.Radius, spawnSpec.RespawnSeconds, spawnSpec.JitterSeconds);
             }
@@ -434,7 +438,7 @@ namespace ProjectEclipse.World
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
         {
-            CreateTiledSprite(root, name + " Art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector2(width, 0.52f), SpriteFactory.GetPlatformStripSprite(), color, -12);
+            CreateTiledSprite(root, name + " Art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), SpriteFactory.GetPlatformStripSprite(), color, -12);
 
             GameObject surface = new GameObject(name + " Surface");
             surface.transform.SetParent(root);
@@ -492,10 +496,10 @@ namespace ProjectEclipse.World
             switch (side)
             {
                 case PortalSide.West:
-                    x = spec.Center.x - spec.Size.x * 0.5f + 0.85f;
+                    x = spec.Center.x - spec.Size.x * 0.5f + SidePortalInset;
                     break;
                 case PortalSide.East:
-                    x = spec.Center.x + spec.Size.x * 0.5f - 0.85f;
+                    x = spec.Center.x + spec.Size.x * 0.5f - SidePortalInset;
                     break;
                 case PortalSide.Up:
                     x = spec.Center.x + spec.Size.x * 0.32f;
@@ -541,7 +545,7 @@ namespace ProjectEclipse.World
             }
 
             float surfaceY = side == PortalSide.Up ? GetUpperPlatformSurfaceY() : floorSurfaceY;
-            return new Vector3(portal.x + xOffset, spec.Center.y + surfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            return new Vector3(portal.x + xOffset, spec.Center.y + surfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
         }
 
         private static GameObject CreateSprite(Transform root, string name, Vector3 position, Vector3 scale, Sprite sprite, Color color, int sortingOrder)
@@ -946,14 +950,14 @@ namespace ProjectEclipse.World
         {
             if (room == null)
             {
-                return new Vector3(desiredX, floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+                return new Vector3(desiredX, floorSurfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
             }
 
             Bounds bounds = room.Bounds;
             float clampedX = Mathf.Clamp(desiredX, bounds.min.x + 1f, bounds.max.x - 1f);
             PlatformSurface surface = FindBestStandingSurface(room, clampedX);
             float surfaceY = surface != null ? surface.SurfaceY : room.Bounds.center.y + floorSurfaceY;
-            return new Vector3(clampedX, surfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            return new Vector3(clampedX, surfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
         }
 
         private PlatformSurface FindBestStandingSurface(RoomBounds2D room, float x)
@@ -997,6 +1001,11 @@ namespace ProjectEclipse.World
             if (player == null)
             {
                 player = FindAnyObjectByType<PlayerController>();
+            }
+
+            if (player != null)
+            {
+                player.NormalizeColliderForVisualFooting();
             }
 
             Collider2D collider = player != null ? player.GetComponent<Collider2D>() : null;

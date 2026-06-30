@@ -22,7 +22,14 @@ namespace ProjectEclipse.EditorTools
         private const float VerticalRoomSpacing = 18f;
         private const float FloorSurfaceOffsetY = -2.15f;
         private const float FloorThickness = 0.6f;
+        private const float GroundFillVisualHeight = 0.56f;
+        private const float OneWayPlatformVisualHeight = 0.24f;
+        private const float StandingSurfaceClearance = 0.01f;
         private const float UpperPlatformSurfaceOffsetY = FloorSurfaceOffsetY + 3.15f;
+        private const float SidePortalInset = 2.8f;
+        private const float PlayerColliderWidth = 0.5f;
+        private const float PlayerColliderHeight = 1f;
+        private const float PlayerColliderOffsetY = 0.45f;
         private const float PortalHeight = 1.55f;
         private const float PortalWidth = 0.9f;
         private const int RouteDepthCount = 5;
@@ -224,13 +231,26 @@ namespace ProjectEclipse.EditorTools
             }
 
             SpriteRenderer platformArt = FindRendererNamed(mapRoot, "saplings-d1-upper-step-art");
-            if (platformArt == null || platformArt.drawMode != SpriteDrawMode.Tiled)
+            if (platformArt == null || platformArt.drawMode != SpriteDrawMode.Tiled || Mathf.Abs(platformArt.size.y - OneWayPlatformVisualHeight) > 0.01f)
             {
                 return true;
             }
 
             SpriteRenderer groundFill = FindRendererNamed(mapRoot, "Ground Fill");
-            if (groundFill == null || groundFill.drawMode != SpriteDrawMode.Tiled)
+            if (groundFill == null || groundFill.drawMode != SpriteDrawMode.Tiled || Mathf.Abs(groundFill.size.y - GroundFillVisualHeight) > 0.01f)
+            {
+                return true;
+            }
+
+            Transform safeEastPortal = mapRoot.transform.Find("safe-east-portal");
+            if (safeEastPortal == null || Mathf.Abs(safeEastPortal.position.x - (RoomWidth * 0.5f - SidePortalInset)) > 0.05f)
+            {
+                return true;
+            }
+
+            Transform safePlayerSpawn = mapRoot.transform.Find("safe-player-spawn");
+            float expectedPlayerSpawnY = FloorSurfaceOffsetY + GetPlayerFeetOffset() + StandingSurfaceClearance;
+            if (safePlayerSpawn == null || Mathf.Abs(safePlayerSpawn.position.y - expectedPlayerSpawnY) > 0.05f)
             {
                 return true;
             }
@@ -457,7 +477,7 @@ namespace ProjectEclipse.EditorTools
             area.Configure(spec.Id, spec.Name, new Vector2(RoomWidth, RoomHeight));
 
             CreateSprite(room.transform, "Backdrop", Vector3.forward * 2.5f, new Vector3(6.2f, 4.4f, 1f), spec.BackdropPath, spec.Sky, -40);
-            CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - 1.08f, 1.8f), new Vector2(RoomWidth + 0.8f, 1.35f), spec.GroundPath, spec.Ground, -18);
+            CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(RoomWidth + 0.8f, GroundFillVisualHeight), spec.GroundPath, spec.Ground, -18);
             CreateFloor(room.transform, spec);
             CreateRoomPlatforms(room.transform, spec);
             CreateSpawn(room.transform, spec);
@@ -492,7 +512,7 @@ namespace ProjectEclipse.EditorTools
 
         private static void CreateOneWayPlatform(Transform room, string id, Vector2 center, float width, string spritePath, Color color)
         {
-            CreateTiledSprite(room, id + "-art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector2(width, 0.52f), spritePath, color, -12);
+            CreateTiledSprite(room, id + "-art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), spritePath, color, -12);
 
             GameObject surface = new GameObject(id);
             surface.transform.SetParent(room);
@@ -510,7 +530,7 @@ namespace ProjectEclipse.EditorTools
             GameObject spawn = new GameObject(spec.Id + "-player-spawn");
             spawn.transform.SetParent(room);
             float x = spec.Id == "safe" ? -1.8f : -RoomWidth * 0.5f + 1.2f;
-            spawn.transform.localPosition = new Vector3(x, FloorSurfaceOffsetY + GetPlayerFeetOffset() + 0.03f, 0f);
+            spawn.transform.localPosition = new Vector3(x, FloorSurfaceOffsetY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
         }
 
         private static void CreateEnemySpawns(Transform room, RoomSpec spec)
@@ -564,7 +584,7 @@ namespace ProjectEclipse.EditorTools
             GameObject spawn = new GameObject(enemyId + "-spawn");
             spawn.transform.SetParent(room);
             float centerYOffset = Mathf.Max(0.15f, definition.ColliderSize.y * Mathf.Abs(definition.VisualScale.y) * 0.5f);
-            spawn.transform.localPosition = new Vector3(footPosition.x, footPosition.y + centerYOffset + 0.03f, 0f);
+            spawn.transform.localPosition = new Vector3(footPosition.x, footPosition.y + centerYOffset + StandingSurfaceClearance, 0f);
             EnemySpawnPoint2D spawnPoint = spawn.AddComponent<EnemySpawnPoint2D>();
             spawnPoint.Configure(definition, maxAlive, radius, respawn, jitter);
         }
@@ -617,10 +637,10 @@ namespace ProjectEclipse.EditorTools
             switch (side)
             {
                 case PortalSide.West:
-                    x = spec.Center.x - RoomWidth * 0.5f + 0.85f;
+                    x = spec.Center.x - RoomWidth * 0.5f + SidePortalInset;
                     break;
                 case PortalSide.East:
-                    x = spec.Center.x + RoomWidth * 0.5f - 0.85f;
+                    x = spec.Center.x + RoomWidth * 0.5f - SidePortalInset;
                     break;
                 case PortalSide.Up:
                     x = spec.Center.x + RoomWidth * 0.32f;
@@ -661,7 +681,7 @@ namespace ProjectEclipse.EditorTools
             }
 
             float surfaceY = side == PortalSide.Up ? UpperPlatformSurfaceOffsetY : FloorSurfaceOffsetY;
-            return new Vector3(portal.x + xOffset, spec.Center.y + surfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            return new Vector3(portal.x + xOffset, spec.Center.y + surfaceY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
         }
 
         private static GameObject CreateSprite(Transform parent, string name, Vector3 localPosition, Vector3 scale, string spritePath, Color color, int sortingOrder)
@@ -775,7 +795,8 @@ namespace ProjectEclipse.EditorTools
             PlayerController player = Object.FindAnyObjectByType<PlayerController>();
             if (player != null)
             {
-                player.transform.position = new Vector3(-1.8f, FloorSurfaceOffsetY + GetPlayerFeetOffset() + 0.03f, 0f);
+                NormalizePlayerCollider(player);
+                player.transform.position = new Vector3(-1.8f, FloorSurfaceOffsetY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
                 Rigidbody2D body = player.GetComponent<Rigidbody2D>();
                 if (body != null)
                 {
@@ -803,6 +824,11 @@ namespace ProjectEclipse.EditorTools
         private static float GetPlayerFeetOffset()
         {
             PlayerController player = Object.FindAnyObjectByType<PlayerController>();
+            if (player != null)
+            {
+                NormalizePlayerCollider(player);
+            }
+
             Collider2D collider = player != null ? player.GetComponent<Collider2D>() : null;
             if (player == null || collider == null)
             {
@@ -810,6 +836,19 @@ namespace ProjectEclipse.EditorTools
             }
 
             return Mathf.Max(0.05f, player.transform.position.y - collider.bounds.min.y);
+        }
+
+        private static void NormalizePlayerCollider(PlayerController player)
+        {
+            BoxCollider2D box = player != null ? player.GetComponent<BoxCollider2D>() : null;
+            if (box == null)
+            {
+                return;
+            }
+
+            box.size = new Vector2(PlayerColliderWidth, PlayerColliderHeight);
+            box.offset = new Vector2(0f, PlayerColliderOffsetY);
+            EditorUtility.SetDirty(box);
         }
 
         private static Color Lighten(Color color, float amount)

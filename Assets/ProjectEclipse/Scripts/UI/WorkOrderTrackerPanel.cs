@@ -65,11 +65,29 @@ namespace ProjectEclipse.UI
             }
         }
 
+        public static void DismissExpiredCompletedOrders(CraftingSystem crafting)
+        {
+            if (crafting == null || crafting.WorkOrders.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = crafting.WorkOrders.Count - 1; i >= 0; i--)
+            {
+                WorkOrder order = crafting.WorkOrders[i];
+                if (ShouldAutoDismiss(order))
+                {
+                    crafting.ClearWorkOrder(order);
+                }
+            }
+
+            firstVisibleOrderIndex = Mathf.Clamp(firstVisibleOrderIndex, 0, Mathf.Max(0, crafting.WorkOrders.Count - VisibleOrderCount));
+        }
+
         private static bool DrawOrder(CraftingSystem crafting, WorkOrder order, int orderIndex, bool incompleteOnly, bool showCompletion)
         {
             if (ShouldAutoDismiss(order))
             {
-                crafting.ClearWorkOrder(order);
                 return true;
             }
 

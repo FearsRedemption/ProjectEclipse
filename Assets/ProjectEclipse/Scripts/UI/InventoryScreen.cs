@@ -14,6 +14,13 @@ namespace ProjectEclipse.UI
         private const float ManualDropPickupLockoutSeconds = 4f;
         private const float ManualDropMagnetLockoutSeconds = 5f;
         private const float ManualDropLifetimeSeconds = 120f;
+        private const float DefaultContentWidth = 1084f;
+        private const float DefaultContentHeight = 668f;
+        private const float LeftColumnWidth = 520f;
+        private const float RightColumnWidth = 512f;
+        private const float ColumnGap = 16f;
+        private const float EquipmentPanelHeight = 292f;
+        private const float SelectedSummaryHeight = 76f;
 
         private readonly InventoryStore inventory;
         private readonly EquipmentController equipment;
@@ -47,18 +54,28 @@ namespace ProjectEclipse.UI
 
         public void Draw(int windowId, ItemHoverState hover)
         {
+            Draw(windowId, hover, DefaultContentWidth, DefaultContentHeight);
+        }
+
+        public void Draw(int windowId, ItemHoverState hover, float availableWidth, float availableHeight)
+        {
             GameGuiStyles.ApplySkin(GUI.skin);
             if (inventory == null)
             {
                 GUILayout.Label("Inventory missing.");
-                GUI.DragWindow();
                 return;
             }
 
-            GUILayout.BeginHorizontal();
-            DrawLeftSide(hover);
-            GUILayout.Space(14f);
-            DrawRightSide(hover);
+            float contentWidth = Mathf.Max(DefaultContentWidth, availableWidth);
+            float contentHeight = Mathf.Max(DefaultContentHeight, availableHeight);
+            float innerHeight = Mathf.Max(560f, contentHeight - 24f);
+            float bodyHeight = !string.IsNullOrEmpty(feedback) ? innerHeight - 28f : innerHeight;
+
+            GUILayout.BeginVertical(GameGuiStyles.InventorySurface, GUILayout.Width(contentWidth), GUILayout.Height(contentHeight));
+            GUILayout.BeginHorizontal(GUILayout.Height(bodyHeight));
+            DrawLeftSide(hover, LeftColumnWidth, bodyHeight);
+            GUILayout.Space(ColumnGap);
+            DrawRightSide(hover, RightColumnWidth, bodyHeight);
             GUILayout.EndHorizontal();
 
             if (!string.IsNullOrEmpty(feedback))
@@ -66,8 +83,7 @@ namespace ProjectEclipse.UI
                 GUILayout.Space(4f);
                 GUILayout.Label(feedback);
             }
-
-            GUI.DragWindow();
+            GUILayout.EndVertical();
         }
 
         public void ResetCraftingTransientState()
@@ -78,25 +94,27 @@ namespace ProjectEclipse.UI
             }
         }
 
-        private void DrawLeftSide(ItemHoverState hover)
+        private void DrawLeftSide(ItemHoverState hover, float width, float height)
         {
-            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(510f));
+            float craftingHeight = Mathf.Max(210f, height - EquipmentPanelHeight - 132f);
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(width), GUILayout.Height(height));
             GUILayout.Label("Character Equipment", GameGuiStyles.HeaderLabel);
             equipmentPanel.Draw(hover);
             GUILayout.Space(8f);
             craftingPortPanel.DrawEquipmentSlots(hover);
             GUILayout.Space(8f);
             GUILayout.Label("Inventory Crafting", GameGuiStyles.HeaderLabel);
-            craftingPanel.DrawIntegrated(185f);
+            craftingPanel.DrawIntegrated(craftingHeight);
             GUILayout.EndVertical();
         }
 
-        private void DrawRightSide(ItemHoverState hover)
+        private void DrawRightSide(ItemHoverState hover, float width, float height)
         {
-            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(500f));
+            float gridHeight = Mathf.Max(300f, height - SelectedSummaryHeight - 86f);
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(width), GUILayout.Height(height));
             DrawTabs();
             GUILayout.Space(6f);
-            DrawInventoryGrid(hover);
+            DrawInventoryGrid(hover, gridHeight);
             DrawInventoryCount();
             GUILayout.Space(6f);
             DrawSelectedSummary();
@@ -159,12 +177,12 @@ namespace ProjectEclipse.UI
             }
         }
 
-        private void DrawInventoryGrid(ItemHoverState hover)
+        private void DrawInventoryGrid(ItemHoverState hover, float height)
         {
             List<InventoryStack> stacks = inventory.GetSnapshot();
             ItemDefinition clicked;
             bool shiftHeld = Event.current != null && Event.current.shift;
-            ItemSlotClick click = inventoryGrid.DrawClickable(stacks, hover, ItemMatchesSelectedTab, 390f, selectedItem, out clicked);
+            ItemSlotClick click = inventoryGrid.DrawClickable(stacks, hover, ItemMatchesSelectedTab, height, selectedItem, out clicked);
             if (click == ItemSlotClick.None || clicked == null)
             {
                 return;
@@ -240,7 +258,7 @@ namespace ProjectEclipse.UI
 
         private void DrawSelectedSummary()
         {
-            Rect summary = GUILayoutUtility.GetRect(480f, 76f, GUILayout.Width(480f), GUILayout.Height(76f));
+            Rect summary = GUILayoutUtility.GetRect(480f, SelectedSummaryHeight, GUILayout.Width(480f), GUILayout.Height(SelectedSummaryHeight));
             GameGuiStyles.DrawBox(summary, new Color(0.1f, 0.13f, 0.14f, 0.96f), new Color(0.33f, 0.4f, 0.39f, 1f), 1f);
             if (selectedItem == null)
             {
