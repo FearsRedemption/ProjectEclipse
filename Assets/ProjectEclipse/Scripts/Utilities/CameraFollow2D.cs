@@ -6,7 +6,7 @@ namespace ProjectEclipse.Utilities
     {
         [SerializeField] private Transform target;
         [SerializeField] private Vector3 offset = new Vector3(0f, 1.5f, -10f);
-        [SerializeField] private float smoothTime = 0.12f;
+        [SerializeField] private float smoothTime = 0.16f;
 
         private Vector3 velocity;
         private Bounds cameraBounds;

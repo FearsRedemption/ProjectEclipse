@@ -1,4 +1,6 @@
 using ProjectEclipse.Combat;
+using ProjectEclipse.Equipment;
+using ProjectEclipse.Utilities;
 using ProjectEclipse.World;
 using UnityEngine;
 
@@ -12,6 +14,8 @@ namespace ProjectEclipse.Player
         [SerializeField] private float respawnDelaySeconds = 10f;
 
         private Rigidbody2D body;
+        private VisualStateAnimator visualState;
+        private CharacterVisualController characterVisuals;
         private bool previousBodySimulation = true;
         private bool subscribed;
         private float respawnAt = -1f;
@@ -24,6 +28,8 @@ namespace ProjectEclipse.Player
         private void Awake()
         {
             body = GetComponent<Rigidbody2D>();
+            visualState = GetComponent<VisualStateAnimator>();
+            characterVisuals = GetComponent<CharacterVisualController>();
             if (health == null)
             {
                 health = GetComponent<Health>();
@@ -129,6 +135,8 @@ namespace ProjectEclipse.Player
                 resource.RestoreToFull();
             }
 
+            ResetVisualState();
+
             if (roomFlowBuilder != null)
             {
                 roomFlowBuilder.ApplyCameraBoundsForPlayer(transform);
@@ -136,6 +144,29 @@ namespace ProjectEclipse.Player
 
             IsRespawning = false;
             respawnAt = -1f;
+        }
+
+        private void ResetVisualState()
+        {
+            if (visualState == null)
+            {
+                visualState = GetComponent<VisualStateAnimator>();
+            }
+
+            if (characterVisuals == null)
+            {
+                characterVisuals = GetComponent<CharacterVisualController>();
+            }
+
+            if (visualState != null)
+            {
+                visualState.ResetVisualState();
+            }
+
+            if (characterVisuals != null)
+            {
+                characterVisuals.ResetVisualState();
+            }
         }
     }
 }

@@ -25,6 +25,7 @@ namespace ProjectEclipse.Crafting
         public CraftingPlan Plan { get; private set; }
         public bool IsComplete { get; private set; }
         public bool IsCanceled { get; private set; }
+        public float CompletedAt { get; private set; }
         public string CompletionCue { get; private set; }
         public AudioClip CompletionSound { get; private set; }
 
@@ -32,6 +33,7 @@ namespace ProjectEclipse.Crafting
         {
             Plan = plan;
             this.initialFinalOwned = Mathf.Max(0, initialFinalOwned);
+            CompletedAt = -1f;
         }
 
         public void Cancel()
@@ -65,7 +67,7 @@ namespace ProjectEclipse.Crafting
             }
 
             ReopenRetryableBlockedSteps(inventory, inventoryCrafting);
-            UpdateActiveJobs(inventory, equipment, out feedback);
+            UpdateActiveJobs(inventory, inventoryCrafting, equipment, out feedback);
             if (feedback != null || IsComplete)
             {
                 return;
@@ -90,6 +92,14 @@ namespace ProjectEclipse.Crafting
         }
 
         public List<CraftingRequirementLine> GetRequirementLines(InventoryStore inventory, InventoryCraftingController inventoryCrafting)
+        {
+            return GetRequirementLines(inventory, inventoryCrafting, null);
+        }
+
+        public List<CraftingRequirementLine> GetRequirementLines(
+            InventoryStore inventory,
+            InventoryCraftingController inventoryCrafting,
+            IReadOnlyDictionary<ItemDefinition, int> priorReservations)
         {
             List<CraftingRequirementLine> lines = new List<CraftingRequirementLine>();
             if (Plan == null || Plan.FinalRecipe == null)
@@ -133,10 +143,10 @@ namespace ProjectEclipse.Crafting
                     continue;
                 }
 
-                AddRequirementLine(lines, ingredient.Item, null, inventory, inventoryCrafting, addedItems);
+                AddRequirementLine(lines, ingredient.Item, null, inventory, inventoryCrafting, priorReservations, addedItems);
                 CraftingPlanStep producerStep = GetOutputStep(ingredient.Item);
                 AppendStationLineForStep(lines, producerStep, inventoryCrafting, stationLinesAdded);
-                AppendProducerIngredientLines(lines, producerStep, inventory, inventoryCrafting, addedItems);
+                AppendProducerIngredientLines(lines, producerStep, inventory, inventoryCrafting, priorReservations, addedItems);
             }
 
             List<KeyValuePair<ItemDefinition, int>> remainingRequirements = new List<KeyValuePair<ItemDefinition, int>>();
@@ -153,7 +163,7 @@ namespace ProjectEclipse.Crafting
                 right.Key != null ? right.Key.DisplayName : string.Empty));
             for (int i = 0; i < remainingRequirements.Count; i++)
             {
-                AddRequirementLine(lines, remainingRequirements[i].Key, null, inventory, inventoryCrafting, addedItems);
+                AddRequirementLine(lines, remainingRequirements[i].Key, null, inventory, inventoryCrafting, priorReservations, addedItems);
             }
 
             AppendCurrentStationLines(lines, inventoryCrafting, stationLinesAdded);
@@ -184,6 +194,7 @@ namespace ProjectEclipse.Crafting
             string labelOverride,
             InventoryStore inventory,
             InventoryCraftingController inventoryCrafting,
+            IReadOnlyDictionary<ItemDefinition, int> priorReservations,
             HashSet<ItemDefinition> addedItems)
         {
             if (lines == null || item == null || addedItems == null || addedItems.Contains(item))
@@ -198,8 +209,10 @@ namespace ProjectEclipse.Crafting
             }
 
             int actualOwned = inventory != null ? inventory.CountItem(item) : 0;
+            int reservedByEarlierOrders = GetPriorReserved(item, priorReservations);
+            int availableAfterEarlierOrders = Mathf.Max(0, actualOwned - reservedByEarlierOrders);
             int consumed = GetConsumed(item);
-            int owned = actualOwned + consumed;
+            int owned = availableAfterEarlierOrders + consumed;
             int reserved = CountReserved(item);
             int reservedDisplay = reserved + consumed;
             string label = !string.IsNullOrEmpty(labelOverride) ? labelOverride : item.DisplayName;
@@ -216,7 +229,7 @@ namespace ProjectEclipse.Crafting
                 required,
                 reservedDisplay,
                 status,
-                GetRequirementDetail(item, actualOwned, owned, required, reserved, consumed, inventory, inventoryCrafting)));
+                GetRequirementDetail(item, actualOwned, owned, required, reserved, consumed, reservedByEarlierOrders, inventory, inventoryCrafting)));
             addedItems.Add(item);
         }
 
@@ -225,6 +238,7 @@ namespace ProjectEclipse.Crafting
             CraftingPlanStep producerStep,
             InventoryStore inventory,
             InventoryCraftingController inventoryCrafting,
+            IReadOnlyDictionary<ItemDefinition, int> priorReservations,
             HashSet<ItemDefinition> addedItems)
         {
             if (producerStep == null || producerStep.Recipe == null)
@@ -246,11 +260,12 @@ namespace ProjectEclipse.Crafting
                     "  " + ingredient.Item.DisplayName,
                     inventory,
                     inventoryCrafting,
+                    priorReservations,
                     addedItems);
             }
         }
 
-        private void UpdateActiveJobs(InventoryStore inventory, EquipmentController equipment, out CraftingFeedbackMessage feedback)
+        private void UpdateActiveJobs(InventoryStore inventory, InventoryCraftingController inventoryCrafting, EquipmentController equipment, out CraftingFeedbackMessage feedback)
         {
             feedback = null;
             for (int i = activeJobs.Count - 1; i >= 0; i--)
@@ -268,7 +283,7 @@ namespace ProjectEclipse.Crafting
                     continue;
                 }
 
-                CompleteJob(job, inventory, equipment, out feedback);
+                CompleteJob(job, inventory, inventoryCrafting, equipment, out feedback);
                 activeJobs.RemoveAt(i);
                 if (feedback != null)
                 {
@@ -329,7 +344,7 @@ namespace ProjectEclipse.Crafting
             });
         }
 
-        private void CompleteJob(ActiveCraftingJob job, InventoryStore inventory, EquipmentController equipment, out CraftingFeedbackMessage feedback)
+        private void CompleteJob(ActiveCraftingJob job, InventoryStore inventory, InventoryCraftingController inventoryCrafting, EquipmentController equipment, out CraftingFeedbackMessage feedback)
         {
             feedback = null;
             if (job == null || job.Step == null || job.Step.Recipe == null)
@@ -341,7 +356,8 @@ namespace ProjectEclipse.Crafting
             if (step.OutputItem != null)
             {
                 inventory.AddItem(step.OutputItem, step.OutputQuantity);
-                if (step.IsFinalStep && step.Recipe.EquipOutputIfWeapon && equipment != null)
+                bool autoSlotted = step.IsFinalStep && TryAutoSlotOutput(step.OutputItem, inventoryCrafting, equipment);
+                if (!autoSlotted && step.IsFinalStep && step.Recipe.EquipOutputIfWeapon && equipment != null)
                 {
                     equipment.TryEquipFromStorage(step.OutputItem);
                 }
@@ -354,6 +370,7 @@ namespace ProjectEclipse.Crafting
             if (step.IsFinalStep)
             {
                 IsComplete = true;
+                CompletedAt = Time.time;
                 completedFinalQuantity = step.OutputQuantity;
                 CompletionCue = step.Recipe.CompletionCueText;
                 CompletionSound = step.Recipe.CompletionSound;
@@ -363,8 +380,40 @@ namespace ProjectEclipse.Crafting
                     detail += " " + CompletionCue;
                 }
 
-                feedback = BuildFeedback("Work Order Complete", detail, false, true, GetRequirementLines(inventory));
+                feedback = BuildFeedback("Work Order Complete", detail, false, true, GetRequirementLines(inventory, inventoryCrafting));
             }
+        }
+
+        private static bool TryAutoSlotOutput(ItemDefinition outputItem, InventoryCraftingController inventoryCrafting, EquipmentController equipment)
+        {
+            CraftingPortDefinition port = outputItem as CraftingPortDefinition;
+            if (port != null && inventoryCrafting != null && inventoryCrafting.GetEquippedPort(port.PortSlot) == null)
+            {
+                return inventoryCrafting.TryEquipPortFromStorage(port);
+            }
+
+            EquipmentDefinition equipmentItem = outputItem as EquipmentDefinition;
+            if (equipmentItem != null && IsEquipmentSlotEmpty(equipment, equipmentItem))
+            {
+                return equipment.TryEquipFromStorage(equipmentItem);
+            }
+
+            return false;
+        }
+
+        private static bool IsEquipmentSlotEmpty(EquipmentController equipment, EquipmentDefinition equipmentItem)
+        {
+            if (equipment == null || equipmentItem == null)
+            {
+                return false;
+            }
+
+            if (equipmentItem.Slot == EquipmentSlot.Mainhand)
+            {
+                return equipment.EquippedWeapon == null;
+            }
+
+            return equipment.GetEquippedEquipment(equipmentItem.Slot) == null;
         }
 
         private bool HasIngredients(CraftingPlanStep step, InventoryStore inventory)
@@ -433,25 +482,7 @@ namespace ProjectEclipse.Crafting
             }
 
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetPort(step.StationType) : null;
-            if (port == null || port.PortLevel < step.RequiredPortLevel)
-            {
-                return false;
-            }
-
-            if (port.AllowedRecipes.Count == 0)
-            {
-                return true;
-            }
-
-            for (int i = 0; i < port.AllowedRecipes.Count; i++)
-            {
-                if (port.AllowedRecipes[i] == step.Recipe)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return port != null && port.CanCraft(step.Recipe);
         }
 
         private bool HasFreeLane(CraftingPlanStep step, InventoryCraftingController inventoryCrafting)
@@ -555,6 +586,7 @@ namespace ProjectEclipse.Crafting
             int required,
             int reserved,
             int consumed,
+            int reservedByEarlierOrders,
             InventoryStore inventory,
             InventoryCraftingController inventoryCrafting)
         {
@@ -597,7 +629,18 @@ namespace ProjectEclipse.Crafting
                 return reserved > 0 ? "Reserved" : "Ready";
             }
 
-            return "Missing " + Mathf.Max(0, required - owned) + " (available " + actualOwned + ")";
+            string availability = reservedByEarlierOrders > 0
+                ? "available " + Mathf.Max(0, actualOwned - reservedByEarlierOrders) + " after earlier Work Orders"
+                : "available " + actualOwned;
+            return "Missing " + Mathf.Max(0, required - owned) + " (" + availability + ")";
+        }
+
+        private static int GetPriorReserved(ItemDefinition item, IReadOnlyDictionary<ItemDefinition, int> priorReservations)
+        {
+            int value;
+            return item != null && priorReservations != null && priorReservations.TryGetValue(item, out value)
+                ? Mathf.Max(0, value)
+                : 0;
         }
 
         private bool IsOutputProcessing(ItemDefinition item)
@@ -846,7 +889,7 @@ namespace ProjectEclipse.Crafting
                 return;
             }
 
-            if (port.AllowedRecipes.Count > 0 && !PortAllowsRecipe(port, step.Recipe))
+            if (!port.CanCraft(step.Recipe))
             {
                 lines.Add(new CraftingRequirementLine(
                     port,
@@ -861,24 +904,6 @@ namespace ProjectEclipse.Crafting
                     stationLinesAdded.Add(step);
                 }
             }
-        }
-
-        private static bool PortAllowsRecipe(CraftingPortDefinition port, CraftingRecipe recipe)
-        {
-            if (port == null || recipe == null)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < port.AllowedRecipes.Count; i++)
-            {
-                if (port.AllowedRecipes[i] == recipe)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         private static bool IsStationBlockingMessage(string message)

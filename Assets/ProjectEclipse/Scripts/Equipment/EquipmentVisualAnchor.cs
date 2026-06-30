@@ -1,5 +1,6 @@
 using UnityEngine;
 using ProjectEclipse.Utilities;
+using ProjectEclipse.Items;
 
 namespace ProjectEclipse.Equipment
 {
@@ -65,6 +66,12 @@ namespace ProjectEclipse.Equipment
             if (equipment == null)
             {
                 return null;
+            }
+
+            WeaponDefinition weapon = equipment as WeaponDefinition;
+            if (weapon != null && equipment.Slot == EquipmentSlot.Mainhand)
+            {
+                return SpriteFactory.GetWeaponOverlaySprite(weapon);
             }
 
             return equipment.HasExplicitVisualSprite

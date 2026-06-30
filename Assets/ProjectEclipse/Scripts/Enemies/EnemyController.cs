@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using ProjectEclipse.Progression;
 using ProjectEclipse.Combat;
 using ProjectEclipse.Equipment;
@@ -27,6 +28,13 @@ namespace ProjectEclipse.Enemies
         [SerializeField] private float bumpKnockback = 2.65f;
         [SerializeField] private float earlyDropChanceMultiplier = 1f;
         [SerializeField] private int earlyMaxDropQuantityPerEntry = 2;
+        [SerializeField] private int earlyMinDropsPerKill = 1;
+        [SerializeField] private int earlyMaxDropsPerKill = 4;
+        [SerializeField] private int laterMaxDropsPerKill = 8;
+        [SerializeField] private float baseExtraDropChance = 0.35f;
+        [SerializeField] private float extraDropChanceFalloff = 0.1f;
+        [SerializeField] private float luckExtraDropChancePerPoint = 0.025f;
+        [SerializeField] private float rareDropLuckWeightPerPoint = 0.04f;
 
         private Transform target;
         private Collider2D targetCollider;
@@ -100,11 +108,15 @@ namespace ProjectEclipse.Enemies
             }
             else
             {
-                spriteRenderer.sprite = SpriteFactory.GetCreatureSilhouetteSprite();
-                spriteRenderer.color = definition.PlaceholderColor;
+                spriteRenderer.sprite = SpriteFactory.GetCreatureSprite(definition);
+                spriteRenderer.color = Color.white;
+                if (spriteSheetAnimator != null)
+                {
+                    spriteSheetAnimator.enabled = false;
+                }
                 if (visualState != null)
                 {
-                    visualState.SetBaseColor(definition.PlaceholderColor);
+                    visualState.SetBaseColor(Color.white);
                 }
             }
 
@@ -452,33 +464,209 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
-            for (int i = 0; i < definition.Drops.Count; i++)
+            List<DropTableEntry> commonEntries = new List<DropTableEntry>();
+            List<DropTableEntry> rareEntries = new List<DropTableEntry>();
+            AddValidDropEntries(definition.Drops, commonEntries);
+            if (definition.DropTable != null)
             {
-                TrySpawnDrop(definition.Drops[i]);
+                AddValidDropEntries(definition.DropTable.RareEntries, rareEntries);
             }
 
-            if (definition.DropTable == null)
+            if (commonEntries.Count == 0 && rareEntries.Count == 0)
             {
                 return;
             }
 
-            for (int i = 0; i < definition.DropTable.RareEntries.Count; i++)
+            int targetQuantity = RollDropsPerKill();
+            int spawnedQuantity = SpawnDropEntry(PickWeightedDrop(commonEntries, rareEntries, false), targetQuantity);
+            int safety = 0;
+            while (spawnedQuantity < targetQuantity && safety < 16)
             {
-                TrySpawnDrop(definition.DropTable.RareEntries[i]);
+                safety++;
+                DropTableEntry extraDrop = PickWeightedDrop(commonEntries, rareEntries, true);
+                if (extraDrop == null)
+                {
+                    break;
+                }
+
+                spawnedQuantity += SpawnDropEntry(extraDrop, targetQuantity - spawnedQuantity);
             }
         }
 
-        private void TrySpawnDrop(DropTableEntry drop)
+        private int SpawnDropEntry(DropTableEntry drop, int remainingQuantity)
         {
-            if (drop == null || drop.Item == null || UnityEngine.Random.value > drop.Chance * GetDropChanceMultiplier())
+            if (drop == null || drop.Item == null || remainingQuantity <= 0)
+            {
+                return 0;
+            }
+
+            int maxQuantity = Mathf.Min(drop.MaxQuantity, GetMaxDropQuantityPerEntry(), remainingQuantity);
+            int minQuantity = Mathf.Min(drop.MinQuantity, maxQuantity);
+            int quantity = UnityEngine.Random.Range(minQuantity, maxQuantity + 1);
+            Vector3 offset = Vector3.up * 0.35f + new Vector3(UnityEngine.Random.Range(-0.16f, 0.16f), UnityEngine.Random.Range(0f, 0.14f), 0f);
+            dropSpawner.SpawnDrop(drop.Item, quantity, transform.position + offset);
+            return quantity;
+        }
+
+        private int RollDropsPerKill()
+        {
+            int minDrops = GetMinDropsPerKill();
+            int maxDrops = Mathf.Max(minDrops, GetMaxDropsPerKill());
+            int quantity = minDrops;
+            for (int nextDrop = minDrops + 1; nextDrop <= maxDrops; nextDrop++)
+            {
+                if (UnityEngine.Random.value > GetExtraDropChance(nextDrop - minDrops))
+                {
+                    break;
+                }
+
+                quantity++;
+            }
+
+            return quantity;
+        }
+
+        private int GetMinDropsPerKill()
+        {
+            return definition == null || IsEarlyTier(definition.ResourceTier)
+                ? Mathf.Max(1, earlyMinDropsPerKill)
+                : 1;
+        }
+
+        private int GetMaxDropsPerKill()
+        {
+            return definition == null || IsEarlyTier(definition.ResourceTier)
+                ? Mathf.Max(1, earlyMaxDropsPerKill)
+                : Mathf.Max(1, laterMaxDropsPerKill);
+        }
+
+        private float GetExtraDropChance(int extraDropIndex)
+        {
+            float falloff = Mathf.Max(0f, extraDropChanceFalloff) * Mathf.Max(0, extraDropIndex - 1);
+            float luckBonus = GetPlayerLuck() * Mathf.Max(0f, luckExtraDropChancePerPoint);
+            return Mathf.Clamp01(baseExtraDropChance + luckBonus - falloff);
+        }
+
+        private DropTableEntry PickWeightedDrop(List<DropTableEntry> commonEntries, List<DropTableEntry> rareEntries, bool includeRareEntries)
+        {
+            float totalWeight = GetTotalDropWeight(commonEntries, false);
+            if (includeRareEntries)
+            {
+                totalWeight += GetTotalDropWeight(rareEntries, true);
+            }
+
+            if (totalWeight <= 0f)
+            {
+                DropTableEntry fallback = GetFirstValidDrop(commonEntries);
+                return fallback != null || !includeRareEntries ? fallback : GetFirstValidDrop(rareEntries);
+            }
+
+            float roll = UnityEngine.Random.value * totalWeight;
+            DropTableEntry selected = PickWeightedDropFromList(commonEntries, false, ref roll);
+            if (selected != null || !includeRareEntries)
+            {
+                return selected;
+            }
+
+            return PickWeightedDropFromList(rareEntries, true, ref roll);
+        }
+
+        private DropTableEntry PickWeightedDropFromList(List<DropTableEntry> entries, bool rareEntry, ref float roll)
+        {
+            if (entries == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                DropTableEntry entry = entries[i];
+                float weight = GetDropWeight(entry, rareEntry);
+                if (weight <= 0f)
+                {
+                    continue;
+                }
+
+                roll -= weight;
+                if (roll <= 0f)
+                {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        private float GetTotalDropWeight(List<DropTableEntry> entries, bool rareEntry)
+        {
+            if (entries == null)
+            {
+                return 0f;
+            }
+
+            float total = 0f;
+            for (int i = 0; i < entries.Count; i++)
+            {
+                total += GetDropWeight(entries[i], rareEntry);
+            }
+
+            return total;
+        }
+
+        private float GetDropWeight(DropTableEntry drop, bool rareEntry)
+        {
+            if (drop == null || drop.Item == null)
+            {
+                return 0f;
+            }
+
+            float weight = Mathf.Clamp01(drop.Chance * GetDropChanceMultiplier());
+            if (rareEntry)
+            {
+                weight *= 1f + GetPlayerLuck() * Mathf.Max(0f, rareDropLuckWeightPerPoint);
+            }
+
+            return Mathf.Max(0f, weight);
+        }
+
+        private int GetPlayerLuck()
+        {
+            return targetEquipment != null ? targetEquipment.TotalLuck : 0;
+        }
+
+        private static void AddValidDropEntries(IReadOnlyList<DropTableEntry> source, List<DropTableEntry> target)
+        {
+            if (source == null || target == null)
             {
                 return;
             }
 
-            int maxQuantity = Mathf.Min(drop.MaxQuantity, GetMaxDropQuantityPerEntry());
-            int minQuantity = Mathf.Min(drop.MinQuantity, maxQuantity);
-            int quantity = UnityEngine.Random.Range(minQuantity, maxQuantity + 1);
-            dropSpawner.SpawnDrop(drop.Item, quantity, transform.position + Vector3.up * 0.35f);
+            for (int i = 0; i < source.Count; i++)
+            {
+                DropTableEntry entry = source[i];
+                if (entry != null && entry.Item != null)
+                {
+                    target.Add(entry);
+                }
+            }
+        }
+
+        private static DropTableEntry GetFirstValidDrop(List<DropTableEntry> entries)
+        {
+            if (entries == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                if (entries[i] != null && entries[i].Item != null)
+                {
+                    return entries[i];
+                }
+            }
+
+            return null;
         }
 
         private float GetDropChanceMultiplier()
@@ -516,7 +704,7 @@ namespace ProjectEclipse.Enemies
                 return;
             }
 
-            EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            EnemyController[] enemies = FindObjectsByType<EnemyController>();
             for (int i = 0; i < enemies.Length; i++)
             {
                 EnemyController other = enemies[i];

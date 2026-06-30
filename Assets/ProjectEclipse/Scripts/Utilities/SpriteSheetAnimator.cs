@@ -150,6 +150,15 @@ namespace ProjectEclipse.Utilities
             SetLoopingState(EnemyState.Dying);
         }
 
+        public void ResetToIdle()
+        {
+            dead = false;
+            oneShot = false;
+            moving = false;
+            grounded = true;
+            SetLoopingState(EnemyState.Idle);
+        }
+
         private void RebuildClips()
         {
             if (spriteRenderer == null)

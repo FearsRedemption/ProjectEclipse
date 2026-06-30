@@ -52,6 +52,8 @@ namespace ProjectEclipse.Equipment
         public float TotalMoveSpeedBonus { get { return SumMovementStat(MovementStatKind.MoveSpeed); } }
         public float TotalJumpForceBonus { get { return SumMovementStat(MovementStatKind.JumpForce); } }
         public float TotalAirControlBonus { get { return SumMovementStat(MovementStatKind.AirControl); } }
+        public float TotalHealthRegenPerSecondBonus { get { return SumHealthRegen(); } }
+        public int TotalLuck { get { return SumLuck(); } }
         public int TotalGearScore { get { return SumGearScore(); } }
 
         private enum MovementStatKind
@@ -186,9 +188,13 @@ namespace ProjectEclipse.Equipment
 
         private void ApplyWeaponVisual()
         {
-            if (weaponVisualAnchor != null)
+            if (weaponVisualAnchor != null && characterVisuals == null)
             {
                 weaponVisualAnchor.ApplyWeapon(equippedWeapon);
+            }
+            else if (weaponVisualAnchor != null)
+            {
+                weaponVisualAnchor.ApplyWeapon(null);
             }
             ApplyEquipmentVisual(EquipmentSlot.Mainhand, equippedWeapon);
         }
@@ -336,6 +342,48 @@ namespace ProjectEclipse.Equipment
             return total;
         }
 
+        private int SumLuck()
+        {
+            int total = 0;
+            HashSet<EquipmentDefinition> counted = new HashSet<EquipmentDefinition>();
+            AddLuck(equippedWeapon, counted, ref total);
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null)
+                {
+                    AddLuck(slots[i].Item, counted, ref total);
+                }
+            }
+
+            return total;
+        }
+
+        private float SumHealthRegen()
+        {
+            float total = 0f;
+            HashSet<EquipmentDefinition> counted = new HashSet<EquipmentDefinition>();
+            AddHealthRegen(equippedWeapon, counted, ref total);
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (slots[i] != null)
+                {
+                    AddHealthRegen(slots[i].Item, counted, ref total);
+                }
+            }
+
+            return total;
+        }
+
+        private static void AddLuck(EquipmentDefinition equipmentItem, HashSet<EquipmentDefinition> counted, ref int total)
+        {
+            if (equipmentItem == null || counted == null || !counted.Add(equipmentItem))
+            {
+                return;
+            }
+
+            total += equipmentItem.Stats.Luck;
+        }
+
         private static void AddGearScore(EquipmentDefinition equipmentItem, HashSet<EquipmentDefinition> counted, ref int total)
         {
             if (equipmentItem == null || counted == null || !counted.Add(equipmentItem))
@@ -346,9 +394,21 @@ namespace ProjectEclipse.Equipment
             total += equipmentItem.Stats.Attack;
             total += equipmentItem.Stats.Defense;
             total += equipmentItem.Stats.MaxHealth;
+            total += equipmentItem.Stats.Luck;
             total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.MoveSpeedBonus) * 3f);
             total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.JumpForceBonus) * 2f);
             total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.AirControlBonus) * 3f);
+            total += Mathf.RoundToInt(Mathf.Max(0f, equipmentItem.Stats.HealthRegenPerSecondBonus) * 3f);
+        }
+
+        private static void AddHealthRegen(EquipmentDefinition equipmentItem, HashSet<EquipmentDefinition> counted, ref float total)
+        {
+            if (equipmentItem == null || counted == null || !counted.Add(equipmentItem))
+            {
+                return;
+            }
+
+            total += equipmentItem.Stats.HealthRegenPerSecondBonus;
         }
     }
 }

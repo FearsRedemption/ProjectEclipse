@@ -1,7 +1,7 @@
 using ProjectEclipse.Combat;
 using ProjectEclipse.Crafting;
 using ProjectEclipse.Equipment;
-using ProjectEclipse.Furnace;
+using ProjectEclipse.Input;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
 using ProjectEclipse.Player;
@@ -18,18 +18,12 @@ namespace ProjectEclipse.UI
         private CombatInputRouter combatInput;
         private CraftingSystem crafting;
         private InventoryCraftingController inventoryCrafting;
-        private FurnaceSystem furnace;
         private DropSpawner dropSpawner;
         private PlayerRespawnController respawnController;
         private InventoryScreen inventoryScreen;
         private bool inventoryOpen;
         private bool initialized;
-        private WorkOrder trackedWorkOrder;
-        private float workOrderCompletedAt = -1f;
         private Rect inventoryWindowRect;
-
-        [SerializeField] private float workOrderCompletionHoldSeconds = 2f;
-        [SerializeField] private float workOrderCompletionFadeSeconds = 1.4f;
 
         public static bool PointerBlocksGameplayInput { get; private set; }
 
@@ -39,7 +33,6 @@ namespace ProjectEclipse.UI
             InventoryStore store,
             EquipmentController playerEquipment,
             CraftingSystem craftingSystem,
-            FurnaceSystem furnaceSystem,
             DropSpawner worldDropSpawner = null)
         {
             playerHealth = health;
@@ -55,7 +48,6 @@ namespace ProjectEclipse.UI
             }
             crafting = craftingSystem;
             inventoryCrafting = store != null ? store.GetComponent<InventoryCraftingController>() : null;
-            furnace = furnaceSystem;
 
             BuildInventoryScreen();
             initialized = true;
@@ -76,7 +68,7 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (GameInput.WasPressedThisFrame(GameInputKey.Tab))
             {
                 inventoryOpen = !inventoryOpen;
                 if (!inventoryOpen && inventoryScreen != null)
@@ -133,7 +125,7 @@ namespace ProjectEclipse.UI
 
         private static Vector2 GetPointerGuiPosition()
         {
-            Vector3 mouse = Input.mousePosition;
+            Vector2 mouse = GameInput.PointerScreenPosition;
             return new Vector2(mouse.x, Screen.height - mouse.y);
         }
 
@@ -178,11 +170,6 @@ namespace ProjectEclipse.UI
                 inventoryCrafting = inventory.GetComponent<InventoryCraftingController>();
             }
 
-            if (furnace == null)
-            {
-                furnace = FindAnyObjectByType<FurnaceSystem>();
-            }
-
             if (dropSpawner == null)
             {
                 dropSpawner = FindAnyObjectByType<DropSpawner>();
@@ -207,60 +194,23 @@ namespace ProjectEclipse.UI
 
         private void BuildInventoryScreen()
         {
-            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, furnace, dropSpawner);
+            inventoryScreen = new InventoryScreen(inventory, equipment, inventoryCrafting, crafting, dropSpawner);
         }
 
         private void DrawWorkOrderTracker()
         {
-            if (crafting == null || crafting.ActiveWorkOrder == null)
+            if (crafting == null || crafting.QueuedWorkOrderCount == 0)
             {
-                trackedWorkOrder = null;
-                workOrderCompletedAt = -1f;
                 return;
-            }
-
-            WorkOrder order = crafting.ActiveWorkOrder;
-            if (trackedWorkOrder != order)
-            {
-                trackedWorkOrder = order;
-                workOrderCompletedAt = -1f;
-            }
-
-            float alpha = 1f;
-            if (order.IsComplete)
-            {
-                if (workOrderCompletedAt < 0f)
-                {
-                    workOrderCompletedAt = Time.time;
-                }
-
-                float elapsed = Time.time - workOrderCompletedAt;
-                float hold = Mathf.Max(0f, workOrderCompletionHoldSeconds);
-                float fade = Mathf.Max(0.1f, workOrderCompletionFadeSeconds);
-                if (elapsed >= hold + fade)
-                {
-                    crafting.ClearActiveWorkOrder();
-                    trackedWorkOrder = null;
-                    workOrderCompletedAt = -1f;
-                    return;
-                }
-
-                if (elapsed > hold)
-                {
-                    alpha = 1f - Mathf.Clamp01((elapsed - hold) / fade);
-                }
             }
 
             float width = 360f;
             float x = Mathf.Max(304f, Screen.width - width - 12f);
-            Color oldColor = GUI.color;
-            GUI.color = new Color(oldColor.r, oldColor.g, oldColor.b, oldColor.a * alpha);
-            GUILayout.Window(5, new Rect(x, 12f, width, 300f), id =>
+            GUILayout.Window(5, new Rect(x, 12f, width, 420f), id =>
             {
                 WorkOrderTrackerPanel.Draw(crafting, true, true);
                 GUI.DragWindow();
             }, "Work Order", GameGuiStyles.Window);
-            GUI.color = oldColor;
         }
 
         private void DrawStatusWindow(int windowId)

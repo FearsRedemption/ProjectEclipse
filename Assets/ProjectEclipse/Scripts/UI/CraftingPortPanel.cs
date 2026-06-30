@@ -1,5 +1,4 @@
 using ProjectEclipse.Crafting;
-using ProjectEclipse.Furnace;
 using UnityEngine;
 
 namespace ProjectEclipse.UI
@@ -7,19 +6,16 @@ namespace ProjectEclipse.UI
     public class CraftingPortPanel
     {
         private readonly InventoryCraftingController inventoryCrafting;
-        private readonly FurnaceSystem furnace;
 
-        public CraftingPortPanel(InventoryCraftingController inventoryCrafting, FurnaceSystem furnace)
+        public CraftingPortPanel(InventoryCraftingController inventoryCrafting)
         {
             this.inventoryCrafting = inventoryCrafting;
-            this.furnace = furnace;
         }
 
         public void Draw(int windowId)
         {
             GameGuiStyles.ApplySkin(GUI.skin);
             DrawEquipmentSlots(new ItemHoverState());
-            DrawLegacyFurnaceStatus();
             GUI.DragWindow();
         }
 
@@ -43,23 +39,6 @@ namespace ProjectEclipse.UI
             }
         }
 
-        public void DrawLegacyFurnaceStatus()
-        {
-            if (furnace == null)
-            {
-                return;
-            }
-
-            GUILayout.Space(6f);
-            GUILayout.Label("Legacy Furnace Station", GameGuiStyles.HeaderLabel);
-            GUILayout.Label("Tier: " + CraftingTrinketTierUtility.FormatTier(furnace.FurnaceLevel));
-            GUILayout.Label("Fuel: " + DescribeSlot(furnace.FuelSlot));
-            GUILayout.Label("Input: " + DescribeSlot(furnace.InputSlot));
-            GUILayout.Label("Output: " + DescribeSlot(furnace.OutputSlot));
-            Rect bar = GUILayoutUtility.GetRect(280f, 16f);
-            GameGuiStyles.DrawProgressBar(bar, furnace.Progress01, new Color(0.93f, 0.55f, 0.22f, 1f));
-        }
-
         private void DrawPortSlot(CraftingPortSlot slot, string label, ItemHoverState hover)
         {
             Rect cell = GUILayoutUtility.GetRect(90f, 72f, GUILayout.Width(90f), GUILayout.Height(72f));
@@ -74,14 +53,5 @@ namespace ProjectEclipse.UI
             }
         }
 
-        private static string DescribeSlot(FurnaceSlot slot)
-        {
-            if (slot == null || slot.IsEmpty || slot.Item == null)
-            {
-                return "Empty";
-            }
-
-            return slot.Item.DisplayName + " x" + slot.Quantity;
-        }
     }
 }

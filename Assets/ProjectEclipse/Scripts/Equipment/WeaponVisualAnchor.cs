@@ -7,6 +7,7 @@ namespace ProjectEclipse.Equipment
     {
         [SerializeField] private SpriteRenderer weaponRenderer;
         [SerializeField] private Transform weaponAnchor;
+        [SerializeField] private float maxVisualScale = 0.2f;
 
         private int facingDirection = 1;
 
@@ -57,10 +58,19 @@ namespace ProjectEclipse.Equipment
 
             weaponAnchor.localPosition = weapon.EquippedVisualOffset;
             weaponAnchor.localRotation = Quaternion.Euler(0f, 0f, weapon.EquippedVisualRotation);
+            Vector2 visualScale = ClampVisualScale(weapon.EquippedVisualScale);
             weaponAnchor.localScale = new Vector3(
-                Mathf.Abs(weapon.EquippedVisualScale.x) * facingDirection,
-                weapon.EquippedVisualScale.y,
+                Mathf.Abs(visualScale.x) * facingDirection,
+                visualScale.y,
                 1f);
+        }
+
+        private Vector2 ClampVisualScale(Vector2 requestedScale)
+        {
+            float maxScale = Mathf.Max(0.05f, maxVisualScale);
+            float x = Mathf.Clamp(Mathf.Abs(requestedScale.x), 0.05f, maxScale);
+            float y = Mathf.Clamp(Mathf.Abs(requestedScale.y), 0.05f, maxScale);
+            return new Vector2(x, y);
         }
     }
 }

@@ -1,5 +1,6 @@
 using ProjectEclipse.Combat;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.Input;
 using ProjectEclipse.UI;
 using ProjectEclipse.Utilities;
 using ProjectEclipse.World;
@@ -14,14 +15,18 @@ namespace ProjectEclipse.Player
     public class PlayerController : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 7f;
-        [SerializeField] private float jumpForce = 15.2f;
-        [SerializeField] private float acceleration = 58f;
-        [SerializeField] private float deceleration = 72f;
-        [SerializeField] private float airControl = 0.62f;
-        [SerializeField] private float coyoteTime = 0.1f;
+        [SerializeField] private float jumpForce = 11.8f;
+        [SerializeField] private float acceleration = 52f;
+        [SerializeField] private float deceleration = 60f;
+        [SerializeField] private float airControl = 0.76f;
+        [SerializeField] private float coyoteTime = 0.12f;
         [SerializeField] private float jumpBufferTime = 0.12f;
-        [SerializeField] private float lowJumpGravityMultiplier = 2.1f;
-        [SerializeField] private float fallGravityMultiplier = 2.4f;
+        [SerializeField] private float lowJumpGravityMultiplier = 1.32f;
+        [SerializeField] private float fallGravityMultiplier = 1.45f;
+        [SerializeField] private float apexGravityMultiplier = 0.78f;
+        [SerializeField] private float apexVelocityThreshold = 1.25f;
+        [SerializeField] private float runtimeGravityScale = 1.65f;
+        [SerializeField] private float maxFallSpeed = 13.5f;
         [SerializeField] private float oneWayIgnoreSeconds = 0.18f;
         [SerializeField] private float dropThroughSeconds = 0.34f;
         [SerializeField] private LayerMask groundMask = ~0;
@@ -56,6 +61,9 @@ namespace ProjectEclipse.Player
         {
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
+            body.gravityScale = Mathf.Max(0.1f, runtimeGravityScale);
+            body.interpolation = RigidbodyInterpolation2D.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             combat = GetComponent<CombatController>();
             combatInput = GetOrAddCombatInputRouter();
             equipment = GetComponent<EquipmentController>();
@@ -213,12 +221,12 @@ namespace ProjectEclipse.Player
         private float ReadHorizontalInput()
         {
             float horizontal = 0f;
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            if (GameInput.IsHeld(GameInputKey.A) || GameInput.IsHeld(GameInputKey.LeftArrow))
             {
                 horizontal -= 1f;
             }
 
-            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            if (GameInput.IsHeld(GameInputKey.D) || GameInput.IsHeld(GameInputKey.RightArrow))
             {
                 horizontal += 1f;
             }
@@ -228,17 +236,17 @@ namespace ProjectEclipse.Player
 
         private bool WantsJump()
         {
-            return Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow);
+            return GameInput.WasPressedThisFrame(GameInputKey.Space) || GameInput.WasPressedThisFrame(GameInputKey.W) || GameInput.WasPressedThisFrame(GameInputKey.UpArrow);
         }
 
         private bool WantsJumpHeld()
         {
-            return Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+            return GameInput.IsHeld(GameInputKey.Space) || GameInput.IsHeld(GameInputKey.W) || GameInput.IsHeld(GameInputKey.UpArrow);
         }
 
         private bool WantsDropHeld()
         {
-            return Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow);
+            return GameInput.IsHeld(GameInputKey.S) || GameInput.IsHeld(GameInputKey.DownArrow);
         }
 
         private bool WantsDropThrough(bool jumpPressed)
@@ -253,13 +261,23 @@ namespace ProjectEclipse.Player
 
         private void ApplyBetterGravity()
         {
+            float gravityScale = Mathf.Max(0.1f, body.gravityScale);
             if (body.linearVelocity.y < -0.01f)
             {
-                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * (fallGravityMultiplier - 1f) * Time.fixedDeltaTime);
+                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * gravityScale * (fallGravityMultiplier - 1f) * Time.fixedDeltaTime);
             }
             else if (body.linearVelocity.y > 0.01f && !jumpHeld)
             {
-                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * (lowJumpGravityMultiplier - 1f) * Time.fixedDeltaTime);
+                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * gravityScale * (lowJumpGravityMultiplier - 1f) * Time.fixedDeltaTime);
+            }
+            else if (!grounded && Mathf.Abs(body.linearVelocity.y) <= Mathf.Max(0.05f, apexVelocityThreshold))
+            {
+                body.linearVelocity += Vector2.up * (Physics2D.gravity.y * gravityScale * (apexGravityMultiplier - 1f) * Time.fixedDeltaTime);
+            }
+
+            if (body.linearVelocity.y < -maxFallSpeed)
+            {
+                body.linearVelocity = new Vector2(body.linearVelocity.x, -maxFallSpeed);
             }
         }
 
@@ -283,9 +301,9 @@ namespace ProjectEclipse.Player
 
         private bool WantsAttack()
         {
-            return Input.GetKey(KeyCode.J)
-                || (!MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(0))
-                || Input.GetKey(KeyCode.LeftControl);
+            return GameInput.IsHeld(GameInputKey.J)
+                || (!MvpHud.PointerBlocksGameplayInput && GameInput.IsLeftMouseHeld())
+                || GameInput.IsHeld(GameInputKey.LeftControl);
         }
 
         private bool CheckGrounded(out Collider2D groundCollider)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ProjectEclipse.Input;
 using ProjectEclipse.Player;
 using ProjectEclipse.Utilities;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace ProjectEclipse.World
         [SerializeField] private float reuseDelay = 0.45f;
         [SerializeField] private float playerCooldownSeconds = 2.25f;
 
-        private static readonly Dictionary<int, float> PlayerCooldowns = new Dictionary<int, float>();
+        private static readonly Dictionary<PlayerController, float> PlayerCooldowns = new Dictionary<PlayerController, float>();
         private float nextUseTime;
         private PlayerController nearbyPlayer;
 
@@ -150,9 +151,9 @@ namespace ProjectEclipse.World
 
         private static bool WantsPortalUse()
         {
-            return Input.GetKeyDown(KeyCode.W)
-                || Input.GetKeyDown(KeyCode.UpArrow)
-                || Input.GetKeyDown(KeyCode.Return);
+            return GameInput.WasPressedThisFrame(GameInputKey.W)
+                || GameInput.WasPressedThisFrame(GameInputKey.UpArrow)
+                || GameInput.WasPressedThisFrame(GameInputKey.Return);
         }
 
         private bool HasDestination()
@@ -168,8 +169,7 @@ namespace ProjectEclipse.World
             }
 
             float cooldownUntil;
-            int key = player.GetInstanceID();
-            if (!PlayerCooldowns.TryGetValue(key, out cooldownUntil))
+            if (!PlayerCooldowns.TryGetValue(player, out cooldownUntil))
             {
                 return false;
             }
@@ -179,7 +179,7 @@ namespace ProjectEclipse.World
                 return true;
             }
 
-            PlayerCooldowns.Remove(key);
+            PlayerCooldowns.Remove(player);
             return false;
         }
 
@@ -190,7 +190,7 @@ namespace ProjectEclipse.World
                 return;
             }
 
-            PlayerCooldowns[player.GetInstanceID()] = Time.time + Mathf.Max(0.1f, playerCooldownSeconds);
+            PlayerCooldowns[player] = Time.time + Mathf.Max(0.1f, playerCooldownSeconds);
         }
 
         private void OnDrawGizmosSelected()

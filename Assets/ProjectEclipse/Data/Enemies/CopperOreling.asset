@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: CopperOreling
+  m_EditorClassIdentifier:
+  enemyId: copper_oreling
+  displayName: Copper Oreling
+  rank: 0
+  resourceTier: 3
+  maxHealth: 16
+  contactDamage: 2
+  moveSpeed: 0.95
+  chaseRange: 5.8
+  attackRange: 0.92
+  attackCooldown: 1.1
+  attackLungeForce: 0.9
+  attackKnockback: 3.1
+  rangedCastRange: 4.8
+  rangedCastDamage: 1
+  rangedCastCooldown: 7
+  rangedCastChance: 0.22
+  rangedProjectileSpeed: 4.9
+  rangedProjectileLifetime: 2.8
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 1, y: 1}
+  colliderSize: {x: 0.86, y: 0.76}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.78, g: 0.36, b: 0.18, a: 1}
+  dropTable: {fileID: 11400000, guid: 1c2b0d996a41462fb7f76d6f7058fbbf, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
+    minQuantity: 1
+    maxQuantity: 2
+    chance: 1

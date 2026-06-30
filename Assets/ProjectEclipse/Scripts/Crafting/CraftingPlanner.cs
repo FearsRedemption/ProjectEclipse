@@ -10,15 +10,26 @@ namespace ProjectEclipse.Crafting
         private readonly IReadOnlyList<CraftingRecipe> recipes;
         private readonly InventoryStore inventory;
         private readonly InventoryCraftingController inventoryCrafting;
+        private readonly IReadOnlyDictionary<ItemDefinition, int> reservedInventory;
 
         public CraftingPlanner(
             IReadOnlyList<CraftingRecipe> recipes,
             InventoryStore inventory,
             InventoryCraftingController inventoryCrafting)
+            : this(recipes, inventory, inventoryCrafting, null)
+        {
+        }
+
+        public CraftingPlanner(
+            IReadOnlyList<CraftingRecipe> recipes,
+            InventoryStore inventory,
+            InventoryCraftingController inventoryCrafting,
+            IReadOnlyDictionary<ItemDefinition, int> reservedInventory)
         {
             this.recipes = recipes;
             this.inventory = inventory;
             this.inventoryCrafting = inventoryCrafting;
+            this.reservedInventory = reservedInventory;
         }
 
         public CraftingPlan BuildPlan(CraftingRecipe finalRecipe, int targetQuantity)
@@ -164,7 +175,7 @@ namespace ProjectEclipse.Crafting
                     " / " + CraftingTrinketTierUtility.FormatTier(recipe.RequiredPortLevel) + ".");
             }
 
-            if (port.AllowedRecipes.Count > 0 && !ContainsRecipe(port, recipe))
+            if (port.PortLevel >= recipe.RequiredPortLevel && !port.CanCraft(recipe))
             {
                 plan.AddBlockingMessage("Recipe Locked: " + recipe.DisplayName + " is not allowed by " + port.DisplayName + ".");
             }
@@ -192,20 +203,23 @@ namespace ProjectEclipse.Crafting
                 snapshot[stack.Item] = existing + stack.Quantity;
             }
 
-            return snapshot;
-        }
-
-        private static bool ContainsRecipe(CraftingPortDefinition port, CraftingRecipe recipe)
-        {
-            for (int i = 0; i < port.AllowedRecipes.Count; i++)
+            if (reservedInventory != null)
             {
-                if (port.AllowedRecipes[i] == recipe)
+                foreach (KeyValuePair<ItemDefinition, int> pair in reservedInventory)
                 {
-                    return true;
+                    if (pair.Key == null || pair.Value <= 0)
+                    {
+                        continue;
+                    }
+
+                    int existing;
+                    snapshot.TryGetValue(pair.Key, out existing);
+                    snapshot[pair.Key] = Mathf.Max(0, existing - pair.Value);
                 }
             }
 
-            return false;
+            return snapshot;
         }
+
     }
 }

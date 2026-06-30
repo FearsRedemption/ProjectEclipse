@@ -9,26 +9,124 @@ namespace ProjectEclipse.World
     public class MvpRoomFlowBuilder : MonoBehaviour
     {
         private const string MapRootName = "Editable MVP Map";
+        private const float RuntimeRoomWidth = 24f;
+        private const float RuntimeRoomHeight = 11.5f;
+        private const float HorizontalRoomSpacing = 36f;
+        private const float VerticalRoomSpacing = 18f;
+        private const float UpperPlatformSurfaceOffset = 3.15f;
+        private const int RouteDepthCount = 5;
+
+        private static readonly string[] HorizontalBaseOrder =
+        {
+            "pine",
+            "birch",
+            "saplings",
+            "safe",
+            "rocks",
+            "coal",
+            "copper",
+            "tin",
+            "zync",
+            "miniboss",
+            "iron"
+        };
+
+        private enum PortalSide
+        {
+            West,
+            East,
+            Up,
+            Down
+        }
+
+        private struct EnemySpawnSpec
+        {
+            public string EnemyId;
+            public Vector2 Offset;
+            public int MaxAlive;
+            public float Radius;
+            public float RespawnSeconds;
+            public float JitterSeconds;
+
+            public EnemySpawnSpec(string enemyId, Vector2 offset, int maxAlive, float radius, float respawnSeconds, float jitterSeconds)
+            {
+                EnemyId = enemyId;
+                Offset = offset;
+                MaxAlive = maxAlive;
+                Radius = radius;
+                RespawnSeconds = respawnSeconds;
+                JitterSeconds = jitterSeconds;
+            }
+        }
 
         private struct RoomSpec
         {
+            public string Id;
             public string Name;
+            public string Route;
+            public int Depth;
             public Vector2 Center;
             public Vector2 Size;
             public Color Sky;
             public Color Ground;
             public Color Platform;
             public Color Portal;
+            public EnemySpawnSpec[] Spawns;
 
-            public RoomSpec(string name, Vector2 center, Vector2 size, Color sky, Color ground, Color platform, Color portal)
+            public RoomSpec(
+                string id,
+                string name,
+                string route,
+                int depth,
+                Vector2 center,
+                Vector2 size,
+                Color sky,
+                Color ground,
+                Color platform,
+                Color portal,
+                params EnemySpawnSpec[] spawns)
             {
+                Id = id;
                 Name = name;
+                Route = route;
+                Depth = depth;
                 Center = center;
                 Size = size;
                 Sky = sky;
                 Ground = ground;
                 Platform = platform;
                 Portal = portal;
+                Spawns = spawns;
+            }
+        }
+
+        private struct RouteSpec
+        {
+            public string Id;
+            public string DisplayName;
+            public int HorizontalIndex;
+            public Color Sky;
+            public Color Ground;
+            public Color Platform;
+            public Color Portal;
+            public string BaseEnemyId;
+            public string MidEnemyId;
+            public string HardEnemyId;
+            public string[] DepthNames;
+
+            public RouteSpec(string id, string displayName, int horizontalIndex, Color sky, Color ground, Color platform, Color portal, string baseEnemyId, string midEnemyId, string hardEnemyId, string[] depthNames)
+            {
+                Id = id;
+                DisplayName = displayName;
+                HorizontalIndex = horizontalIndex;
+                Sky = sky;
+                Ground = ground;
+                Platform = platform;
+                Portal = portal;
+                BaseEnemyId = baseEnemyId;
+                MidEnemyId = midEnemyId;
+                HardEnemyId = hardEnemyId;
+                DepthNames = depthNames;
             }
         }
 
@@ -38,19 +136,23 @@ namespace ProjectEclipse.World
 
         private readonly List<RoomBounds2D> builtRooms = new List<RoomBounds2D>();
         private readonly List<Transform> builtSpawns = new List<Transform>();
+        private readonly Dictionary<string, int> roomIndexById = new Dictionary<string, int>();
+        private readonly Dictionary<string, EnemyDefinition> enemyDefinitions = new Dictionary<string, EnemyDefinition>();
         private PlayerController player;
         private bool built;
 
         public Vector3 GetSafeRespawnPosition()
         {
-            RoomSpec safeRoom = CreateRoomSpecs()[0];
-            if (builtRooms.Count > 0 && builtRooms[0] != null)
+            EnsureRoomCache();
+            RoomBounds2D safeRoom = GetRoomById("safe");
+            if (safeRoom != null)
             {
-                Bounds bounds = builtRooms[0].Bounds;
-                return new Vector3(bounds.center.x, floorSurfaceY + 0.95f, 0f);
+                Bounds bounds = safeRoom.Bounds;
+                return GetStandingPositionInRoom(safeRoom, bounds.center.x - 1.8f);
             }
 
-            return new Vector3(safeRoom.Center.x, floorSurfaceY + 0.95f, 0f);
+            RoomSpec fallbackSafeRoom = CreateRoomSpecs()[0];
+            return new Vector3(fallbackSafeRoom.Center.x - 1.8f, floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
         }
 
         public void ApplyCameraBoundsForPlayer(Transform playerTransform)
@@ -83,6 +185,22 @@ namespace ProjectEclipse.World
             if (Application.isPlaying && buildOnStart)
             {
                 Build();
+                return;
+            }
+
+            CacheAuthoredRooms();
+        }
+
+        public void ConfigureEnemyDefinitions(IEnumerable<EnemyDefinition> definitions)
+        {
+            if (definitions == null)
+            {
+                return;
+            }
+
+            foreach (EnemyDefinition definition in definitions)
+            {
+                RegisterEnemyDefinition(definition);
             }
         }
 
@@ -101,25 +219,39 @@ namespace ProjectEclipse.World
                 return;
             }
 
-            built = true;
             if (player == null)
             {
                 player = FindAnyObjectByType<PlayerController>();
             }
 
+            if (CacheAuthoredRooms())
+            {
+                ApplyInitialCameraBounds();
+                return;
+            }
+
+            built = true;
+
             GameObject root = new GameObject(MapRootName);
             RoomSpec[] specs = CreateRoomSpecs();
             for (int i = 0; i < specs.Length; i++)
             {
+                roomIndexById[specs[i].Id] = i;
                 BuildRoom(root.transform, specs[i], i);
             }
 
-            for (int i = 0; i < specs.Length - 1; i++)
+            for (int i = 0; i < HorizontalBaseOrder.Length - 1; i++)
             {
-                RoomPortal2D eastPortal = CreatePortal(root.transform, specs[i], true, builtRooms[i]);
-                RoomPortal2D westPortal = CreatePortal(root.transform, specs[i + 1], false, builtRooms[i + 1]);
-                eastPortal.LinkTo(westPortal);
-                westPortal.LinkTo(eastPortal);
+                LinkRooms(root.transform, specs, GetDepthRoomId(HorizontalBaseOrder[i], 1), PortalSide.East, GetDepthRoomId(HorizontalBaseOrder[i + 1], 1), PortalSide.West);
+            }
+
+            RouteSpec[] routes = CreateRouteSpecs();
+            for (int i = 0; i < routes.Length; i++)
+            {
+                for (int depth = 1; depth < RouteDepthCount; depth++)
+                {
+                    LinkRooms(root.transform, specs, GetDepthRoomId(routes[i].Id, depth), PortalSide.Up, GetDepthRoomId(routes[i].Id, depth + 1), PortalSide.Down);
+                }
             }
 
             DistributeExistingEnemies();
@@ -129,15 +261,85 @@ namespace ProjectEclipse.World
 
         private static RoomSpec[] CreateRoomSpecs()
         {
-            return new RoomSpec[]
+            List<RoomSpec> rooms = new List<RoomSpec>
             {
-                new RoomSpec("Starter Safe Room", new Vector2(120f, 0f), new Vector2(24f, 11.5f), new Color(0.36f, 0.58f, 0.58f), new Color(0.28f, 0.38f, 0.24f), new Color(0.34f, 0.28f, 0.18f), new Color(0.75f, 0.86f, 0.58f)),
-                new RoomSpec("Sapling Grove", new Vector2(200f, 0.1f), new Vector2(24f, 11.5f), new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f)),
-                new RoomSpec("Rock Passage", new Vector2(280f, 0f), new Vector2(24f, 11.5f), new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f)),
-                new RoomSpec("Crafting Pocket", new Vector2(360f, 0.1f), new Vector2(24f, 11.5f), new Color(0.28f, 0.45f, 0.42f), new Color(0.29f, 0.34f, 0.22f), new Color(0.44f, 0.31f, 0.18f), new Color(0.97f, 0.72f, 0.34f)),
-                new RoomSpec("Birchling Canopy", new Vector2(440f, 0.2f), new Vector2(24f, 11.5f), new Color(0.32f, 0.56f, 0.52f), new Color(0.25f, 0.38f, 0.21f), new Color(0.68f, 0.6f, 0.44f), new Color(0.9f, 0.86f, 0.64f)),
-                new RoomSpec("Copper Coal Teaser", new Vector2(520f, 0f), new Vector2(24f, 11.5f), new Color(0.29f, 0.33f, 0.36f), new Color(0.23f, 0.22f, 0.21f), new Color(0.55f, 0.36f, 0.22f), new Color(0.95f, 0.55f, 0.28f)),
+                new RoomSpec("safe", "Safe Zone", "Safe Zone", 0, new Vector2(0f, 0f), new Vector2(RuntimeRoomWidth, RuntimeRoomHeight), new Color(0.36f, 0.58f, 0.58f), new Color(0.28f, 0.38f, 0.24f), new Color(0.34f, 0.28f, 0.18f), new Color(0.75f, 0.86f, 0.58f))
             };
+
+            RouteSpec[] routes = CreateRouteSpecs();
+            for (int i = 0; i < routes.Length; i++)
+            {
+                RouteSpec route = routes[i];
+                for (int depth = 1; depth <= RouteDepthCount; depth++)
+                {
+                    int depthIndex = depth - 1;
+                    float depthTint = depthIndex * 0.045f;
+                    string depthName = route.DepthNames != null && depthIndex < route.DepthNames.Length ? route.DepthNames[depthIndex] : "Depth " + depth.ToString();
+                    rooms.Add(new RoomSpec(
+                        GetDepthRoomId(route.Id, depth),
+                        route.DisplayName + " Route Depth " + depth.ToString() + " - " + depthName,
+                        route.DisplayName + " Route",
+                        depth,
+                        new Vector2(route.HorizontalIndex * HorizontalRoomSpacing, depthIndex * VerticalRoomSpacing),
+                        new Vector2(RuntimeRoomWidth, RuntimeRoomHeight),
+                        Color.Lerp(route.Sky, Color.black, depthTint),
+                        Color.Lerp(route.Ground, Color.black, depthTint),
+                        Color.Lerp(route.Platform, Color.white, depthIndex * 0.035f),
+                        Color.Lerp(route.Portal, Color.white, depthIndex * 0.04f),
+                        CreateSpawnSpecs(route, depth)));
+                }
+            }
+
+            return rooms.ToArray();
+        }
+
+        private static RouteSpec[] CreateRouteSpecs()
+        {
+            return new[]
+            {
+                new RouteSpec("saplings", "Saplings", -1, new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f), "sapling", "birchling", "birchling", new[] { "Saplings", "Saplings + Birchlings", "Birchlings", "Birchlings + Pine", "Pine Stand" }),
+                new RouteSpec("birch", "Birch", -2, new Color(0.28f, 0.52f, 0.45f), new Color(0.24f, 0.36f, 0.19f), new Color(0.53f, 0.42f, 0.24f), new Color(0.64f, 0.9f, 0.58f), "birchling", "birchling", "birchling", new[] { "Birchlings", "Thick Birchlings", "Birch Grove", "Dense Birch Grove", "Old Birch Grove" }),
+                new RouteSpec("pine", "Pine", -3, new Color(0.22f, 0.46f, 0.43f), new Color(0.18f, 0.32f, 0.18f), new Color(0.3f, 0.22f, 0.14f), new Color(0.38f, 0.8f, 0.43f), "sapling", "birchling", "birchling", new[] { "Pine Saplings", "Pine + Birchlings", "Pine Timber", "Pine Timber + Heartwood", "Heartwood Stand" }),
+                new RouteSpec("rocks", "Rocks", 1, new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f), "rock_creature", "rock_creature", "copper_orelet", new[] { "Rocklets", "Rocklets + Rocklings", "Rocklings", "Rocklings + Dense Rock", "Dense Rock Cluster" }),
+                new RouteSpec("coal", "Coal", 2, new Color(0.26f, 0.3f, 0.34f), new Color(0.21f, 0.21f, 0.2f), new Color(0.36f, 0.35f, 0.34f), new Color(0.84f, 0.62f, 0.42f), "coal_sprite", "coal_sprite", "coal_sprite", new[] { "Coal Sprites", "Coal Sprites + Dense Coal", "Dense Coal", "Dense Coal + Coal Nodes", "Coal Node Cluster" }),
+                new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
+                new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Tin Chips", "Tin Chips + Tinlings", "Tinlings", "Tinlings + Tin Nodes", "Tin Node Cluster" }),
+                new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Zync Chips", "Zync Chips + Zynclings", "Zynclings", "Zynclings + Zync Nodes", "Zync Node Cluster" }),
+                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
+                new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Iron Chips", "Iron Chips + Ironlings", "Ironlings", "Ironlings + Iron Nodes", "Iron Node Cluster" })
+            };
+        }
+
+        private static EnemySpawnSpec[] CreateSpawnSpecs(RouteSpec route, int depth)
+        {
+            switch (depth)
+            {
+                case 1:
+                    return new[] { new EnemySpawnSpec(route.BaseEnemyId, new Vector2(-2.8f, 0f), 4, 3.4f, 4.2f, 1.1f) };
+                case 2:
+                    return new[]
+                    {
+                        new EnemySpawnSpec(route.BaseEnemyId, new Vector2(-4.2f, 0f), 3, 3.2f, 4.1f, 1f),
+                        new EnemySpawnSpec(route.MidEnemyId, new Vector2(3.1f, 0f), 2, 2.8f, 5.2f, 1.2f)
+                    };
+                case 3:
+                    return new[] { new EnemySpawnSpec(route.MidEnemyId, new Vector2(-1.2f, 0f), 5, 4.4f, 5.4f, 1.4f) };
+                case 4:
+                    return new[]
+                    {
+                        new EnemySpawnSpec(route.MidEnemyId, new Vector2(-4.1f, 0f), 3, 3.4f, 5.6f, 1.3f),
+                        new EnemySpawnSpec(route.HardEnemyId, new Vector2(3.7f, 0f), 2, 3f, 7.2f, 1.5f)
+                    };
+                case 5:
+                    return new[] { new EnemySpawnSpec(route.HardEnemyId, new Vector2(-1f, 0f), 5, 4.6f, 7.8f, 1.7f) };
+                default:
+                    return null;
+            }
+        }
+
+        private static string GetDepthRoomId(string routeId, int depth)
+        {
+            return routeId == "safe" ? "safe" : routeId + "-d" + depth.ToString();
         }
 
         private void BuildRoom(Transform root, RoomSpec spec, int index)
@@ -148,33 +350,18 @@ namespace ProjectEclipse.World
             RoomBounds2D bounds = roomObject.AddComponent<RoomBounds2D>();
             bounds.Configure(spec.Size);
             MapArea2D mapArea = roomObject.AddComponent<MapArea2D>();
-            mapArea.Configure(spec.Name.ToLowerInvariant().Replace(" ", "-"), spec.Name, spec.Size);
+            mapArea.Configure(spec.Id, spec.Name, spec.Size);
             builtRooms.Add(bounds);
 
             Transform spawn = CreateSpawn(root, spec, index);
             builtSpawns.Add(spawn);
 
             CreateSprite(root, spec.Name + " Background", new Vector3(spec.Center.x, spec.Center.y, 2.5f), new Vector3((spec.Size.x + 1.4f) * 0.5f, (spec.Size.y + 1f) * 0.34f, 1f), SpriteFactory.GetRoomBackgroundSprite(), spec.Sky, -40);
-            CreateSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, floorSurfaceY - 1.08f, 1.8f), new Vector3((spec.Size.x + 0.8f) * 0.25f, 1.35f, 1f), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
+            CreateSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 1.08f, 1.8f), new Vector3((spec.Size.x + 0.8f) * 0.25f, 1.35f, 1f), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
             CreateSolidFloor(root, spec);
 
-            if (index == 1)
-            {
-                CreateOneWayPlatform(root, spec.Name + " Branch", new Vector2(spec.Center.x - 0.6f, floorSurfaceY + 1.55f), 4.3f, spec.Platform);
-            }
-            else if (index == 2)
-            {
-                CreateOneWayPlatform(root, spec.Name + " Stone Shelf", new Vector2(spec.Center.x + 0.4f, floorSurfaceY + 1.25f), 4.8f, spec.Platform);
-            }
-            else if (index == 4)
-            {
-                CreateOneWayPlatform(root, spec.Name + " Birch Log", new Vector2(spec.Center.x - 0.6f, floorSurfaceY + 1.7f), 5.2f, spec.Platform);
-                CreateOneWayPlatform(root, spec.Name + " Upper Branch", new Vector2(spec.Center.x + 2.2f, floorSurfaceY + 2.85f), 3.6f, spec.Platform);
-            }
-            else if (index == 5)
-            {
-                CreateOneWayPlatform(root, spec.Name + " Ore Shelf", new Vector2(spec.Center.x - 0.3f, floorSurfaceY + 1.45f), 4.4f, spec.Platform);
-            }
+            CreateRoomPlatforms(root, spec);
+            CreateEnemySpawnPoints(root, spec);
         }
 
         private Transform CreateSpawn(Transform root, RoomSpec spec, int index)
@@ -186,20 +373,56 @@ namespace ProjectEclipse.World
             {
                 x = spec.Center.x - 1.8f;
             }
-            spawn.transform.position = new Vector3(x, floorSurfaceY + 0.95f, 0f);
+            spawn.transform.position = new Vector3(x, spec.Center.y + floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
             return spawn.transform;
+        }
+
+        private void CreateRoomPlatforms(Transform root, RoomSpec spec)
+        {
+            if (spec.Id == "safe")
+            {
+                return;
+            }
+
+            CreateOneWayPlatform(root, spec.Name + " Lower Step", new Vector2(spec.Center.x - 3.6f, spec.Center.y + floorSurfaceY + 1.05f), 4.2f, spec.Platform);
+            CreateOneWayPlatform(root, spec.Name + " Mid Step", new Vector2(spec.Center.x + 1.2f, spec.Center.y + floorSurfaceY + 2.05f), 4.2f, Lighten(spec.Platform, 0.08f));
+            CreateOneWayPlatform(root, spec.Name + " Upper Step", new Vector2(spec.Center.x + spec.Size.x * 0.32f, spec.Center.y + GetUpperPlatformSurfaceY()), 3.8f, Lighten(spec.Platform, 0.16f));
+        }
+
+        private void CreateEnemySpawnPoints(Transform root, RoomSpec spec)
+        {
+            if (spec.Spawns == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < spec.Spawns.Length; i++)
+            {
+                EnemySpawnSpec spawnSpec = spec.Spawns[i];
+                EnemyDefinition definition = FindEnemyDefinition(spawnSpec.EnemyId);
+                if (definition == null)
+                {
+                    continue;
+                }
+
+                GameObject spawn = new GameObject(spec.Name + " " + definition.DisplayName + " Spawn");
+                spawn.transform.SetParent(root);
+                spawn.transform.position = new Vector3(spec.Center.x + spawnSpec.Offset.x, spec.Center.y + floorSurfaceY + GetEnemyFeetOffset(definition) + spawnSpec.Offset.y + 0.03f, 0f);
+                EnemySpawnPoint2D spawnPoint = spawn.AddComponent<EnemySpawnPoint2D>();
+                spawnPoint.Configure(definition, spawnSpec.MaxAlive, spawnSpec.Radius, spawnSpec.RespawnSeconds, spawnSpec.JitterSeconds);
+            }
         }
 
         private void CreateSolidFloor(Transform root, RoomSpec spec)
         {
             GameObject floor = new GameObject(spec.Name + " SolidGround");
             floor.transform.SetParent(root);
-            floor.transform.position = new Vector3(spec.Center.x, floorSurfaceY - 0.12f, 0f);
+            floor.transform.position = new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 0.12f, 0f);
             BoxCollider2D collider = floor.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(spec.Size.x + 0.8f, 0.24f);
             floor.AddComponent<PlatformSurface>();
             MapPlatform2D mapPlatform = floor.AddComponent<MapPlatform2D>();
-            mapPlatform.Configure(spec.Name.ToLowerInvariant().Replace(" ", "-") + "-floor", spec.Size.x + 0.8f, false);
+            mapPlatform.Configure(spec.Id + "-floor", spec.Size.x + 0.8f, false);
         }
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
@@ -217,12 +440,12 @@ namespace ProjectEclipse.World
             mapPlatform.Configure(name.ToLowerInvariant().Replace(" ", "-"), width, true);
         }
 
-        private RoomPortal2D CreatePortal(Transform root, RoomSpec spec, bool rightSide, RoomBounds2D owningRoom)
+        private RoomPortal2D CreatePortal(Transform root, RoomSpec spec, PortalSide side, RoomBounds2D owningRoom)
         {
-            float x = rightSide ? spec.Center.x + spec.Size.x * 0.5f - 0.85f : spec.Center.x - spec.Size.x * 0.5f + 0.85f;
-            GameObject portal = new GameObject(spec.Name + (rightSide ? " East Portal" : " West Portal"));
+            Vector2 portalPosition = GetPortalPosition(spec, side);
+            GameObject portal = new GameObject(spec.Name + " " + side + " Portal");
             portal.transform.SetParent(root);
-            portal.transform.position = new Vector3(x, floorSurfaceY + 0.75f, 0f);
+            portal.transform.position = new Vector3(portalPosition.x, portalPosition.y, 0f);
             portal.transform.localScale = new Vector3(portalSize.x, portalSize.y, 1f);
 
             CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), SpriteFactory.GetPortalPadSprite(), spec.Portal, 1);
@@ -234,11 +457,84 @@ namespace ProjectEclipse.World
 
             GameObject arrival = new GameObject("Arrival Point");
             arrival.transform.SetParent(portal.transform);
-            arrival.transform.localPosition = new Vector3(rightSide ? -1.15f : 1.15f, 0.16f, 0f);
+            arrival.transform.position = GetArrivalPosition(spec, side);
 
             RoomPortal2D portalLink = portal.AddComponent<RoomPortal2D>();
             portalLink.Configure(owningRoom, arrival.transform, null);
             return portalLink;
+        }
+
+        private void LinkRooms(Transform root, RoomSpec[] specs, string fromId, PortalSide fromSide, string toId, PortalSide toSide)
+        {
+            int fromIndex;
+            int toIndex;
+            if (!roomIndexById.TryGetValue(fromId, out fromIndex) || !roomIndexById.TryGetValue(toId, out toIndex))
+            {
+                return;
+            }
+
+            RoomPortal2D first = CreatePortal(root, specs[fromIndex], fromSide, builtRooms[fromIndex]);
+            RoomPortal2D second = CreatePortal(root, specs[toIndex], toSide, builtRooms[toIndex]);
+            first.LinkTo(second);
+            second.LinkTo(first);
+        }
+
+        private Vector2 GetPortalPosition(RoomSpec spec, PortalSide side)
+        {
+            float x;
+            switch (side)
+            {
+                case PortalSide.West:
+                    x = spec.Center.x - spec.Size.x * 0.5f + 0.85f;
+                    break;
+                case PortalSide.East:
+                    x = spec.Center.x + spec.Size.x * 0.5f - 0.85f;
+                    break;
+                case PortalSide.Up:
+                    x = spec.Center.x + spec.Size.x * 0.32f;
+                    break;
+                case PortalSide.Down:
+                    x = spec.Center.x - spec.Size.x * 0.32f;
+                    break;
+                default:
+                    x = spec.Center.x;
+                    break;
+            }
+
+            float surfaceY = side == PortalSide.Up ? GetUpperPlatformSurfaceY() : floorSurfaceY;
+            return new Vector2(x, spec.Center.y + surfaceY + 0.75f);
+        }
+
+        private float GetUpperPlatformSurfaceY()
+        {
+            return floorSurfaceY + UpperPlatformSurfaceOffset;
+        }
+
+        private Vector3 GetArrivalPosition(RoomSpec spec, PortalSide side)
+        {
+            Vector2 portal = GetPortalPosition(spec, side);
+            float xOffset;
+            switch (side)
+            {
+                case PortalSide.West:
+                    xOffset = 1.15f;
+                    break;
+                case PortalSide.East:
+                    xOffset = -1.15f;
+                    break;
+                case PortalSide.Up:
+                    xOffset = -1.05f;
+                    break;
+                case PortalSide.Down:
+                    xOffset = 1.05f;
+                    break;
+                default:
+                    xOffset = 1.05f;
+                    break;
+            }
+
+            float surfaceY = side == PortalSide.Up ? GetUpperPlatformSurfaceY() : floorSurfaceY;
+            return new Vector3(portal.x + xOffset, spec.Center.y + surfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
         }
 
         private static GameObject CreateSprite(Transform root, string name, Vector3 position, Vector3 scale, Sprite sprite, Color color, int sortingOrder)
@@ -264,7 +560,7 @@ namespace ProjectEclipse.World
 
         private void DistributeExistingEnemies()
         {
-            EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            EnemyController[] enemies = FindObjectsByType<EnemyController>();
             Dictionary<int, int> roomCounts = new Dictionary<int, int>();
             for (int i = 0; i < enemies.Length; i++)
             {
@@ -292,22 +588,48 @@ namespace ProjectEclipse.World
             string id = enemy != null && enemy.Definition != null ? enemy.Definition.EnemyId.ToLowerInvariant() : string.Empty;
             string label = enemy != null && enemy.Definition != null ? enemy.Definition.DisplayName.ToLowerInvariant() : string.Empty;
             string haystack = id + " " + label;
-            if (haystack.Contains("stone") || haystack.Contains("rock"))
-            {
-                return 2;
-            }
-
             if (haystack.Contains("birch"))
             {
-                return 4;
+                return GetRoomIndexOrDefault("saplings-d3", 0);
             }
 
-            if (haystack.Contains("copper") || haystack.Contains("coal"))
+            if (haystack.Contains("sapling") || haystack.Contains("tree"))
             {
-                return 5;
+                return GetRoomIndexOrDefault("saplings-d1", 0);
             }
 
-            return 1;
+            if (haystack.Contains("ore_node") || haystack.Contains("ore node") || haystack.Contains("node"))
+            {
+                return GetRoomIndexOrDefault("copper-d5", 0);
+            }
+
+            if (haystack.Contains("oreling"))
+            {
+                return GetRoomIndexOrDefault("copper-d3", 0);
+            }
+
+            if (haystack.Contains("copper") || haystack.Contains("orelet"))
+            {
+                return GetRoomIndexOrDefault("copper-d1", 0);
+            }
+
+            if (haystack.Contains("stone") || haystack.Contains("rock"))
+            {
+                return GetRoomIndexOrDefault("rocks-d1", 0);
+            }
+
+            if (haystack.Contains("coal"))
+            {
+                return GetRoomIndexOrDefault("coal-d1", 0);
+            }
+
+            return GetRoomIndexOrDefault("saplings-d1", 0);
+        }
+
+        private int GetRoomIndexOrDefault(string id, int fallback)
+        {
+            int index;
+            return roomIndexById.TryGetValue(id, out index) ? index : fallback;
         }
 
         private Vector3 GetEnemyPositionInRoom(RoomBounds2D room, int index)
@@ -316,12 +638,12 @@ namespace ProjectEclipse.World
             float[] offsets = { -4.4f, -1.4f, 1.8f, 4.8f };
             float offset = offsets[Mathf.Abs(index) % offsets.Length];
             int row = Mathf.Abs(index) / offsets.Length;
-            return new Vector3(bounds.center.x + offset, floorSurfaceY + 0.95f + row * 0.05f, 0f);
+            return new Vector3(bounds.center.x + offset, bounds.center.y + floorSurfaceY + 0.95f + row * 0.05f, 0f);
         }
 
         private void MarkExistingOneWaySurfaces()
         {
-            OneWayPlatform[] oneWayPlatforms = FindObjectsByType<OneWayPlatform>(FindObjectsSortMode.None);
+            OneWayPlatform[] oneWayPlatforms = FindObjectsByType<OneWayPlatform>();
             for (int i = 0; i < oneWayPlatforms.Length; i++)
             {
                 if (oneWayPlatforms[i] != null && oneWayPlatforms[i].GetComponent<PlatformSurface>() == null)
@@ -367,7 +689,10 @@ namespace ProjectEclipse.World
                 return;
             }
 
-            player.transform.position = spawn.position;
+            RoomBounds2D room = FindRoomForPosition(spawn.position);
+            player.transform.position = room != null
+                ? GetStandingPositionInRoom(room, spawn.position.x)
+                : spawn.position;
             Rigidbody2D body = player.GetComponent<Rigidbody2D>();
             if (body != null)
             {
@@ -386,6 +711,274 @@ namespace ProjectEclipse.World
             }
 
             return null;
+        }
+
+        private void RegisterEnemyDefinition(EnemyDefinition definition)
+        {
+            if (definition == null)
+            {
+                return;
+            }
+
+            string id = definition.EnemyId.ToLowerInvariant();
+            string label = definition.DisplayName.ToLowerInvariant();
+            if (!enemyDefinitions.ContainsKey(id))
+            {
+                enemyDefinitions.Add(id, definition);
+            }
+
+            if (!enemyDefinitions.ContainsKey(label))
+            {
+                enemyDefinitions.Add(label, definition);
+            }
+        }
+
+        private EnemyDefinition FindEnemyDefinition(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return null;
+            }
+
+            EnemyDefinition definition;
+            return enemyDefinitions.TryGetValue(id.ToLowerInvariant(), out definition) ? definition : null;
+        }
+
+        private void EnsureRoomCache()
+        {
+            if (builtRooms.Count > 0)
+            {
+                return;
+            }
+
+            CacheAuthoredRooms();
+        }
+
+        private bool CacheAuthoredRooms()
+        {
+            if (builtRooms.Count > 0)
+            {
+                return true;
+            }
+
+            MapArea2D[] areas = FindObjectsByType<MapArea2D>();
+            if (areas == null || areas.Length == 0)
+            {
+                return false;
+            }
+
+            builtRooms.Clear();
+            builtSpawns.Clear();
+            roomIndexById.Clear();
+
+            System.Array.Sort(areas, CompareMapAreas);
+            for (int i = 0; i < areas.Length; i++)
+            {
+                MapArea2D area = areas[i];
+                if (area == null || area.RoomBounds == null)
+                {
+                    continue;
+                }
+
+                string id = area.AreaId.ToLowerInvariant();
+                if (roomIndexById.ContainsKey(id))
+                {
+                    continue;
+                }
+
+                roomIndexById[id] = builtRooms.Count;
+                builtRooms.Add(area.RoomBounds);
+                builtSpawns.Add(FindAuthoredSpawnForRoom(area));
+            }
+
+            built = builtRooms.Count > 0;
+            return built;
+        }
+
+        private static int CompareMapAreas(MapArea2D left, MapArea2D right)
+        {
+            int leftPriority = GetAreaSortPriority(left);
+            int rightPriority = GetAreaSortPriority(right);
+            if (leftPriority != rightPriority)
+            {
+                return leftPriority.CompareTo(rightPriority);
+            }
+
+            Vector3 leftPosition = left != null ? left.transform.position : Vector3.zero;
+            Vector3 rightPosition = right != null ? right.transform.position : Vector3.zero;
+            int yCompare = rightPosition.y.CompareTo(leftPosition.y);
+            return yCompare != 0 ? yCompare : leftPosition.x.CompareTo(rightPosition.x);
+        }
+
+        private static int GetAreaSortPriority(MapArea2D area)
+        {
+            if (area == null)
+            {
+                return 999;
+            }
+
+            string id = area.AreaId.ToLowerInvariant();
+            if (id == "safe")
+            {
+                return 0;
+            }
+
+            string routeId = GetRouteId(id);
+            for (int i = 0; i < HorizontalBaseOrder.Length; i++)
+            {
+                if (HorizontalBaseOrder[i] == routeId)
+                {
+                    return 10 + i * 10 + GetDepthSort(area);
+                }
+            }
+
+            return 100;
+        }
+
+        private static int GetDepthSort(MapArea2D area)
+        {
+            if (area == null)
+            {
+                return 0;
+            }
+
+            string id = area.AreaId.ToLowerInvariant();
+            return GetDepthNumber(id);
+        }
+
+        private static string GetRouteId(string roomId)
+        {
+            int depthIndex = roomId.LastIndexOf("-d");
+            return depthIndex > 0 ? roomId.Substring(0, depthIndex) : roomId;
+        }
+
+        private static int GetDepthNumber(string roomId)
+        {
+            int depthIndex = roomId.LastIndexOf("-d");
+            if (depthIndex < 0 || depthIndex + 2 >= roomId.Length)
+            {
+                return 1;
+            }
+
+            int depth;
+            return int.TryParse(roomId.Substring(depthIndex + 2), out depth) ? Mathf.Clamp(depth, 1, RouteDepthCount) : 1;
+        }
+
+        private Transform FindAuthoredSpawnForRoom(MapArea2D area)
+        {
+            if (area == null || area.RoomBounds == null)
+            {
+                return null;
+            }
+
+            Transform[] transforms = FindObjectsByType<Transform>();
+            string id = area.AreaId.ToLowerInvariant();
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                Transform candidate = transforms[i];
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                string name = candidate.name.ToLowerInvariant();
+                if (name.Contains("spawn") && name.Contains(id) && area.RoomBounds.Contains(candidate.position))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        private RoomBounds2D GetRoomById(string id)
+        {
+            EnsureRoomCache();
+            if (string.IsNullOrEmpty(id))
+            {
+                return null;
+            }
+
+            int index;
+            return roomIndexById.TryGetValue(id.ToLowerInvariant(), out index) && index >= 0 && index < builtRooms.Count
+                ? builtRooms[index]
+                : null;
+        }
+
+        private Vector3 GetStandingPositionInRoom(RoomBounds2D room, float desiredX)
+        {
+            if (room == null)
+            {
+                return new Vector3(desiredX, floorSurfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+            }
+
+            Bounds bounds = room.Bounds;
+            float clampedX = Mathf.Clamp(desiredX, bounds.min.x + 1f, bounds.max.x - 1f);
+            PlatformSurface surface = FindBestStandingSurface(room, clampedX);
+            float surfaceY = surface != null ? surface.SurfaceY : room.Bounds.center.y + floorSurfaceY;
+            return new Vector3(clampedX, surfaceY + GetPlayerFeetOffset() + 0.03f, 0f);
+        }
+
+        private PlatformSurface FindBestStandingSurface(RoomBounds2D room, float x)
+        {
+            PlatformSurface[] surfaces = FindObjectsByType<PlatformSurface>();
+            PlatformSurface best = null;
+            float bestY = float.NegativeInfinity;
+            for (int i = 0; i < surfaces.Length; i++)
+            {
+                PlatformSurface surface = surfaces[i];
+                if (surface == null || surface.GetComponent<OneWayPlatform>() != null)
+                {
+                    continue;
+                }
+
+                Collider2D surfaceCollider = surface.GetComponent<Collider2D>();
+                if (surfaceCollider == null)
+                {
+                    continue;
+                }
+
+                Bounds surfaceBounds = surfaceCollider.bounds;
+                if (x < surfaceBounds.min.x || x > surfaceBounds.max.x || !room.Contains(surface.transform.position))
+                {
+                    continue;
+                }
+
+                float y = surface.SurfaceY;
+                if (y > bestY)
+                {
+                    best = surface;
+                    bestY = y;
+                }
+            }
+
+            return best;
+        }
+
+        private float GetPlayerFeetOffset()
+        {
+            if (player == null)
+            {
+                player = FindAnyObjectByType<PlayerController>();
+            }
+
+            Collider2D collider = player != null ? player.GetComponent<Collider2D>() : null;
+            if (collider == null)
+            {
+                return 0.72f;
+            }
+
+            return Mathf.Max(0.05f, player.transform.position.y - collider.bounds.min.y);
+        }
+
+        private static float GetEnemyFeetOffset(EnemyDefinition definition)
+        {
+            if (definition == null)
+            {
+                return 0.55f;
+            }
+
+            return Mathf.Max(0.15f, definition.ColliderSize.y * Mathf.Abs(definition.VisualScale.y) * 0.5f);
         }
 
         private static Color Lighten(Color color, float amount)

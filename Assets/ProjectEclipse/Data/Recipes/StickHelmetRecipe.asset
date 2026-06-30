@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8364bb891d2a91c478f0b419b21bdb95, type: 3}
+  m_Name: StickHelmetRecipe
+  m_EditorClassIdentifier:
+  recipeId: stick_helmet
+  displayName: Craft Stick Helmet
+  ingredients:
+  - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
+    quantity: 8
+  outputItem: {fileID: 11400000, guid: 47f20a1b8345403ea12afc0806bef588, type: 2}
+  outputQuantity: 1
+  equipOutputIfWeapon: 0
+  stationType: 0
+  requiredPortLevel: 1
+  craftTimeSeconds: 0.45
+  completionSound: {fileID: 0}
+  completionCueText:

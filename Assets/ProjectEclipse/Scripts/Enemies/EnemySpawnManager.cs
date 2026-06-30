@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using ProjectEclipse.Items;
 using ProjectEclipse.Progression;
 using ProjectEclipse.Utilities;
+using ProjectEclipse.World;
 using UnityEngine;
 
 namespace ProjectEclipse.Enemies
@@ -54,7 +55,7 @@ namespace ProjectEclipse.Enemies
                 }
             }
 
-            EnemyController[] sceneEnemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
+            EnemyController[] sceneEnemies = FindObjectsByType<EnemyController>();
             for (int i = 0; i < sceneEnemies.Length; i++)
             {
                 RegisterExistingEnemy(sceneEnemies[i]);
@@ -158,12 +159,13 @@ namespace ProjectEclipse.Enemies
             enemyObject.AddComponent<VisualStateAnimator>();
             EnemyController enemy = enemyObject.AddComponent<EnemyController>();
             enemy.Initialize(group.Definition, playerTarget, dropSpawner);
+            SnapEnemyToNearestSurface(enemyObject.transform, enemyObject.GetComponent<Collider2D>());
             return enemy;
         }
 
         private void RegisterAuthoredSpawnPoints()
         {
-            EnemySpawnPoint2D[] spawnPoints = FindObjectsByType<EnemySpawnPoint2D>(FindObjectsSortMode.None);
+            EnemySpawnPoint2D[] spawnPoints = FindObjectsByType<EnemySpawnPoint2D>();
             for (int i = 0; i < spawnPoints.Length; i++)
             {
                 EnemySpawnPoint2D point = spawnPoints[i];
@@ -235,6 +237,57 @@ namespace ProjectEclipse.Enemies
                 || tier == ResourceTier.Stone
                 || tier == ResourceTier.Coal
                 || tier == ResourceTier.Copper;
+        }
+
+        private static void SnapEnemyToNearestSurface(Transform enemyTransform, Collider2D enemyCollider)
+        {
+            if (enemyTransform == null || enemyCollider == null)
+            {
+                return;
+            }
+
+            ProjectEclipse.World.PlatformSurface[] surfaces = FindObjectsByType<ProjectEclipse.World.PlatformSurface>();
+            ProjectEclipse.World.PlatformSurface bestSurface = null;
+            float bestDistance = float.PositiveInfinity;
+            float x = enemyTransform.position.x;
+            float desiredY = enemyTransform.position.y;
+            for (int i = 0; i < surfaces.Length; i++)
+            {
+                ProjectEclipse.World.PlatformSurface surface = surfaces[i];
+                if (surface == null)
+                {
+                    continue;
+                }
+
+                Collider2D surfaceCollider = surface.GetComponent<Collider2D>();
+                if (surfaceCollider == null || surfaceCollider.isTrigger)
+                {
+                    continue;
+                }
+
+                Bounds surfaceBounds = surfaceCollider.bounds;
+                if (x < surfaceBounds.min.x - 0.2f || x > surfaceBounds.max.x + 0.2f)
+                {
+                    continue;
+                }
+
+                float distance = Mathf.Abs(surface.SurfaceY - desiredY);
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    bestSurface = surface;
+                }
+            }
+
+            if (bestSurface == null)
+            {
+                return;
+            }
+
+            float feetOffset = enemyTransform.position.y - enemyCollider.bounds.min.y;
+            Vector3 position = enemyTransform.position;
+            position.y = bestSurface.SurfaceY + feetOffset + 0.02f;
+            enemyTransform.position = position;
         }
     }
 }

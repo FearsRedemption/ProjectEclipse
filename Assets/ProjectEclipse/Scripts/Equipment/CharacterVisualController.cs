@@ -65,6 +65,7 @@ namespace ProjectEclipse.Equipment
             EnsureAnchor(EquipmentSlot.Ring2, EquippedVisualLayer.Accessory, baseSortingOrder + 11);
             EnsureAnchor(EquipmentSlot.Earring1, EquippedVisualLayer.Accessory, baseSortingOrder + 11);
             EnsureAnchor(EquipmentSlot.Earring2, EquippedVisualLayer.Accessory, baseSortingOrder + 11);
+            DisableObsoleteSpriteLayers();
             SetFacingDirection(facingDirection);
         }
 
@@ -78,6 +79,12 @@ namespace ProjectEclipse.Equipment
                     anchors[i].SetFacingDirection(facingDirection);
                 }
             }
+        }
+
+        public void ResetVisualState()
+        {
+            EnsureRuntimeLayers();
+            SetFacingDirection(facingDirection);
         }
 
         public void ApplyEquipment(EquipmentSlot slot, EquipmentDefinition equipment)
@@ -118,9 +125,35 @@ namespace ProjectEclipse.Equipment
                 anchor = renderer.gameObject.AddComponent<EquipmentVisualAnchor>();
             }
 
-            anchor.Configure(slot, layer, renderer, Vector2.zero, 0f, Vector2.one);
+            anchor.Configure(slot, layer, renderer, GetDefaultLayerOffset(slot), 0f, GetDefaultLayerScale(slot));
             anchor.SetFacingDirection(facingDirection);
             anchors.Add(anchor);
+        }
+
+        private static Vector2 GetDefaultLayerOffset(EquipmentSlot slot)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.Mainhand:
+                    return Vector2.zero;
+                case EquipmentSlot.Offhand:
+                    return new Vector2(0.02f, 0.02f);
+                default:
+                    return Vector2.zero;
+            }
+        }
+
+        private static Vector2 GetDefaultLayerScale(EquipmentSlot slot)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.Mainhand:
+                    return Vector2.one;
+                case EquipmentSlot.Offhand:
+                    return new Vector2(0.46f, 0.46f);
+                default:
+                    return Vector2.one;
+            }
         }
 
         private SpriteRenderer GetOrCreateLayerRenderer(string layerName, int sortingOrder)
@@ -141,6 +174,32 @@ namespace ProjectEclipse.Equipment
             renderer.sortingOrder = sortingOrder;
             renderer.color = Color.white;
             return renderer;
+        }
+
+        private void DisableObsoleteSpriteLayers()
+        {
+            SpriteRenderer[] renderers = GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                SpriteRenderer renderer = renderers[i];
+                if (renderer == null || renderer == baseRenderer)
+                {
+                    continue;
+                }
+
+                if (renderer.transform.name.StartsWith("PaperDoll") || renderer.GetComponent<EquipmentVisualAnchor>() != null)
+                {
+                    continue;
+                }
+
+                if (renderer.GetComponentInParent<WeaponVisualAnchor>() != null)
+                {
+                    renderer.enabled = false;
+                    continue;
+                }
+
+                renderer.enabled = false;
+            }
         }
     }
 }

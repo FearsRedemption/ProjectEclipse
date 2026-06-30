@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using ProjectEclipse.Crafting;
 using ProjectEclipse.Equipment;
-using ProjectEclipse.Furnace;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
 using UnityEngine;
@@ -13,7 +12,6 @@ namespace ProjectEclipse.UI
         private readonly InventoryStore inventory;
         private readonly EquipmentController equipment;
         private readonly InventoryCraftingController inventoryCrafting;
-        private readonly FurnaceSystem furnace;
         private readonly EquipmentPanel equipmentPanel;
         private readonly ItemGridView itemGrid = new ItemGridView();
         private InventoryTab selectedTab = InventoryTab.Equipment;
@@ -21,13 +19,11 @@ namespace ProjectEclipse.UI
         public InventoryPanel(
             InventoryStore inventory,
             EquipmentController equipment,
-            InventoryCraftingController inventoryCrafting,
-            FurnaceSystem furnace)
+            InventoryCraftingController inventoryCrafting)
         {
             this.inventory = inventory;
             this.equipment = equipment;
             this.inventoryCrafting = inventoryCrafting;
-            this.furnace = furnace;
             equipmentPanel = new EquipmentPanel(equipment);
         }
 
@@ -55,7 +51,7 @@ namespace ProjectEclipse.UI
                     DrawGrid(hover, item => item.Category == ItemCategory.Consumable);
                     break;
                 case InventoryTab.Misc:
-                    DrawGrid(hover, item => (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade) || item.Category == ItemCategory.Furnace || item.Category == ItemCategory.Placeholder);
+                    DrawGrid(hover, item => (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade) || item.Category == ItemCategory.Placeholder);
                     break;
                 case InventoryTab.KeyItems:
                     DrawGrid(hover, item => item.Category == ItemCategory.KeyItem || item.Category == ItemCategory.Quest);
@@ -124,10 +120,6 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            if (furnace != null && (item.ItemId.Contains("coal") || item.ItemId.Contains("copper")))
-            {
-                furnace.TryMoveToRelevantSlot(item, 1);
-            }
         }
     }
 }

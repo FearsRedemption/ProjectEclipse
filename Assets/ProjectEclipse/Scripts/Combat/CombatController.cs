@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ProjectEclipse.Items;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.Input;
 using ProjectEclipse.Utilities;
 using ProjectEclipse.World;
 using UnityEngine;
@@ -90,7 +91,8 @@ namespace ProjectEclipse.Combat
                 return FallbackAim(fallbackFacingDirection);
             }
 
-            Vector3 mouse = Input.mousePosition;
+            Vector2 pointer = GameInput.PointerScreenPosition;
+            Vector3 mouse = new Vector3(pointer.x, pointer.y, 0f);
             mouse.z = Mathf.Abs(camera.transform.position.z - transform.position.z);
             Vector3 world = camera.ScreenToWorldPoint(mouse);
             Vector2 aim = (Vector2)world - origin;

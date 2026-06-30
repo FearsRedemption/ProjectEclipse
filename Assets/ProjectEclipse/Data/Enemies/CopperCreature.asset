@@ -10,30 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
-  m_Name: Copper Orelet
+  m_Name: CopperCreature
   m_EditorClassIdentifier:
   enemyId: copper_orelet
   displayName: Copper Orelet
   rank: 0
   resourceTier: 3
-  maxHealth: 24
-  contactDamage: 4
-  moveSpeed: 1.35
-  chaseRange: 6.6
-  attackRange: 1.15
-  attackCooldown: 0.9
-  attackLungeForce: 4.2
-  attackKnockback: 5.2
-  rangedCastRange: 7
-  rangedCastDamage: 3
-  rangedCastCooldown: 5.8
-  rangedCastChance: 0.45
-  rangedProjectileSpeed: 5.8
-  rangedProjectileLifetime: 3.4
-  visualScale: {x: 1.22, y: 1.22}
-  colliderSize: {x: 1.02, y: 0.9}
-  spriteSheet: {fileID: 2800000, guid: 6961b0e4db712674f87ff3a637a06a15, type: 3}
-  placeholderColor: {r: 0.76, g: 0.32, b: 0.12, a: 1}
+  maxHealth: 8
+  contactDamage: 1
+  moveSpeed: 1.1
+  chaseRange: 5.4
+  attackRange: 0.78
+  attackCooldown: 1.2
+  attackLungeForce: 0.55
+  attackKnockback: 2.4
+  rangedCastRange: 0
+  rangedCastDamage: 1
+  rangedCastCooldown: 6.5
+  rangedCastChance: 0.2
+  rangedProjectileSpeed: 4.8
+  rangedProjectileLifetime: 2.6
+  visualScale: {x: 0.78, y: 0.78}
+  colliderSize: {x: 0.7, y: 0.55}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.66, g: 0.53, b: 0.43, a: 1}
   dropTable: {fileID: 11400000, guid: 0569510f747944a1bee03fdf8e1f1cbc, type: 2}
   drops:
   - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}

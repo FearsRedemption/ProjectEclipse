@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using ProjectEclipse.Equipment;
 using ProjectEclipse.Utilities;
 using UnityEngine;
 
@@ -10,12 +11,13 @@ namespace ProjectEclipse.Combat
         [SerializeField] private int maxHealth = 10;
         [SerializeField] private float invulnerabilitySeconds = 0.25f;
         [SerializeField] private float baseRegenPerSecond = 0.35f;
-        [SerializeField] private float regenDelayAfterDamage = 3f;
+        [SerializeField] private float regenDelayAfterDamage;
 
         private int currentHealth;
         private bool invulnerable;
         private bool dead;
         private VisualStateAnimator visualState;
+        private EquipmentController equipment;
         private float lastDamageTime = -999f;
         private float regenAccumulator;
 
@@ -30,6 +32,7 @@ namespace ProjectEclipse.Combat
         {
             currentHealth = MaxHealth;
             visualState = GetComponent<VisualStateAnimator>();
+            equipment = GetComponent<EquipmentController>();
         }
 
         private void Update()
@@ -115,17 +118,18 @@ namespace ProjectEclipse.Combat
 
         private void TickRegeneration()
         {
-            if (dead || currentHealth >= MaxHealth || baseRegenPerSecond <= 0f)
+            float regenPerSecond = GetRegenPerSecond();
+            if (dead || currentHealth >= MaxHealth || regenPerSecond <= 0f)
             {
                 return;
             }
 
-            if (Time.time - lastDamageTime < Mathf.Max(0f, regenDelayAfterDamage))
+            if (regenDelayAfterDamage > 0f && Time.time - lastDamageTime < regenDelayAfterDamage)
             {
                 return;
             }
 
-            regenAccumulator += baseRegenPerSecond * Time.deltaTime;
+            regenAccumulator += regenPerSecond * Time.deltaTime;
             int healAmount = Mathf.FloorToInt(regenAccumulator);
             if (healAmount <= 0)
             {
@@ -135,6 +139,17 @@ namespace ProjectEclipse.Combat
             regenAccumulator -= healAmount;
             currentHealth = Mathf.Min(MaxHealth, currentHealth + healAmount);
             Damaged?.Invoke(currentHealth, MaxHealth);
+        }
+
+        private float GetRegenPerSecond()
+        {
+            if (equipment == null)
+            {
+                equipment = GetComponent<EquipmentController>();
+            }
+
+            float equipmentBonus = equipment != null ? equipment.TotalHealthRegenPerSecondBonus : 0f;
+            return Mathf.Max(0f, baseRegenPerSecond + equipmentBonus);
         }
     }
 }

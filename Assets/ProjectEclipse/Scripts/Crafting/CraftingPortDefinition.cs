@@ -31,5 +31,39 @@ namespace ProjectEclipse.Crafting
         public string AllowedRecipeCategories { get { return allowedRecipeCategories; } }
         public string SpecialEffectText { get { return specialEffectText; } }
         public string UpgradeRequirements { get { return upgradeRequirements; } }
+
+        public bool CanCraft(CraftingRecipe recipe)
+        {
+            if (recipe == null || recipe.StationType != StationType || PortLevel < recipe.RequiredPortLevel)
+            {
+                return false;
+            }
+
+            if (allowedRecipes == null || allowedRecipes.Count == 0 || ContainsRecipe(recipe))
+            {
+                return true;
+            }
+
+            // Higher-tier trinkets stay backward compatible with older station recipes.
+            return recipe.RequiredPortLevel < PortLevel;
+        }
+
+        private bool ContainsRecipe(CraftingRecipe recipe)
+        {
+            if (allowedRecipes == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < allowedRecipes.Count; i++)
+            {
+                if (allowedRecipes[i] == recipe)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: CopperOreNode
+  m_EditorClassIdentifier:
+  enemyId: copper_ore_node
+  displayName: Copper Ore Node
+  rank: 0
+  resourceTier: 3
+  maxHealth: 34
+  contactDamage: 3
+  moveSpeed: 0.45
+  chaseRange: 4.2
+  attackRange: 1.05
+  attackCooldown: 1.55
+  attackLungeForce: 0.35
+  attackKnockback: 4.4
+  rangedCastRange: 5.4
+  rangedCastDamage: 2
+  rangedCastCooldown: 8
+  rangedCastChance: 0.3
+  rangedProjectileSpeed: 4.6
+  rangedProjectileLifetime: 3
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 1.26, y: 1.18}
+  colliderSize: {x: 1.28, y: 0.82}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.86, g: 0.34, b: 0.12, a: 1}
+  dropTable: {fileID: 11400000, guid: 7633e6e8a059431c88b59ab2feeb0d70, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: 8380ba1a906855887d9b35280798167e, type: 2}
+    minQuantity: 2
+    maxQuantity: 3
+    chance: 1

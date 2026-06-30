@@ -39,9 +39,11 @@ namespace ProjectEclipse.UI
             DrawStatDelta("Attack", hovered.Stats.Attack, equipped != null ? equipped.Stats.Attack : 0);
             DrawStatDelta("Defense", hovered.Stats.Defense, equipped != null ? equipped.Stats.Defense : 0);
             DrawStatDelta("Health", hovered.Stats.MaxHealth, equipped != null ? equipped.Stats.MaxHealth : 0);
+            DrawStatDelta("Luck", hovered.Stats.Luck, equipped != null ? equipped.Stats.Luck : 0);
             DrawStatDelta("Move", hovered.Stats.MoveSpeedBonus, equipped != null ? equipped.Stats.MoveSpeedBonus : 0f);
             DrawStatDelta("Jump", hovered.Stats.JumpForceBonus, equipped != null ? equipped.Stats.JumpForceBonus : 0f);
             DrawStatDelta("Air", hovered.Stats.AirControlBonus, equipped != null ? equipped.Stats.AirControlBonus : 0f);
+            DrawStatDelta("HP Regen", hovered.Stats.HealthRegenPerSecondBonus, equipped != null ? equipped.Stats.HealthRegenPerSecondBonus : 0f);
         }
 
         private static void DrawStatDelta(string label, int hovered, int equipped)

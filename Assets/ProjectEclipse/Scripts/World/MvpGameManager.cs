@@ -3,7 +3,6 @@ using ProjectEclipse.Combat;
 using ProjectEclipse.Crafting;
 using ProjectEclipse.Enemies;
 using ProjectEclipse.Equipment;
-using ProjectEclipse.Furnace;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
 using ProjectEclipse.Player;
@@ -41,13 +40,13 @@ namespace ProjectEclipse.World
 
         [Header("World Systems")]
         [SerializeField] private DropSpawner dropSpawner;
-        [SerializeField] private FurnaceSystem furnaceSystem;
         [SerializeField] private MvpHud hud;
         [SerializeField] private MvpRoomFlowBuilder roomFlowBuilder;
         [SerializeField] private EnemySpawnManager enemySpawnManager;
 
         [Header("Scene Content")]
         [SerializeField] private List<EnemyController> placedEnemies = new List<EnemyController>();
+        [SerializeField] private List<EnemyDefinition> routeEnemyDefinitions = new List<EnemyDefinition>();
         [SerializeField] private List<CraftingRecipe> availableRecipes = new List<CraftingRecipe>();
 
         [Header("Debug/Test")]
@@ -57,12 +56,12 @@ namespace ProjectEclipse.World
 
         private void Awake()
         {
-            Physics2D.gravity = new Vector2(0f, -24f);
+            Physics2D.gravity = new Vector2(0f, -18f);
             ResolveMissingReferences();
             WireRoomFlow();
             WirePlayer();
             ApplyDebugInventorySeeds();
-            WireCraftingAndFurnace();
+            WireCrafting();
             WireEnemies();
             WireHud();
         }
@@ -127,11 +126,6 @@ namespace ProjectEclipse.World
                 dropSpawner = FindAnyObjectByType<DropSpawner>();
             }
 
-            if (furnaceSystem == null)
-            {
-                furnaceSystem = FindAnyObjectByType<FurnaceSystem>();
-            }
-
             if (hud == null)
             {
                 hud = FindAnyObjectByType<MvpHud>();
@@ -155,7 +149,28 @@ namespace ProjectEclipse.World
                 roomFlowBuilder = gameObject.AddComponent<MvpRoomFlowBuilder>();
             }
 
+            roomFlowBuilder.ConfigureEnemyDefinitions(GetRouteEnemyDefinitions());
             roomFlowBuilder.Initialize(player);
+        }
+
+        private IEnumerable<EnemyDefinition> GetRouteEnemyDefinitions()
+        {
+            for (int i = 0; i < routeEnemyDefinitions.Count; i++)
+            {
+                if (routeEnemyDefinitions[i] != null)
+                {
+                    yield return routeEnemyDefinitions[i];
+                }
+            }
+
+            for (int i = 0; i < placedEnemies.Count; i++)
+            {
+                EnemyController enemy = placedEnemies[i];
+                if (enemy != null && enemy.Definition != null)
+                {
+                    yield return enemy.Definition;
+                }
+            }
         }
 
         private void WirePlayer()
@@ -215,16 +230,11 @@ namespace ProjectEclipse.World
             }
         }
 
-        private void WireCraftingAndFurnace()
+        private void WireCrafting()
         {
             if (playerCrafting != null)
             {
                 playerCrafting.Initialize(playerInventory, playerEquipment, availableRecipes);
-            }
-
-            if (furnaceSystem != null)
-            {
-                furnaceSystem.Initialize(playerInventory);
             }
         }
 
@@ -264,7 +274,7 @@ namespace ProjectEclipse.World
         {
             if (hud != null)
             {
-                hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, furnaceSystem, dropSpawner);
+                hud.Initialize(playerHealth, playerResource, playerInventory, playerEquipment, playerCrafting, dropSpawner);
                 hud.SetRespawnController(playerRespawn);
             }
         }

@@ -79,7 +79,7 @@ namespace ProjectEclipse.Utilities
                 animator.SetBool(IsMovingHash, value);
             }
 
-            if (spriteSheetAnimator != null)
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
             {
                 spriteSheetAnimator.SetMoving(value);
             }
@@ -92,7 +92,7 @@ namespace ProjectEclipse.Utilities
                 animator.SetBool(IsGroundedHash, value);
             }
 
-            if (spriteSheetAnimator != null)
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
             {
                 spriteSheetAnimator.SetGrounded(value);
             }
@@ -106,7 +106,7 @@ namespace ProjectEclipse.Utilities
                 animator.SetTrigger(AttackHash);
             }
 
-            if (spriteSheetAnimator != null)
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
             {
                 spriteSheetAnimator.TriggerAttack();
             }
@@ -120,7 +120,7 @@ namespace ProjectEclipse.Utilities
                 animator.SetTrigger(HurtHash);
             }
 
-            if (spriteSheetAnimator != null)
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
             {
                 spriteSheetAnimator.TriggerHurt();
             }
@@ -134,9 +134,44 @@ namespace ProjectEclipse.Utilities
                 animator.SetTrigger(DieHash);
             }
 
-            if (spriteSheetAnimator != null)
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
             {
                 spriteSheetAnimator.TriggerDie();
+            }
+        }
+
+        public void ResetVisualState()
+        {
+            dead = false;
+            moving = false;
+            attackPulseUntil = 0f;
+            hurtPulseUntil = 0f;
+
+            float facing = Mathf.Sign(transform.localScale.x);
+            if (Mathf.Approximately(facing, 0f))
+            {
+                facing = 1f;
+            }
+
+            transform.localScale = new Vector3(Mathf.Abs(baseScale.x) * facing, baseScale.y, baseScale.z);
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = baseColor;
+                spriteRenderer.enabled = true;
+            }
+
+            if (animator != null)
+            {
+                animator.ResetTrigger(AttackHash);
+                animator.ResetTrigger(HurtHash);
+                animator.ResetTrigger(DieHash);
+                animator.SetBool(IsMovingHash, false);
+                animator.SetBool(IsGroundedHash, true);
+            }
+
+            if (spriteSheetAnimator != null && spriteSheetAnimator.enabled)
+            {
+                spriteSheetAnimator.ResetToIdle();
             }
         }
     }

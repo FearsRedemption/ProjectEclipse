@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectEclipse.Crafting;
 using UnityEngine;
 
@@ -5,6 +6,11 @@ namespace ProjectEclipse.UI
 {
     public static class WorkOrderTrackerPanel
     {
+        private const int VisibleOrderCount = 3;
+        private const float CompletionHoldSeconds = 1.4f;
+        private const float CompletionFadeSeconds = 1.1f;
+        private static int firstVisibleOrderIndex;
+
         public static void Draw(CraftingSystem crafting)
         {
             Draw(crafting, false, false);
@@ -12,27 +18,95 @@ namespace ProjectEclipse.UI
 
         public static void Draw(CraftingSystem crafting, bool incompleteOnly, bool showCompletion)
         {
-            if (crafting == null || crafting.ActiveWorkOrder == null || crafting.ActiveWorkOrder.Plan == null)
+            if (crafting == null || crafting.WorkOrders.Count == 0)
             {
                 GUILayout.Label("No Work Order", GameGuiStyles.MutedLabel);
                 return;
             }
 
-            WorkOrder order = crafting.ActiveWorkOrder;
+            int visibleCount = Mathf.Min(VisibleOrderCount, crafting.WorkOrders.Count);
+            int maxFirstIndex = Mathf.Max(0, crafting.WorkOrders.Count - visibleCount);
+            firstVisibleOrderIndex = Mathf.Clamp(firstVisibleOrderIndex, 0, maxFirstIndex);
+            bool canScroll = crafting.WorkOrders.Count > visibleCount;
+
+            if (canScroll)
+            {
+                GUI.enabled = firstVisibleOrderIndex > 0;
+                if (GUILayout.Button("^", GameGuiStyles.Button, GUILayout.Height(20f)))
+                {
+                    firstVisibleOrderIndex = Mathf.Max(0, firstVisibleOrderIndex - 1);
+                }
+                GUI.enabled = true;
+            }
+
+            int endIndex = Mathf.Min(crafting.WorkOrders.Count, firstVisibleOrderIndex + visibleCount);
+            for (int i = firstVisibleOrderIndex; i < endIndex; i++)
+            {
+                WorkOrder order = crafting.WorkOrders[i];
+                if (order == null || order.Plan == null)
+                {
+                    continue;
+                }
+
+                if (DrawOrder(crafting, order, i, incompleteOnly, showCompletion))
+                {
+                    return;
+                }
+            }
+
+            if (canScroll)
+            {
+                GUI.enabled = firstVisibleOrderIndex < maxFirstIndex;
+                if (GUILayout.Button("v", GameGuiStyles.Button, GUILayout.Height(20f)))
+                {
+                    firstVisibleOrderIndex = Mathf.Min(maxFirstIndex, firstVisibleOrderIndex + 1);
+                }
+                GUI.enabled = true;
+            }
+        }
+
+        private static bool DrawOrder(CraftingSystem crafting, WorkOrder order, int orderIndex, bool incompleteOnly, bool showCompletion)
+        {
+            if (ShouldAutoDismiss(order))
+            {
+                crafting.ClearWorkOrder(order);
+                return true;
+            }
+
             string outputName = order.Plan.FinalRecipe != null && order.Plan.FinalRecipe.OutputItem != null
                 ? order.Plan.FinalRecipe.OutputItem.DisplayName
                 : "Item";
 
-            GUILayout.Label(order.IsComplete ? outputName + " Complete" : "Work Order: " + outputName + " x" + order.Plan.TargetQuantity, GameGuiStyles.HeaderLabel);
+            Color previousColor = GUI.color;
+            if (order.IsComplete)
+            {
+                float alpha = GetCompletionAlpha(order);
+                GUI.color = new Color(previousColor.r, previousColor.g, previousColor.b, previousColor.a * alpha);
+            }
+
+            GUILayout.BeginVertical(GameGuiStyles.SubPanel);
+            GUILayout.Label(order.IsComplete ? "WO" + (orderIndex + 1) + ": " + outputName + " Complete" : "WO" + (orderIndex + 1) + ": " + outputName + " x" + order.Plan.TargetQuantity, GameGuiStyles.HeaderLabel);
             if (order.IsComplete && showCompletion)
             {
                 GUILayout.Label("Crafting complete", GameGuiStyles.MutedLabel);
-                return;
+                if (GUILayout.Button("Dismiss", GameGuiStyles.Button, GUILayout.Height(24f)))
+                {
+                    crafting.ClearWorkOrder(order);
+                    GUILayout.EndVertical();
+                    GUI.color = previousColor;
+                    return true;
+                }
+
+                GUILayout.EndVertical();
+                GUI.color = previousColor;
+                return false;
             }
 
             bool drewLine = false;
-            foreach (CraftingRequirementLine line in crafting.GetActiveWorkOrderLines())
+            List<CraftingRequirementLine> lines = crafting.GetWorkOrderLines(order);
+            for (int i = 0; i < lines.Count; i++)
             {
+                CraftingRequirementLine line = lines[i];
                 if (incompleteOnly && !ShouldShowIncomplete(line))
                 {
                     continue;
@@ -50,15 +124,51 @@ namespace ProjectEclipse.UI
             GUILayout.Space(4f);
             if (order.IsComplete)
             {
-                if (GUILayout.Button("Dismiss"))
+                if (GUILayout.Button("Dismiss", GameGuiStyles.Button, GUILayout.Height(24f)))
                 {
-                    crafting.ClearActiveWorkOrder();
+                    crafting.ClearWorkOrder(order);
+                    GUILayout.EndVertical();
+                    GUI.color = previousColor;
+                    return true;
                 }
             }
-            else if (GUILayout.Button("Cancel Work Order"))
+            else if (GUILayout.Button("Cancel Work Order", GameGuiStyles.Button, GUILayout.Height(24f)))
             {
-                crafting.CancelActiveWorkOrder();
+                crafting.CancelWorkOrder(order);
+                GUILayout.EndVertical();
+                GUI.color = previousColor;
+                return true;
             }
+
+            GUILayout.EndVertical();
+            GUI.color = previousColor;
+            return false;
+        }
+
+        private static bool ShouldAutoDismiss(WorkOrder order)
+        {
+            if (order == null || !order.IsComplete || order.CompletedAt < 0f)
+            {
+                return false;
+            }
+
+            return Time.time - order.CompletedAt >= CompletionHoldSeconds + CompletionFadeSeconds;
+        }
+
+        private static float GetCompletionAlpha(WorkOrder order)
+        {
+            if (order == null || !order.IsComplete || order.CompletedAt < 0f)
+            {
+                return 1f;
+            }
+
+            float elapsed = Time.time - order.CompletedAt;
+            if (elapsed <= CompletionHoldSeconds)
+            {
+                return 1f;
+            }
+
+            return Mathf.Clamp01(1f - ((elapsed - CompletionHoldSeconds) / CompletionFadeSeconds));
         }
 
         private static bool ShouldShowIncomplete(CraftingRequirementLine line)

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ProjectEclipse.Crafting;
 using ProjectEclipse.Equipment;
-using ProjectEclipse.Furnace;
+using ProjectEclipse.Input;
 using ProjectEclipse.Inventory;
 using ProjectEclipse.Items;
 using ProjectEclipse.Player;
@@ -34,7 +34,6 @@ namespace ProjectEclipse.UI
             EquipmentController equipment,
             InventoryCraftingController inventoryCrafting,
             CraftingSystem crafting,
-            FurnaceSystem furnace,
             DropSpawner dropSpawner = null)
         {
             this.inventory = inventory;
@@ -42,7 +41,7 @@ namespace ProjectEclipse.UI
             this.inventoryCrafting = inventoryCrafting;
             this.dropSpawner = dropSpawner;
             equipmentPanel = new EquipmentPanel(equipment);
-            craftingPortPanel = new CraftingPortPanel(inventoryCrafting, furnace);
+            craftingPortPanel = new CraftingPortPanel(inventoryCrafting);
             craftingPanel = new CraftingPanel(crafting);
         }
 
@@ -199,7 +198,6 @@ namespace ProjectEclipse.UI
                     return item.Category == ItemCategory.Material;
                 case InventoryTab.Misc:
                     return (!(item is EquipmentDefinition) && item.Category == ItemCategory.Upgrade)
-                        || item.Category == ItemCategory.Furnace
                         || item.Category == ItemCategory.Placeholder;
                 case InventoryTab.KeyItems:
                     return item.Category == ItemCategory.KeyItem || item.Category == ItemCategory.Quest;
@@ -333,7 +331,7 @@ namespace ProjectEclipse.UI
 
         private static Vector2 GetPointerGuiPosition()
         {
-            Vector3 mouse = Input.mousePosition;
+            Vector2 mouse = GameInput.PointerScreenPosition;
             return new Vector2(mouse.x, Screen.height - mouse.y);
         }
     }

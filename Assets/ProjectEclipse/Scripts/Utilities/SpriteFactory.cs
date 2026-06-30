@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using ProjectEclipse.Enemies;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.Items;
 using UnityEngine;
 
 namespace ProjectEclipse.Utilities
@@ -23,6 +25,8 @@ namespace ProjectEclipse.Utilities
         private static Sprite playerUndershirtSprite;
         private static Sprite playerShortsSprite;
         private static Sprite playerHairFaceSprite;
+        private static readonly Dictionary<string, Sprite> CreatureSprites = new Dictionary<string, Sprite>();
+        private static readonly Dictionary<string, Sprite> WeaponOverlaySprites = new Dictionary<string, Sprite>();
         private static readonly Dictionary<string, Sprite> EquipmentOverlaySprites = new Dictionary<string, Sprite>();
 
         public static Sprite GetSquareSprite(Color color)
@@ -389,6 +393,43 @@ namespace ProjectEclipse.Utilities
             return creatureSilhouetteSprite;
         }
 
+        public static Sprite GetCreatureSprite(EnemyDefinition definition)
+        {
+            if (definition == null)
+            {
+                return GetCreatureSilhouetteSprite();
+            }
+
+            string id = definition.EnemyId.ToLowerInvariant();
+            string label = definition.DisplayName.ToLowerInvariant();
+            string key = id + "_" + label;
+            Sprite sprite;
+            if (CreatureSprites.TryGetValue(key, out sprite))
+            {
+                return sprite;
+            }
+
+            if (key.Contains("ore_node") || key.Contains("ore node") || key.Contains("node"))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime Copper Ore Node", DrawCopperOreNode);
+            }
+            else if (key.Contains("oreling"))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime Copper Oreling", DrawCopperOreling);
+            }
+            else if (key.Contains("orelet") || key.Contains("copper"))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime Copper Orelet", DrawCopperOrelet);
+            }
+            else
+            {
+                sprite = GetCreatureSilhouetteSprite();
+            }
+
+            CreatureSprites[key] = sprite;
+            return sprite;
+        }
+
         public static Sprite GetRoomBackgroundSprite()
         {
             if (roomBackgroundSprite != null)
@@ -543,6 +584,25 @@ namespace ProjectEclipse.Utilities
             return sprite;
         }
 
+        public static Sprite GetWeaponOverlaySprite(WeaponDefinition weapon)
+        {
+            if (weapon == null)
+            {
+                return null;
+            }
+
+            string key = weapon.ItemId + "_" + weapon.PlaceholderColor;
+            Sprite sprite;
+            if (WeaponOverlaySprites.TryGetValue(key, out sprite))
+            {
+                return sprite;
+            }
+
+            sprite = CreatePlayerLayerSprite("Runtime " + weapon.DisplayName + " PaperDoll", pixels => DrawWeaponOverlay(pixels, weapon));
+            WeaponOverlaySprites[key] = sprite;
+            return sprite;
+        }
+
         private static Texture2D CreateTransparentTexture(int width, int height, string name)
         {
             Texture2D texture = new Texture2D(width, height);
@@ -571,50 +631,218 @@ namespace ProjectEclipse.Utilities
             return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 96f);
         }
 
+        private delegate void CreatureLayerPainter(Color[] pixels);
+
+        private static Sprite CreateCreatureLayerSprite(string name, CreatureLayerPainter painter)
+        {
+            int width = 96;
+            int height = 96;
+            Texture2D texture = CreateTransparentTexture(width, height, name);
+            texture.filterMode = FilterMode.Point;
+            Color[] pixels = new Color[width * height];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = Color.clear;
+            }
+
+            painter(pixels);
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 96f);
+        }
+
+        private static void DrawCopperOrelet(Color[] pixels)
+        {
+            Color outline = new Color(0.12f, 0.1f, 0.09f, 1f);
+            Color rock = new Color(0.47f, 0.45f, 0.42f, 1f);
+            Color rockLight = new Color(0.66f, 0.63f, 0.56f, 1f);
+            Color copper = new Color(0.9f, 0.38f, 0.14f, 1f);
+
+            FillEllipse(pixels, 48, 31, 18, 16, outline);
+            FillEllipse(pixels, 48, 32, 16, 14, rock);
+            FillEllipse(pixels, 38, 18, 7, 7, outline);
+            FillEllipse(pixels, 58, 18, 7, 7, outline);
+            FillEllipse(pixels, 38, 19, 5, 5, rockLight);
+            FillEllipse(pixels, 58, 19, 5, 5, rock);
+            FillRect(pixels, 42, 42, 48, 45, outline);
+            FillRect(pixels, 49, 42, 55, 45, outline);
+            FillRect(pixels, 42, 43, 48, 45, rock);
+            FillRect(pixels, 49, 43, 55, 45, rock);
+            FillEllipse(pixels, 44, 49, 4, 4, copper);
+            FillEllipse(pixels, 56, 41, 3, 3, copper);
+            FillRect(pixels, 43, 28, 53, 31, new Color(0.18f, 0.13f, 0.1f, 1f));
+            FillRect(pixels, 45, 29, 47, 30, new Color(1f, 0.86f, 0.45f, 1f));
+            FillRect(pixels, 50, 29, 52, 30, new Color(1f, 0.86f, 0.45f, 1f));
+        }
+
+        private static void DrawCopperOreling(Color[] pixels)
+        {
+            Color outline = new Color(0.11f, 0.09f, 0.08f, 1f);
+            Color rock = new Color(0.5f, 0.47f, 0.42f, 1f);
+            Color rockShade = new Color(0.34f, 0.31f, 0.28f, 1f);
+            Color copper = new Color(0.88f, 0.36f, 0.12f, 1f);
+            Color copperLight = new Color(1f, 0.58f, 0.22f, 1f);
+
+            FillEllipse(pixels, 48, 38, 23, 22, outline);
+            FillEllipse(pixels, 48, 39, 20, 19, rock);
+            FillEllipse(pixels, 36, 24, 10, 9, outline);
+            FillEllipse(pixels, 60, 24, 10, 9, outline);
+            FillEllipse(pixels, 36, 25, 8, 7, rockShade);
+            FillEllipse(pixels, 60, 25, 8, 7, rock);
+            FillEllipse(pixels, 31, 40, 7, 13, outline);
+            FillEllipse(pixels, 65, 40, 7, 13, outline);
+            FillEllipse(pixels, 31, 40, 5, 11, rock);
+            FillEllipse(pixels, 65, 40, 5, 11, rockShade);
+            FillRect(pixels, 38, 52, 46, 58, outline);
+            FillRect(pixels, 51, 52, 59, 58, outline);
+            FillRect(pixels, 39, 53, 46, 58, rockShade);
+            FillRect(pixels, 51, 53, 58, 58, rock);
+            FillEllipse(pixels, 41, 54, 8, 5, outline);
+            FillEllipse(pixels, 57, 54, 8, 5, outline);
+            FillEllipse(pixels, 41, 54, 6, 3, rock);
+            FillEllipse(pixels, 57, 54, 6, 3, rockShade);
+            FillEllipse(pixels, 39, 45, 5, 5, copper);
+            FillEllipse(pixels, 54, 48, 6, 6, copper);
+            FillEllipse(pixels, 59, 36, 5, 5, copperLight);
+            FillEllipse(pixels, 47, 58, 4, 4, copper);
+            FillRect(pixels, 41, 36, 55, 39, new Color(0.16f, 0.11f, 0.09f, 1f));
+            FillRect(pixels, 44, 37, 47, 38, new Color(1f, 0.86f, 0.45f, 1f));
+            FillRect(pixels, 51, 37, 54, 38, new Color(1f, 0.86f, 0.45f, 1f));
+        }
+
+        private static void DrawCopperOreNode(Color[] pixels)
+        {
+            Color outline = new Color(0.1f, 0.08f, 0.07f, 1f);
+            Color rock = new Color(0.43f, 0.4f, 0.37f, 1f);
+            Color rockLight = new Color(0.62f, 0.58f, 0.5f, 1f);
+            Color copper = new Color(0.86f, 0.32f, 0.1f, 1f);
+            Color copperLight = new Color(1f, 0.64f, 0.24f, 1f);
+
+            FillEllipse(pixels, 48, 30, 30, 24, outline);
+            FillEllipse(pixels, 48, 31, 27, 21, rock);
+            FillEllipse(pixels, 29, 27, 14, 15, outline);
+            FillEllipse(pixels, 68, 26, 15, 16, outline);
+            FillEllipse(pixels, 29, 28, 12, 13, rockLight);
+            FillEllipse(pixels, 68, 27, 13, 14, rock);
+            FillEllipse(pixels, 43, 50, 22, 10, outline);
+            FillEllipse(pixels, 43, 51, 20, 8, rock);
+            FillEllipse(pixels, 62, 48, 18, 10, outline);
+            FillEllipse(pixels, 62, 49, 16, 8, rockLight);
+
+            FillEllipse(pixels, 31, 48, 9, 7, copper);
+            FillEllipse(pixels, 45, 55, 8, 7, copperLight);
+            FillEllipse(pixels, 57, 40, 10, 9, copper);
+            FillEllipse(pixels, 67, 57, 7, 6, copperLight);
+            FillEllipse(pixels, 74, 31, 6, 7, copper);
+            FillEllipse(pixels, 42, 30, 6, 6, copperLight);
+            FillEllipse(pixels, 25, 31, 5, 5, copper);
+            FillEllipse(pixels, 52, 20, 7, 6, copper);
+
+            FillRect(pixels, 38, 31, 59, 35, new Color(0.15f, 0.1f, 0.08f, 1f));
+            FillRect(pixels, 42, 32, 46, 33, new Color(1f, 0.86f, 0.45f, 1f));
+            FillRect(pixels, 53, 32, 57, 33, new Color(1f, 0.86f, 0.45f, 1f));
+        }
+
         private static void DrawPlayerBaseBody(Color[] pixels)
         {
-            Color skin = new Color(0.78f, 0.57f, 0.42f, 1f);
-            Color skinShade = new Color(0.61f, 0.39f, 0.29f, 1f);
-            FillEllipse(pixels, 48, 69, 12, 14, skin);
-            FillRect(pixels, 44, 52, 52, 59, skin);
-            FillEllipse(pixels, 48, 43, 10, 16, skin);
-            FillEllipse(pixels, 37, 43, 5, 19, skinShade);
-            FillEllipse(pixels, 59, 43, 5, 19, skinShade);
-            FillEllipse(pixels, 42, 24, 5, 18, skin);
-            FillEllipse(pixels, 54, 24, 5, 18, skin);
-            FillEllipse(pixels, 42, 8, 5, 4, skinShade);
-            FillEllipse(pixels, 54, 8, 5, 4, skinShade);
+            Color outline = new Color(0.19f, 0.1f, 0.08f, 1f);
+            Color skin = new Color(0.83f, 0.61f, 0.43f, 1f);
+            Color skinLight = new Color(0.96f, 0.74f, 0.53f, 1f);
+            Color skinShade = new Color(0.57f, 0.34f, 0.24f, 1f);
+
+            FillEllipse(pixels, 42, 21, 6, 17, outline);
+            FillEllipse(pixels, 54, 21, 6, 17, outline);
+            FillEllipse(pixels, 42, 22, 4, 15, skin);
+            FillEllipse(pixels, 54, 22, 4, 15, skin);
+            FillEllipse(pixels, 39, 8, 7, 5, outline);
+            FillEllipse(pixels, 55, 8, 7, 5, outline);
+            FillEllipse(pixels, 39, 9, 5, 3, skinShade);
+            FillEllipse(pixels, 55, 9, 5, 3, skinShade);
+
+            FillEllipse(pixels, 48, 42, 13, 18, outline);
+            FillEllipse(pixels, 48, 43, 11, 16, skin);
+            FillRect(pixels, 44, 54, 52, 61, outline);
+            FillRect(pixels, 45, 54, 51, 61, skin);
+
+            FillEllipse(pixels, 35, 42, 5, 16, outline);
+            FillEllipse(pixels, 61, 42, 5, 16, outline);
+            FillEllipse(pixels, 36, 42, 3, 14, skinShade);
+            FillEllipse(pixels, 60, 42, 3, 14, skin);
+            FillEllipse(pixels, 34, 25, 6, 5, outline);
+            FillEllipse(pixels, 62, 25, 6, 5, outline);
+            FillEllipse(pixels, 34, 26, 4, 3, skin);
+            FillEllipse(pixels, 62, 26, 4, 3, skinLight);
+
+            FillEllipse(pixels, 34, 68, 4, 6, outline);
+            FillEllipse(pixels, 62, 68, 4, 6, outline);
+            FillEllipse(pixels, 34, 68, 2, 4, skinShade);
+            FillEllipse(pixels, 62, 68, 2, 4, skin);
+            FillEllipse(pixels, 48, 70, 15, 16, outline);
+            FillEllipse(pixels, 48, 69, 13, 14, skin);
+            FillEllipse(pixels, 52, 71, 7, 7, skinLight);
         }
 
         private static void DrawPlayerUndershirt(Color[] pixels)
         {
-            Color cloth = new Color(0.92f, 0.94f, 0.88f, 1f);
-            Color trim = new Color(0.62f, 0.7f, 0.66f, 1f);
-            FillEllipse(pixels, 48, 45, 11, 13, cloth);
-            FillRect(pixels, 40, 34, 56, 49, cloth);
-            FillRect(pixels, 41, 50, 55, 52, trim);
-            FillRect(pixels, 40, 33, 56, 35, trim);
+            Color outline = new Color(0.2f, 0.12f, 0.09f, 1f);
+            Color cloth = new Color(0.92f, 0.84f, 0.66f, 1f);
+            Color shadow = new Color(0.62f, 0.43f, 0.28f, 1f);
+            Color trim = new Color(0.98f, 0.92f, 0.72f, 1f);
+
+            FillEllipse(pixels, 48, 44, 13, 16, outline);
+            FillEllipse(pixels, 48, 44, 11, 14, cloth);
+            FillRect(pixels, 38, 34, 58, 48, cloth);
+            FillRect(pixels, 39, 47, 57, 50, shadow);
+            FillRect(pixels, 42, 53, 54, 56, trim);
+            FillRect(pixels, 46, 47, 50, 57, shadow);
+            FillRect(pixels, 36, 45, 41, 50, cloth);
+            FillRect(pixels, 55, 45, 60, 50, cloth);
         }
 
         private static void DrawPlayerShorts(Color[] pixels)
         {
-            Color cloth = new Color(0.36f, 0.45f, 0.49f, 1f);
-            Color trim = new Color(0.18f, 0.25f, 0.28f, 1f);
-            FillRect(pixels, 38, 25, 58, 34, cloth);
-            FillEllipse(pixels, 43, 24, 6, 8, cloth);
-            FillEllipse(pixels, 53, 24, 6, 8, cloth);
-            FillRect(pixels, 39, 33, 57, 35, trim);
+            Color outline = new Color(0.16f, 0.09f, 0.07f, 1f);
+            Color cloth = new Color(0.42f, 0.29f, 0.22f, 1f);
+            Color trim = new Color(0.21f, 0.13f, 0.1f, 1f);
+            Color light = new Color(0.58f, 0.4f, 0.28f, 1f);
+
+            FillRect(pixels, 37, 25, 59, 36, outline);
+            FillRect(pixels, 39, 27, 57, 35, cloth);
+            FillEllipse(pixels, 42, 24, 7, 8, outline);
+            FillEllipse(pixels, 54, 24, 7, 8, outline);
+            FillEllipse(pixels, 42, 25, 5, 6, cloth);
+            FillEllipse(pixels, 54, 25, 5, 6, cloth);
+            FillRect(pixels, 39, 34, 57, 36, trim);
+            FillRect(pixels, 42, 29, 47, 33, light);
         }
 
         private static void DrawPlayerHairFace(Color[] pixels)
         {
-            Color hair = new Color(0.34f, 0.16f, 0.08f, 1f);
-            Color eye = new Color(0.08f, 0.1f, 0.12f, 1f);
-            FillEllipse(pixels, 48, 76, 13, 8, hair);
-            FillEllipse(pixels, 39, 70, 5, 7, hair);
-            FillEllipse(pixels, 57, 70, 5, 7, hair);
-            FillRect(pixels, 43, 69, 45, 71, eye);
-            FillRect(pixels, 51, 69, 53, 71, eye);
+            Color hairDark = new Color(0.16f, 0.07f, 0.04f, 1f);
+            Color hair = new Color(0.42f, 0.2f, 0.08f, 1f);
+            Color hairLight = new Color(0.68f, 0.35f, 0.12f, 1f);
+            Color eye = new Color(0.08f, 0.09f, 0.11f, 1f);
+            Color eyeLight = new Color(0.86f, 0.92f, 1f, 1f);
+            Color cheek = new Color(0.86f, 0.42f, 0.34f, 0.75f);
+
+            FillEllipse(pixels, 48, 79, 15, 8, hairDark);
+            FillEllipse(pixels, 40, 75, 9, 11, hairDark);
+            FillEllipse(pixels, 56, 75, 9, 11, hairDark);
+            FillEllipse(pixels, 48, 80, 12, 6, hair);
+            FillEllipse(pixels, 39, 73, 7, 9, hair);
+            FillEllipse(pixels, 58, 73, 7, 9, hair);
+            FillRect(pixels, 37, 81, 44, 87, hair);
+            FillRect(pixels, 47, 82, 54, 89, hair);
+            FillRect(pixels, 55, 79, 62, 85, hairDark);
+            FillRect(pixels, 43, 78, 51, 82, hairLight);
+
+            FillRect(pixels, 40, 68, 45, 72, eye);
+            FillRect(pixels, 52, 68, 57, 72, eye);
+            FillRect(pixels, 42, 70, 43, 71, eyeLight);
+            FillRect(pixels, 54, 70, 55, 71, eyeLight);
+            FillRect(pixels, 47, 65, 50, 66, new Color(0.32f, 0.16f, 0.1f, 1f));
+            FillEllipse(pixels, 39, 64, 3, 2, cheek);
+            FillEllipse(pixels, 57, 64, 3, 2, cheek);
         }
 
         private static void DrawEquipmentOverlay(Color[] pixels, EquipmentSlot slot, Color color)
@@ -666,16 +894,62 @@ namespace ProjectEclipse.Utilities
             }
         }
 
+        private static void DrawWeaponOverlay(Color[] pixels, WeaponDefinition weapon)
+        {
+            string id = weapon.ItemId.ToLowerInvariant();
+            Color outline = new Color(0.13f, 0.1f, 0.08f, 1f);
+            Color grip = new Color(0.28f, 0.17f, 0.1f, 1f);
+            Color blade = Color.Lerp(weapon.PlaceholderColor, Color.white, 0.28f);
+            Color shade = Color.Lerp(weapon.PlaceholderColor, Color.black, 0.34f);
+
+            if (id.Contains("stone"))
+            {
+                FillRect(pixels, 58, 31, 70, 35, outline);
+                FillRect(pixels, 60, 32, 68, 34, grip);
+                FillRotatedWeaponBlade(pixels, 63, 33, 18, 4, blade, shade, true);
+            }
+            else if (id.Contains("copper"))
+            {
+                FillRect(pixels, 58, 31, 69, 34, outline);
+                FillRect(pixels, 60, 32, 67, 33, grip);
+                FillRotatedWeaponBlade(pixels, 63, 33, 21, 3, blade, shade, false);
+                FillEllipse(pixels, 68, 47, 3, 3, new Color(1f, 0.62f, 0.26f, 1f));
+            }
+            else
+            {
+                FillRect(pixels, 58, 31, 68, 34, outline);
+                FillRect(pixels, 60, 32, 66, 33, grip);
+                FillRotatedWeaponBlade(pixels, 63, 33, 16, 2, blade, shade, false);
+            }
+        }
+
+        private static void FillRotatedWeaponBlade(Color[] pixels, int startX, int startY, int length, int thickness, Color fill, Color shade, bool chunky)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                int x = startX + i / 4;
+                int y = startY + i;
+                int halfThickness = Mathf.Max(1, thickness - i / (chunky ? 10 : 13));
+                FillRect(pixels, x - halfThickness, y, x + halfThickness, y + 1, fill);
+                if (i % 3 == 0)
+                {
+                    FillRect(pixels, x + halfThickness, y, x + halfThickness, y + 1, shade);
+                }
+            }
+
+            FillRect(pixels, startX + length / 4 - 1, startY + length, startX + length / 4 + 1, startY + length + 2, fill);
+        }
+
         private static void FillRotatedBlade(Color[] pixels, Color fill, Color shade)
         {
-            for (int y = 20; y < 70; y++)
+            for (int y = 27; y < 63; y++)
             {
-                int x = 63 + (y - 20) / 8;
+                int x = 62 + (y - 27) / 9;
                 FillRect(pixels, x, y, x + 3, y + 2, fill);
             }
 
-            FillRect(pixels, 59, 28, 69, 31, shade);
-            FillRect(pixels, 60, 22, 64, 29, shade);
+            FillRect(pixels, 58, 31, 68, 34, shade);
+            FillRect(pixels, 60, 25, 64, 32, shade);
         }
 
         private static void FillEllipse(Color[] pixels, int centerX, int centerY, int radiusX, int radiusY, Color color)

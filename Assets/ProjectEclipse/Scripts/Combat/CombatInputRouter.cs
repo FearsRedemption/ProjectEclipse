@@ -1,5 +1,6 @@
 using UnityEngine;
 using ProjectEclipse.Equipment;
+using ProjectEclipse.Input;
 using ProjectEclipse.UI;
 
 namespace ProjectEclipse.Combat
@@ -9,7 +10,7 @@ namespace ProjectEclipse.Combat
         [System.Serializable]
         private class ActionBinding
         {
-            [SerializeField] private KeyCode key = KeyCode.Q;
+            [SerializeField] private GameInputKey key = GameInputKey.Q;
             [SerializeField] private CombatAction action = CombatAction.SkillQ;
             [SerializeField] private float cooldown = 1f;
 
@@ -17,20 +18,20 @@ namespace ProjectEclipse.Combat
             {
             }
 
-            public ActionBinding(KeyCode key, CombatAction action, float cooldown)
+            public ActionBinding(GameInputKey key, CombatAction action, float cooldown)
             {
                 this.key = key;
                 this.action = action;
                 this.cooldown = cooldown;
             }
 
-            public KeyCode Key { get { return key; } }
+            public GameInputKey Key { get { return key; } }
             public CombatAction Action { get { return action; } }
             public float Cooldown { get { return Mathf.Max(0.05f, cooldown); } }
 
             public bool TryUse()
             {
-                return Input.GetKey(key);
+                return GameInput.IsHeld(key);
             }
         }
 
@@ -41,10 +42,10 @@ namespace ProjectEclipse.Combat
         [SerializeField] private float feedbackSeconds = 1.15f;
         [SerializeField] private ActionBinding[] actionBindings =
         {
-            new ActionBinding(KeyCode.Q, CombatAction.SkillQ, 1f),
-            new ActionBinding(KeyCode.E, CombatAction.SkillE, 1f),
-            new ActionBinding(KeyCode.R, CombatAction.SkillR, 1.25f),
-            new ActionBinding(KeyCode.F, CombatAction.SkillF, 1.25f),
+            new ActionBinding(GameInputKey.Q, CombatAction.SkillQ, 1f),
+            new ActionBinding(GameInputKey.E, CombatAction.SkillE, 1f),
+            new ActionBinding(GameInputKey.R, CombatAction.SkillR, 1.25f),
+            new ActionBinding(GameInputKey.F, CombatAction.SkillF, 1.25f),
         };
 
         public bool SprintHeld { get; private set; }
@@ -85,7 +86,7 @@ namespace ProjectEclipse.Combat
         {
             EnsureReferences();
             int requestedFacingDirection = 0;
-            SprintHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            SprintHeld = GameInput.IsHeld(GameInputKey.LeftShift) || GameInput.IsHeld(GameInputKey.RightShift);
 
             if (PressedMainhand())
             {
@@ -94,9 +95,9 @@ namespace ProjectEclipse.Combat
                 {
                     bool attacked = combatController.TryAttack(facingDirection);
                     requestedFacingDirection = combatController.LastAimFacingDirection;
-                    if (!attacked)
+                    if (!attacked && combatController.EquippedWeapon == null)
                     {
-                        ShowFeedback(combatController.EquippedWeapon == null ? "No mainhand equipped" : "Mainhand not ready");
+                        ShowFeedback("No mainhand equipped");
                     }
                 }
                 else
@@ -119,7 +120,7 @@ namespace ProjectEclipse.Combat
                 else if (!SprintHeld && warriorSkills != null && !string.IsNullOrEmpty(warriorSkills.LastFailureReason))
                 {
                     LastAction = CombatAction.SkillF;
-                    ShowFeedback(warriorSkills.LastFailureReason);
+                    ShowFailureFeedback(warriorSkills.LastFailureReason);
                 }
                 else if (combatController != null)
                 {
@@ -141,7 +142,7 @@ namespace ProjectEclipse.Combat
                     }
                     else
                     {
-                        ShowFeedback("Offhand not ready");
+                        ShowFailureFeedback("Offhand not ready");
                     }
                 }
                 else
@@ -168,7 +169,7 @@ namespace ProjectEclipse.Combat
                         string reason = warriorSkills != null && !string.IsNullOrEmpty(warriorSkills.LastFailureReason)
                             ? warriorSkills.LastFailureReason
                             : GetActionLabel(actionBindings[i].Action) + " not ready";
-                        ShowFeedback(reason);
+                        ShowFailureFeedback(reason);
                     }
                 }
             }
@@ -178,20 +179,41 @@ namespace ProjectEclipse.Combat
 
         private static bool PressedMainhand()
         {
-            return Input.GetKey(KeyCode.J)
-                || (!MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(0))
-                || Input.GetKey(KeyCode.LeftControl);
+            return GameInput.IsHeld(GameInputKey.J)
+                || (!MvpHud.PointerBlocksGameplayInput && GameInput.IsLeftMouseHeld())
+                || GameInput.IsHeld(GameInputKey.LeftControl);
         }
 
         private static bool PressedOffhand()
         {
-            return !MvpHud.PointerBlocksGameplayInput && Input.GetMouseButton(1);
+            return !MvpHud.PointerBlocksGameplayInput && GameInput.IsRightMouseHeld();
         }
 
         private void ShowFeedback(string message)
         {
             feedbackText = message;
             feedbackUntil = Time.time + Mathf.Max(0.1f, feedbackSeconds);
+        }
+
+        private void ShowFailureFeedback(string message)
+        {
+            if (IsCooldownOrNotReadyFailure(message))
+            {
+                return;
+            }
+
+            ShowFeedback(message);
+        }
+
+        private static bool IsCooldownOrNotReadyFailure(string message)
+        {
+            if (string.IsNullOrEmpty(message))
+            {
+                return false;
+            }
+
+            string lower = message.ToLowerInvariant();
+            return lower.Contains("cooling down") || lower.Contains("not ready");
         }
 
         private static string GetActionLabel(CombatAction action)
