@@ -8,6 +8,9 @@ namespace ProjectEclipse.EditorTools
 {
     public static class MapCreatorMenu
     {
+        private const string PortalPadPath = "Assets/ProjectEclipse/Art/World/portal_pad.png";
+        private const string PortalColumnPath = "Assets/ProjectEclipse/Art/World/portal_column.png";
+
         [MenuItem("Project Eclipse/Map Creator/Create Area")]
         public static void CreateArea()
         {
@@ -56,6 +59,8 @@ namespace ProjectEclipse.EditorTools
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
             trigger.size = new Vector2(0.9f, 1.55f);
+            CreatePortalVisual(portal.transform, "Teleport Pad", PortalPadPath, new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), new Color(0.55f, 0.9f, 1f, 1f), 1);
+            CreatePortalVisual(portal.transform, "Teleport Column", PortalColumnPath, new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), new Color(0.8f, 0.96f, 1f, 1f), 2);
 
             GameObject arrival = new GameObject("Arrival Point");
             arrival.transform.SetParent(portal.transform);
@@ -65,6 +70,19 @@ namespace ProjectEclipse.EditorTools
             portalLink.Configure(null, arrival.transform, null);
             Register(portal, "Create Portal");
             return portalLink;
+        }
+
+        private static void CreatePortalVisual(Transform portal, string name, string spritePath, Vector3 localPosition, Vector3 localScale, Color color, int sortingOrder)
+        {
+            GameObject visual = new GameObject(name);
+            visual.transform.SetParent(portal);
+            visual.transform.localPosition = localPosition;
+            visual.transform.localScale = localScale;
+
+            SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
+            renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
         }
 
         private static Vector3 GetScenePlacementPosition()

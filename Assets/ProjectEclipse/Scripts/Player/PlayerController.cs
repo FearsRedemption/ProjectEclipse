@@ -259,12 +259,12 @@ namespace ProjectEclipse.Player
 
         private bool WantsJump()
         {
-            return GameInput.WasPressedThisFrame(GameInputKey.Space) || GameInput.WasPressedThisFrame(GameInputKey.W) || GameInput.WasPressedThisFrame(GameInputKey.UpArrow);
+            return GameInput.WasPressedThisFrame(GameInputKey.Space);
         }
 
         private bool WantsJumpHeld()
         {
-            return GameInput.IsHeld(GameInputKey.Space) || GameInput.IsHeld(GameInputKey.W) || GameInput.IsHeld(GameInputKey.UpArrow);
+            return GameInput.IsHeld(GameInputKey.Space);
         }
 
         private bool WantsDropHeld()

@@ -16,6 +16,8 @@ namespace ProjectEclipse.EditorTools
         private const string MvpScenePath = "Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity";
         private const string MapRootName = "Scene Authored Route Map";
         private const string RuntimeMapRootName = "Editable MVP Map";
+        private const string PortalPadPath = "Assets/ProjectEclipse/Art/World/portal_pad.png";
+        private const string PortalColumnPath = "Assets/ProjectEclipse/Art/World/portal_column.png";
         private const float RoomWidth = 24f;
         private const float RoomHeight = 11.5f;
         private const float HorizontalRoomSpacing = 36f;
@@ -248,6 +250,11 @@ namespace ProjectEclipse.EditorTools
                 return true;
             }
 
+            if (HasPlatformStylePortalArt(safeEastPortal))
+            {
+                return true;
+            }
+
             Transform safePlayerSpawn = mapRoot.transform.Find("safe-player-spawn");
             float expectedPlayerSpawnY = FloorSurfaceOffsetY + GetPlayerFeetOffset() + StandingSurfaceClearance;
             if (safePlayerSpawn == null || Mathf.Abs(safePlayerSpawn.position.y - expectedPlayerSpawnY) > 0.05f)
@@ -284,6 +291,27 @@ namespace ProjectEclipse.EditorTools
             }
 
             return null;
+        }
+
+        private static bool HasPlatformStylePortalArt(Transform portal)
+        {
+            if (portal == null)
+            {
+                return true;
+            }
+
+            SpriteRenderer pad = FindChildRenderer(portal, "Teleport Pad");
+            SpriteRenderer column = FindChildRenderer(portal, "Teleport Column");
+            return pad == null
+                || column == null
+                || AssetDatabase.GetAssetPath(pad.sprite) != PortalPadPath
+                || AssetDatabase.GetAssetPath(column.sprite) != PortalColumnPath;
+        }
+
+        private static SpriteRenderer FindChildRenderer(Transform parent, string childName)
+        {
+            Transform child = parent != null ? parent.Find(childName) : null;
+            return child != null ? child.GetComponent<SpriteRenderer>() : null;
         }
 
         private static bool HasGeneratedChildNamed(GameObject root, string objectName)
@@ -614,8 +642,8 @@ namespace ProjectEclipse.EditorTools
             portal.transform.position = new Vector3(position.x, position.y, 0f);
             portal.transform.localScale = new Vector3(PortalWidth, PortalHeight, 1f);
 
-            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.5f, 0.02f), new Vector3(1.15f, 0.5f, 1f), spec.PlatformPath, spec.Portal, 1);
-            CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.08f, 0.01f), new Vector3(0.45f, 1.1f, 1f), spec.PlatformPath, Lighten(spec.Portal, 0.18f), 2);
+            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), PortalPadPath, spec.Portal, 1);
+            CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), PortalColumnPath, Lighten(spec.Portal, 0.18f), 2);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
