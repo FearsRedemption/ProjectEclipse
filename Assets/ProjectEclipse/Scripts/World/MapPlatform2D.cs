@@ -10,7 +10,7 @@ namespace ProjectEclipse.World
         [SerializeField] private float width = 4.5f;
         [SerializeField] private bool oneWay = true;
         [SerializeField] private float colliderHeight = 0.08f;
-        [SerializeField] private float solidColliderHeight = 0.28f;
+        [SerializeField] private float solidColliderHeight = 0.6f;
 
         public string PlatformId { get { return platformId; } }
         public float Width { get { return Mathf.Max(0.25f, width); } }

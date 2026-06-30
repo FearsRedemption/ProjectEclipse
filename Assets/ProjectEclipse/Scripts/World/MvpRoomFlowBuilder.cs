@@ -14,6 +14,7 @@ namespace ProjectEclipse.World
         private const float HorizontalRoomSpacing = 36f;
         private const float VerticalRoomSpacing = 18f;
         private const float UpperPlatformSurfaceOffset = 3.15f;
+        private const float SolidFloorThickness = 0.6f;
         private const int RouteDepthCount = 5;
 
         private static readonly string[] HorizontalBaseOrder =
@@ -188,7 +189,11 @@ namespace ProjectEclipse.World
                 return;
             }
 
-            CacheAuthoredRooms();
+            if (CacheAuthoredRooms() && Application.isPlaying)
+            {
+                MovePlayerToInitialSpawn();
+                ApplyInitialCameraBounds();
+            }
         }
 
         public void ConfigureEnemyDefinitions(IEnumerable<EnemyDefinition> definitions)
@@ -226,6 +231,7 @@ namespace ProjectEclipse.World
 
             if (CacheAuthoredRooms())
             {
+                MovePlayerToInitialSpawn();
                 ApplyInitialCameraBounds();
                 return;
             }
@@ -256,6 +262,7 @@ namespace ProjectEclipse.World
 
             DistributeExistingEnemies();
             MarkExistingOneWaySurfaces();
+            MovePlayerToInitialSpawn();
             ApplyInitialCameraBounds();
         }
 
@@ -357,7 +364,7 @@ namespace ProjectEclipse.World
             builtSpawns.Add(spawn);
 
             CreateSprite(root, spec.Name + " Background", new Vector3(spec.Center.x, spec.Center.y, 2.5f), new Vector3((spec.Size.x + 1.4f) * 0.5f, (spec.Size.y + 1f) * 0.34f, 1f), SpriteFactory.GetRoomBackgroundSprite(), spec.Sky, -40);
-            CreateSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 1.08f, 1.8f), new Vector3((spec.Size.x + 0.8f) * 0.25f, 1.35f, 1f), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
+            CreateTiledSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 1.08f, 1.8f), new Vector2(spec.Size.x + 0.8f, 1.35f), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
             CreateSolidFloor(root, spec);
 
             CreateRoomPlatforms(root, spec);
@@ -417,12 +424,12 @@ namespace ProjectEclipse.World
         {
             GameObject floor = new GameObject(spec.Name + " SolidGround");
             floor.transform.SetParent(root);
-            floor.transform.position = new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - 0.12f, 0f);
+            floor.transform.position = new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - SolidFloorThickness * 0.5f, 0f);
             BoxCollider2D collider = floor.AddComponent<BoxCollider2D>();
-            collider.size = new Vector2(spec.Size.x + 0.8f, 0.24f);
+            collider.size = new Vector2(spec.Size.x + 0.8f, SolidFloorThickness);
             floor.AddComponent<PlatformSurface>();
             MapPlatform2D mapPlatform = floor.AddComponent<MapPlatform2D>();
-            mapPlatform.Configure(spec.Id + "-floor", spec.Size.x + 0.8f, false, 0.28f);
+            mapPlatform.Configure(spec.Id + "-floor", spec.Size.x + 0.8f, false, SolidFloorThickness);
         }
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
@@ -714,6 +721,20 @@ namespace ProjectEclipse.World
             {
                 body.linearVelocity = Vector2.zero;
             }
+        }
+
+        private void MovePlayerToInitialSpawn()
+        {
+            if (builtSpawns.Count == 0)
+            {
+                return;
+            }
+
+            int safeIndex;
+            Transform spawn = roomIndexById.TryGetValue("safe", out safeIndex) && safeIndex >= 0 && safeIndex < builtSpawns.Count
+                ? builtSpawns[safeIndex]
+                : builtSpawns[0];
+            MovePlayerToSpawn(spawn);
         }
 
         private RoomBounds2D FindRoomForPosition(Vector3 position)

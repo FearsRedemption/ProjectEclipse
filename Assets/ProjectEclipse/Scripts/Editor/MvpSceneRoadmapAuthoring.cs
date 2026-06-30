@@ -21,7 +21,7 @@ namespace ProjectEclipse.EditorTools
         private const float HorizontalRoomSpacing = 36f;
         private const float VerticalRoomSpacing = 18f;
         private const float FloorSurfaceOffsetY = -2.15f;
-        private const float FloorThickness = 0.28f;
+        private const float FloorThickness = 0.6f;
         private const float UpperPlatformSurfaceOffsetY = FloorSurfaceOffsetY + 3.15f;
         private const float PortalHeight = 1.55f;
         private const float PortalWidth = 0.9f;
@@ -153,9 +153,24 @@ namespace ProjectEclipse.EditorTools
             }
 
             Scene scene = SceneManager.GetActiveScene();
-            if (!scene.isLoaded || NormalizeScenePath(scene.path) != MvpScenePath)
+            if (!scene.isLoaded)
             {
                 return;
+            }
+
+            string activeScenePath = NormalizeScenePath(scene.path);
+            if (activeScenePath != MvpScenePath)
+            {
+                if (!IsUnityPlayModeBackupScene(activeScenePath) || AssetDatabase.LoadAssetAtPath<SceneAsset>(MvpScenePath) == null)
+                {
+                    return;
+                }
+
+                scene = EditorSceneManager.OpenScene(MvpScenePath);
+                if (!scene.isLoaded)
+                {
+                    return;
+                }
             }
 
             GameObject existingMapRoot = GameObject.Find(MapRootName);
@@ -173,6 +188,12 @@ namespace ProjectEclipse.EditorTools
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
             Debug.Log("Project Eclipse converted the MVP scene into the route/depth map.");
+        }
+
+        private static bool IsUnityPlayModeBackupScene(string scenePath)
+        {
+            return !string.IsNullOrEmpty(scenePath)
+                && scenePath.Replace('\\', '/').StartsWith("Temp/__Backupscenes/", System.StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsCurrentMapOutdated(GameObject mapRoot)
@@ -204,6 +225,12 @@ namespace ProjectEclipse.EditorTools
 
             SpriteRenderer platformArt = FindRendererNamed(mapRoot, "saplings-d1-upper-step-art");
             if (platformArt == null || platformArt.drawMode != SpriteDrawMode.Tiled)
+            {
+                return true;
+            }
+
+            SpriteRenderer groundFill = FindRendererNamed(mapRoot, "Ground Fill");
+            if (groundFill == null || groundFill.drawMode != SpriteDrawMode.Tiled)
             {
                 return true;
             }
@@ -430,7 +457,7 @@ namespace ProjectEclipse.EditorTools
             area.Configure(spec.Id, spec.Name, new Vector2(RoomWidth, RoomHeight));
 
             CreateSprite(room.transform, "Backdrop", Vector3.forward * 2.5f, new Vector3(6.2f, 4.4f, 1f), spec.BackdropPath, spec.Sky, -40);
-            CreateSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - 1.08f, 1.8f), new Vector3(5.9f, 1.35f, 1f), spec.GroundPath, spec.Ground, -18);
+            CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - 1.08f, 1.8f), new Vector2(RoomWidth + 0.8f, 1.35f), spec.GroundPath, spec.Ground, -18);
             CreateFloor(room.transform, spec);
             CreateRoomPlatforms(room.transform, spec);
             CreateSpawn(room.transform, spec);
