@@ -196,7 +196,47 @@ namespace ProjectEclipse.EditorTools
                 return true;
             }
 
+            BoxCollider2D safeFloor = FindColliderNamed(mapRoot, "safe-floor");
+            if (safeFloor == null || safeFloor.size.y < FloorThickness - 0.01f)
+            {
+                return true;
+            }
+
+            SpriteRenderer platformArt = FindRendererNamed(mapRoot, "saplings-d1-upper-step-art");
+            if (platformArt == null || platformArt.drawMode != SpriteDrawMode.Tiled)
+            {
+                return true;
+            }
+
             return !HasGeneratedChildNamed(mapRoot, "saplings-d1-upper-step");
+        }
+
+        private static BoxCollider2D FindColliderNamed(GameObject root, string objectName)
+        {
+            BoxCollider2D[] colliders = root.GetComponentsInChildren<BoxCollider2D>(true);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i] != null && colliders[i].name == objectName)
+                {
+                    return colliders[i];
+                }
+            }
+
+            return null;
+        }
+
+        private static SpriteRenderer FindRendererNamed(GameObject root, string objectName)
+        {
+            SpriteRenderer[] renderers = root.GetComponentsInChildren<SpriteRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i] != null && renderers[i].name == objectName)
+                {
+                    return renderers[i];
+                }
+            }
+
+            return null;
         }
 
         private static bool HasGeneratedChildNamed(GameObject root, string objectName)
@@ -408,7 +448,7 @@ namespace ProjectEclipse.EditorTools
             collider.size = new Vector2(RoomWidth + 0.8f, FloorThickness);
             floor.AddComponent<PlatformSurface>();
             MapPlatform2D platform = floor.AddComponent<MapPlatform2D>();
-            platform.Configure(spec.Id + "-floor", RoomWidth + 0.8f, false);
+            platform.Configure(spec.Id + "-floor", RoomWidth + 0.8f, false, FloorThickness);
         }
 
         private static void CreateRoomPlatforms(Transform room, RoomSpec spec)
@@ -425,7 +465,7 @@ namespace ProjectEclipse.EditorTools
 
         private static void CreateOneWayPlatform(Transform room, string id, Vector2 center, float width, string spritePath, Color color)
         {
-            CreateSprite(room, id + "-art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector3(width * 0.25f, 0.4f, 1f), spritePath, color, -12);
+            CreateTiledSprite(room, id + "-art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector2(width, 0.52f), spritePath, color, -12);
 
             GameObject surface = new GameObject(id);
             surface.transform.SetParent(room);
@@ -435,7 +475,7 @@ namespace ProjectEclipse.EditorTools
             surface.AddComponent<OneWayPlatform>();
             surface.AddComponent<PlatformSurface>();
             MapPlatform2D platform = surface.AddComponent<MapPlatform2D>();
-            platform.Configure(id, width, true);
+            platform.Configure(id, width, true, 0.08f);
         }
 
         private static void CreateSpawn(Transform room, RoomSpec spec)
@@ -608,6 +648,22 @@ namespace ProjectEclipse.EditorTools
             renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
+            return spriteObject;
+        }
+
+        private static GameObject CreateTiledSprite(Transform parent, string name, Vector3 localPosition, Vector2 size, string spritePath, Color color, int sortingOrder)
+        {
+            GameObject spriteObject = new GameObject(name);
+            spriteObject.transform.SetParent(parent);
+            spriteObject.transform.localPosition = localPosition;
+            spriteObject.transform.localScale = Vector3.one;
+
+            SpriteRenderer renderer = spriteObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
+            renderer.drawMode = SpriteDrawMode.Tiled;
+            renderer.size = size;
             return spriteObject;
         }
 

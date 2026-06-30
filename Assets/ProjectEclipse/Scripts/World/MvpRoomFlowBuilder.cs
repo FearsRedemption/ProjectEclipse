@@ -422,12 +422,12 @@ namespace ProjectEclipse.World
             collider.size = new Vector2(spec.Size.x + 0.8f, 0.24f);
             floor.AddComponent<PlatformSurface>();
             MapPlatform2D mapPlatform = floor.AddComponent<MapPlatform2D>();
-            mapPlatform.Configure(spec.Id + "-floor", spec.Size.x + 0.8f, false);
+            mapPlatform.Configure(spec.Id + "-floor", spec.Size.x + 0.8f, false, 0.28f);
         }
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
         {
-            CreateSprite(root, name + " Art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector3(width * 0.25f, 0.4f, 1f), SpriteFactory.GetPlatformStripSprite(), color, -12);
+            CreateTiledSprite(root, name + " Art", new Vector3(center.x, center.y - 0.12f, 1.55f), new Vector2(width, 0.52f), SpriteFactory.GetPlatformStripSprite(), color, -12);
 
             GameObject surface = new GameObject(name + " Surface");
             surface.transform.SetParent(root);
@@ -437,7 +437,7 @@ namespace ProjectEclipse.World
             surface.AddComponent<OneWayPlatform>();
             surface.AddComponent<PlatformSurface>();
             MapPlatform2D mapPlatform = surface.AddComponent<MapPlatform2D>();
-            mapPlatform.Configure(name.ToLowerInvariant().Replace(" ", "-"), width, true);
+            mapPlatform.Configure(name.ToLowerInvariant().Replace(" ", "-"), width, true, 0.08f);
         }
 
         private RoomPortal2D CreatePortal(Transform root, RoomSpec spec, PortalSide side, RoomBounds2D owningRoom)
@@ -548,6 +548,22 @@ namespace ProjectEclipse.World
             renderer.sprite = sprite;
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
+            return gameObject;
+        }
+
+        private static GameObject CreateTiledSprite(Transform root, string name, Vector3 position, Vector2 size, Sprite sprite, Color color, int sortingOrder)
+        {
+            GameObject gameObject = new GameObject(name);
+            gameObject.transform.SetParent(root);
+            gameObject.transform.position = position;
+            gameObject.transform.localScale = Vector3.one;
+
+            SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
+            renderer.sprite = sprite;
+            renderer.color = color;
+            renderer.sortingOrder = sortingOrder;
+            renderer.drawMode = SpriteDrawMode.Tiled;
+            renderer.size = size;
             return gameObject;
         }
 
