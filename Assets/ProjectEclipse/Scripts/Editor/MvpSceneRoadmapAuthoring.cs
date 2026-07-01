@@ -228,6 +228,11 @@ namespace ProjectEclipse.EditorTools
                 return true;
             }
 
+            if (!HasGeneratedChildNamed(mapRoot, "safe-atmosphere-wash"))
+            {
+                return true;
+            }
+
             BoxCollider2D safeFloor = FindColliderNamed(mapRoot, "safe-floor");
             if (safeFloor == null || safeFloor.size.y < FloorThickness - 0.01f)
             {
@@ -507,12 +512,44 @@ namespace ProjectEclipse.EditorTools
             area.Configure(spec.Id, spec.Name, new Vector2(RoomWidth, RoomHeight));
 
             CreateSprite(room.transform, "Backdrop", Vector3.forward * 2.5f, new Vector3(6.2f, 4.4f, 1f), spec.BackdropPath, spec.Sky, -40);
+            CreateRoomDressing(room.transform, spec);
             CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(RoomWidth + 0.8f, GroundFillVisualHeight), spec.GroundPath, spec.Ground, -18);
             CreateFloor(room.transform, spec);
             CreateRoomPlatforms(room.transform, spec);
             CreateSpawn(room.transform, spec);
             CreateEnemySpawns(room.transform, spec);
             return bounds;
+        }
+
+        private static void CreateRoomDressing(Transform room, RoomSpec spec)
+        {
+            Color wash = WithAlpha(Lighten(spec.Sky, 0.08f), 0.34f);
+            Color deepShadow = WithAlpha(Color.Lerp(spec.Ground, Color.black, 0.42f), 0.5f);
+            Color accent = WithAlpha(Lighten(spec.Portal, 0.18f), 0.48f);
+            CreateSprite(room, spec.Id + "-atmosphere-wash", new Vector3(0f, 1.15f, 2.35f), new Vector3(7.6f, 2.6f, 1f), spec.BackdropPath, wash, -39);
+            CreateSprite(room, spec.Id + "-distant-left-form", new Vector3(-RoomWidth * 0.42f, FloorSurfaceOffsetY + 1.85f, 2.08f), new Vector3(1.6f, 1.95f, 1f), spec.PlatformPath, deepShadow, -30);
+            CreateSprite(room, spec.Id + "-distant-right-form", new Vector3(RoomWidth * 0.43f, FloorSurfaceOffsetY + 1.55f, 2.08f), new Vector3(1.35f, 1.65f, 1f), spec.PlatformPath, deepShadow, -30);
+            CreateSprite(room, spec.Id + "-floor-glow", new Vector3(0f, FloorSurfaceOffsetY + 0.12f, 1.65f), new Vector3(4.8f, 0.22f, 1f), PortalPadPath, WithAlpha(spec.Portal, 0.28f), -16);
+
+            if (IsForestRoute(spec))
+            {
+                CreateSprite(room, spec.Id + "-leaf-cluster-left", new Vector3(-RoomWidth * 0.26f, FloorSurfaceOffsetY + 3.9f, 2.05f), new Vector3(1.4f, 0.72f, 1f), spec.PlatformPath, WithAlpha(Lighten(spec.Portal, 0.08f), 0.5f), -29);
+                CreateSprite(room, spec.Id + "-leaf-cluster-right", new Vector3(RoomWidth * 0.24f, FloorSurfaceOffsetY + 4.25f, 2.05f), new Vector3(1.2f, 0.66f, 1f), spec.PlatformPath, WithAlpha(accent, 0.46f), -29);
+                return;
+            }
+
+            CreateSprite(room, spec.Id + "-ore-glint-left", new Vector3(-RoomWidth * 0.28f, FloorSurfaceOffsetY + 2.1f, 2f), new Vector3(0.42f, 0.2f, 1f), PortalPadPath, accent, -28);
+            CreateSprite(room, spec.Id + "-ore-glint-right", new Vector3(RoomWidth * 0.22f, FloorSurfaceOffsetY + 3.05f, 2f), new Vector3(0.34f, 0.18f, 1f), PortalPadPath, WithAlpha(Lighten(spec.Portal, 0.32f), 0.54f), -28);
+            if (spec.Id == "miniboss-d1")
+            {
+                CreateSprite(room, spec.Id + "-boss-aura", new Vector3(0.4f, FloorSurfaceOffsetY + 1.35f, 1.92f), new Vector3(1.55f, 1.9f, 1f), PortalColumnPath, WithAlpha(Lighten(spec.Portal, 0.32f), 0.42f), -10);
+            }
+        }
+
+        private static bool IsForestRoute(RoomSpec spec)
+        {
+            string route = spec.Route != null ? spec.Route.ToLowerInvariant() : string.Empty;
+            return route.Contains("safe") || route.Contains("sapling") || route.Contains("birch") || route.Contains("pine");
         }
 
         private static void CreateFloor(Transform room, RoomSpec spec)
@@ -927,6 +964,12 @@ namespace ProjectEclipse.EditorTools
         private static Color Lighten(Color color, float amount)
         {
             return Color.Lerp(color, Color.white, Mathf.Clamp01(amount));
+        }
+
+        private static Color WithAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
         }
 
         private static string NormalizeScenePath(string scenePath)

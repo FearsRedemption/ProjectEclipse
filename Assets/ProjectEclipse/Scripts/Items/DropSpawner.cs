@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ProjectEclipse.Utilities;
 using UnityEngine;
 
@@ -5,6 +6,8 @@ namespace ProjectEclipse.Items
 {
     public class DropSpawner : MonoBehaviour
     {
+        private static readonly HashSet<string> WarnedGeneratedDropArt = new HashSet<string>();
+
 #pragma warning disable CS0649
         [SerializeField] private WorldItemDrop dropPrefab;
 #pragma warning restore CS0649
@@ -31,7 +34,12 @@ namespace ProjectEclipse.Items
             }
             else
             {
-                Debug.LogWarning("World drop is using generated temporary art for " + (item != null ? item.DisplayName : "Unknown Item") + ". Assign a real WorldDropSprite before final art lock.");
+                string itemName = item != null ? item.DisplayName : "Unknown Item";
+                if (WarnedGeneratedDropArt.Add(itemName))
+                {
+                    Debug.Log("World drop is using generated fallback art for " + itemName + ". Assign a real WorldDropSprite before final art lock.");
+                }
+
                 renderer.sprite = SpriteFactory.GetItemDropSprite(item != null ? item.PlaceholderColor : Color.white);
             }
             renderer.color = Color.white;

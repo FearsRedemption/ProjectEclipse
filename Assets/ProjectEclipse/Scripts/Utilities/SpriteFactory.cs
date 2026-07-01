@@ -68,6 +68,8 @@ namespace ProjectEclipse.Utilities
             Color[] pixels = new Color[size * size];
             Color rim = Color.Lerp(color, Color.white, 0.55f);
             Color shadow = Color.Lerp(color, Color.black, 0.35f);
+            Color core = Color.Lerp(color, Color.white, 0.15f);
+            Color glint = Color.Lerp(color, Color.white, 0.85f);
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
@@ -75,15 +77,35 @@ namespace ProjectEclipse.Utilities
                     float nx = Mathf.Abs((x + 0.5f) / size * 2f - 1f);
                     float ny = Mathf.Abs((y + 0.5f) / size * 2f - 1f);
                     float diamond = nx + ny;
+                    float baseShadow = Mathf.Pow(Mathf.Clamp01(1f - ((x - 24f) * (x - 24f) / 240f + (y - 8f) * (y - 8f) / 20f)), 1.4f);
                     Color pixel = Color.clear;
-                    if (diamond <= 0.98f)
+                    if (baseShadow > 0.02f && y < 16)
                     {
-                        pixel = Color.Lerp(shadow, rim, (float)y / size);
+                        pixel = new Color(0f, 0f, 0f, baseShadow * 0.22f);
+                    }
+
+                    if (diamond <= 0.9f)
+                    {
+                        float vertical = (float)y / (size - 1);
+                        float facet = Mathf.Sin((x + y) * 0.42f) * 0.06f + Mathf.Sin((x - y) * 0.28f) * 0.05f;
+                        pixel = Color.Lerp(shadow, core, Mathf.Clamp01(vertical + facet));
+                        pixel.a = 1f;
+                    }
+                    else if (diamond <= 1.04f)
+                    {
+                        pixel = rim;
                         pixel.a = 1f;
                     }
                     else if (diamond <= 1.12f)
                     {
-                        pixel = new Color(1f, 1f, 1f, 0.55f);
+                        pixel = new Color(1f, 1f, 1f, 0.28f);
+                    }
+
+                    float highlight = Mathf.Pow(Mathf.Clamp01(1f - ((x - 18f) * (x - 18f) / 48f + (y - 33f) * (y - 33f) / 30f)), 1.7f);
+                    if (highlight > 0.08f)
+                    {
+                        pixel = Color.Lerp(pixel, glint, highlight * 0.65f);
+                        pixel.a = Mathf.Max(pixel.a, highlight * 0.75f);
                     }
 
                     pixels[y * size + x] = pixel;
@@ -791,6 +813,12 @@ namespace ProjectEclipse.Utilities
 
         private static void DrawOreCreature(Color[] pixels, int stage, Color rock, Color ore, Color oreLight)
         {
+            if (stage >= 0)
+            {
+                DrawReadableOreCreature(pixels, stage, rock, ore, oreLight);
+                return;
+            }
+
             Color outline = Color.Lerp(rock, Color.black, 0.72f);
             Color rockShade = Color.Lerp(rock, Color.black, 0.28f);
             Color rockLight = Color.Lerp(rock, Color.white, 0.3f);
@@ -867,6 +895,12 @@ namespace ProjectEclipse.Utilities
 
         private static void DrawTreeCreature(Color[] pixels, int stage, Color bark, Color leaf, Color light)
         {
+            if (stage >= 0)
+            {
+                DrawReadableTreeCreature(pixels, stage, bark, leaf, light);
+                return;
+            }
+
             Color outline = Color.Lerp(bark, Color.black, 0.72f);
             Color barkShade = Color.Lerp(bark, Color.black, 0.3f);
             Color leafShade = Color.Lerp(leaf, Color.black, 0.24f);
@@ -933,6 +967,149 @@ namespace ProjectEclipse.Utilities
             FillRect(pixels, 51, 47, 55, 48, eye);
         }
 
+        private static void DrawReadableOreCreature(Color[] pixels, int stage, Color rock, Color ore, Color oreLight)
+        {
+            Color outline = Color.Lerp(rock, Color.black, 0.72f);
+            Color rockShade = Color.Lerp(rock, Color.black, 0.28f);
+            Color rockLight = Color.Lerp(rock, Color.white, 0.3f);
+            Color eye = new Color(1f, 0.86f, 0.45f, 1f);
+
+            if (stage <= 0)
+            {
+                DrawCreatureShadow(pixels, 48, 8, 20, 4);
+                FillEllipse(pixels, 42, 11, 5, 4, outline);
+                FillEllipse(pixels, 56, 11, 5, 4, outline);
+                FillEllipse(pixels, 48, 28, 18, 17, outline);
+                FillEllipse(pixels, 48, 29, 16, 15, rock);
+                FillEllipse(pixels, 38, 37, 7, 6, rockLight);
+                FillEllipse(pixels, 58, 37, 8, 7, rockShade);
+                FillEllipse(pixels, 52, 45, 4, 4, ore);
+                FillEllipse(pixels, 58, 33, 3, 3, oreLight);
+                FillRect(pixels, 41, 30, 55, 33, outline);
+                FillRect(pixels, 44, 31, 47, 32, eye);
+                FillRect(pixels, 51, 31, 54, 32, eye);
+                return;
+            }
+
+            if (stage == 1)
+            {
+                DrawCreatureShadow(pixels, 48, 8, 26, 5);
+                FillEllipse(pixels, 36, 13, 7, 5, outline);
+                FillEllipse(pixels, 60, 13, 7, 5, outline);
+                FillEllipse(pixels, 48, 33, 23, 22, outline);
+                FillEllipse(pixels, 48, 34, 20, 19, rock);
+                FillEllipse(pixels, 31, 33, 7, 12, outline);
+                FillEllipse(pixels, 65, 33, 7, 12, outline);
+                FillEllipse(pixels, 32, 34, 5, 10, rockShade);
+                FillEllipse(pixels, 64, 34, 5, 10, rockLight);
+                FillEllipse(pixels, 37, 49, 8, 8, rockShade);
+                FillEllipse(pixels, 61, 48, 9, 8, rockLight);
+                FillEllipse(pixels, 42, 43, 5, 5, ore);
+                FillEllipse(pixels, 55, 48, 7, 6, ore);
+                FillEllipse(pixels, 61, 36, 5, 5, oreLight);
+                FillEllipse(pixels, 48, 55, 4, 4, oreLight);
+                FillRect(pixels, 40, 35, 57, 39, outline);
+                FillRect(pixels, 44, 36, 47, 37, eye);
+                FillRect(pixels, 52, 36, 55, 37, eye);
+                return;
+            }
+
+            DrawCreatureShadow(pixels, 48, 8, 34, 6);
+            FillEllipse(pixels, 48, 31, 31, 23, outline);
+            FillEllipse(pixels, 48, 32, 28, 20, rock);
+            FillEllipse(pixels, 28, 35, 14, 15, outline);
+            FillEllipse(pixels, 68, 36, 15, 16, outline);
+            FillEllipse(pixels, 29, 36, 12, 13, rockLight);
+            FillEllipse(pixels, 67, 37, 13, 14, rockShade);
+            FillEllipse(pixels, 38, 53, 18, 12, outline);
+            FillEllipse(pixels, 39, 54, 16, 10, rockShade);
+            FillEllipse(pixels, 61, 52, 18, 12, outline);
+            FillEllipse(pixels, 61, 53, 16, 10, rockLight);
+            FillEllipse(pixels, 31, 48, 9, 7, ore);
+            FillEllipse(pixels, 45, 59, 9, 8, oreLight);
+            FillEllipse(pixels, 58, 43, 10, 9, ore);
+            FillEllipse(pixels, 69, 59, 7, 6, oreLight);
+            FillEllipse(pixels, 74, 36, 6, 7, ore);
+            FillEllipse(pixels, 43, 39, 6, 6, oreLight);
+            FillEllipse(pixels, 52, 23, 7, 6, ore);
+            FillRect(pixels, 38, 34, 60, 38, outline);
+            FillRect(pixels, 42, 35, 46, 36, eye);
+            FillRect(pixels, 54, 35, 58, 36, eye);
+        }
+
+        private static void DrawReadableTreeCreature(Color[] pixels, int stage, Color bark, Color leaf, Color light)
+        {
+            Color outline = Color.Lerp(bark, Color.black, 0.74f);
+            Color barkShade = Color.Lerp(bark, Color.black, 0.32f);
+            Color barkLight = Color.Lerp(bark, Color.white, 0.24f);
+            Color leafShade = Color.Lerp(leaf, Color.black, 0.24f);
+            Color eye = new Color(1f, 0.86f, 0.42f, 1f);
+
+            if (stage <= 0)
+            {
+                DrawCreatureShadow(pixels, 48, 8, 18, 4);
+                FillRect(pixels, 38, 8, 48, 12, outline);
+                FillRect(pixels, 48, 8, 58, 12, outline);
+                FillRect(pixels, 41, 13, 55, 45, outline);
+                FillRect(pixels, 43, 14, 53, 45, bark);
+                FillRect(pixels, 45, 19, 48, 44, barkLight);
+                FillRect(pixels, 44, 30, 52, 34, barkShade);
+                FillEllipse(pixels, 48, 58, 18, 14, outline);
+                FillEllipse(pixels, 48, 59, 15, 11, leaf);
+                FillEllipse(pixels, 38, 55, 8, 7, leafShade);
+                FillEllipse(pixels, 58, 62, 8, 7, light);
+                FillRect(pixels, 44, 37, 47, 38, eye);
+                FillRect(pixels, 51, 37, 54, 38, eye);
+                return;
+            }
+
+            if (stage == 1)
+            {
+                DrawCreatureShadow(pixels, 48, 8, 24, 5);
+                FillRect(pixels, 32, 8, 47, 14, outline);
+                FillRect(pixels, 50, 8, 65, 14, outline);
+                FillRect(pixels, 36, 14, 60, 53, outline);
+                FillRect(pixels, 39, 16, 57, 53, bark);
+                FillRect(pixels, 42, 20, 47, 52, barkLight);
+                FillRect(pixels, 42, 34, 55, 40, barkShade);
+                FillEllipse(pixels, 48, 62, 24, 15, outline);
+                FillEllipse(pixels, 48, 63, 21, 12, leaf);
+                FillEllipse(pixels, 31, 59, 12, 9, leafShade);
+                FillEllipse(pixels, 65, 64, 13, 10, light);
+                FillEllipse(pixels, 35, 31, 8, 8, outline);
+                FillEllipse(pixels, 61, 31, 8, 8, outline);
+                FillEllipse(pixels, 35, 31, 6, 6, barkShade);
+                FillEllipse(pixels, 61, 31, 6, 6, bark);
+                FillRect(pixels, 43, 42, 46, 43, eye);
+                FillRect(pixels, 52, 42, 55, 43, eye);
+                return;
+            }
+
+            DrawCreatureShadow(pixels, 48, 8, 32, 6);
+            FillRect(pixels, 28, 8, 47, 15, outline);
+            FillRect(pixels, 50, 8, 69, 15, outline);
+            FillRect(pixels, 35, 15, 61, 65, outline);
+            FillRect(pixels, 39, 17, 57, 65, bark);
+            FillRect(pixels, 43, 20, 49, 64, barkLight);
+            FillRect(pixels, 42, 42, 56, 49, barkShade);
+            FillEllipse(pixels, 47, 75, 31, 16, outline);
+            FillEllipse(pixels, 47, 76, 28, 13, leaf);
+            FillEllipse(pixels, 30, 66, 17, 13, leafShade);
+            FillEllipse(pixels, 68, 67, 18, 14, light);
+            FillEllipse(pixels, 48, 61, 24, 12, leaf);
+            FillEllipse(pixels, 30, 38, 12, 9, outline);
+            FillEllipse(pixels, 66, 38, 12, 9, outline);
+            FillEllipse(pixels, 31, 38, 9, 7, barkShade);
+            FillEllipse(pixels, 65, 38, 9, 7, bark);
+            FillRect(pixels, 42, 50, 46, 51, eye);
+            FillRect(pixels, 52, 50, 56, 51, eye);
+        }
+
+        private static void DrawCreatureShadow(Color[] pixels, int centerX, int centerY, int radiusX, int radiusY)
+        {
+            FillEllipse(pixels, centerX, centerY, radiusX, radiusY, new Color(0f, 0f, 0f, 0.24f));
+        }
+
         private static void DrawRouteGateSentinel(Color[] pixels)
         {
             Color outline = new Color(0.11f, 0.08f, 0.16f, 1f);
@@ -941,26 +1118,27 @@ namespace ProjectEclipse.Utilities
             Color glow = new Color(0.82f, 0.66f, 1f, 1f);
             Color eye = new Color(1f, 0.86f, 0.42f, 1f);
 
-            FillEllipse(pixels, 48, 26, 30, 19, outline);
-            FillEllipse(pixels, 48, 27, 27, 16, stone);
-            FillRect(pixels, 30, 32, 66, 67, outline);
-            FillRect(pixels, 33, 35, 63, 67, stone);
-            FillRect(pixels, 38, 39, 58, 63, stoneLight);
-            FillEllipse(pixels, 30, 47, 10, 16, outline);
-            FillEllipse(pixels, 66, 47, 10, 16, outline);
-            FillEllipse(pixels, 30, 48, 8, 13, stone);
-            FillEllipse(pixels, 66, 48, 8, 13, stone);
-            FillRect(pixels, 38, 23, 58, 29, outline);
-            FillRect(pixels, 40, 24, 56, 27, glow);
-            FillRect(pixels, 40, 49, 56, 53, outline);
-            FillRect(pixels, 43, 50, 46, 51, eye);
-            FillRect(pixels, 51, 50, 54, 51, eye);
-            FillEllipse(pixels, 48, 38, 8, 7, glow);
-            FillEllipse(pixels, 48, 38, 4, 4, Color.white);
-            FillRect(pixels, 34, 67, 44, 76, outline);
-            FillRect(pixels, 52, 67, 62, 76, outline);
-            FillRect(pixels, 35, 68, 43, 73, stone);
-            FillRect(pixels, 53, 68, 61, 73, stone);
+            DrawCreatureShadow(pixels, 48, 8, 33, 6);
+            FillRect(pixels, 34, 9, 45, 18, outline);
+            FillRect(pixels, 52, 9, 63, 18, outline);
+            FillRect(pixels, 35, 11, 44, 18, stone);
+            FillRect(pixels, 53, 11, 62, 18, stone);
+            FillRect(pixels, 29, 18, 67, 59, outline);
+            FillRect(pixels, 33, 21, 63, 59, stone);
+            FillRect(pixels, 38, 27, 58, 55, stoneLight);
+            FillEllipse(pixels, 29, 39, 10, 16, outline);
+            FillEllipse(pixels, 67, 39, 10, 16, outline);
+            FillEllipse(pixels, 30, 40, 8, 13, stone);
+            FillEllipse(pixels, 66, 40, 8, 13, stone);
+            FillEllipse(pixels, 48, 66, 30, 18, outline);
+            FillEllipse(pixels, 48, 67, 27, 15, stone);
+            FillRect(pixels, 38, 63, 58, 69, outline);
+            FillRect(pixels, 40, 64, 56, 67, glow);
+            FillRect(pixels, 40, 42, 56, 46, outline);
+            FillRect(pixels, 43, 43, 46, 44, eye);
+            FillRect(pixels, 51, 43, 54, 44, eye);
+            FillEllipse(pixels, 48, 34, 8, 7, glow);
+            FillEllipse(pixels, 48, 34, 4, 4, Color.white);
         }
 
         private static void DrawCopperOrelet(Color[] pixels)

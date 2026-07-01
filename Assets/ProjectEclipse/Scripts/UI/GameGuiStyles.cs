@@ -102,9 +102,25 @@ namespace ProjectEclipse.UI
 
         public static void DrawProgressBar(Rect rect, float normalized, Color fill)
         {
-            DrawBox(rect, new Color(0.05f, 0.06f, 0.06f, 1f), new Color(0.4f, 0.45f, 0.43f, 1f), 1f);
-            Rect fillRect = new Rect(rect.x + 2f, rect.y + 2f, Mathf.Max(0f, rect.width - 4f) * Mathf.Clamp01(normalized), Mathf.Max(0f, rect.height - 4f));
-            GUI.DrawTexture(fillRect, GetTexture(fill));
+            DrawBox(rect, new Color(0.035f, 0.045f, 0.045f, 1f), new Color(0.45f, 0.38f, 0.22f, 1f), 1f);
+            Rect track = new Rect(rect.x + 2f, rect.y + 2f, Mathf.Max(0f, rect.width - 4f), Mathf.Max(0f, rect.height - 4f));
+            GUI.DrawTexture(track, GetTexture(new Color(0.08f, 0.1f, 0.095f, 1f)));
+
+            Rect fillRect = new Rect(track.x, track.y, track.width * Mathf.Clamp01(normalized), track.height);
+            if (fillRect.width > 0.5f)
+            {
+                GUI.DrawTexture(fillRect, GetTexture(Color.Lerp(fill, Color.black, 0.18f)));
+                GUI.DrawTexture(new Rect(fillRect.x, fillRect.y, fillRect.width, Mathf.Max(1f, fillRect.height * 0.42f)), GetTexture(Color.Lerp(fill, Color.white, 0.22f)));
+                GUI.DrawTexture(new Rect(fillRect.x, fillRect.yMax - 2f, fillRect.width, 2f), GetTexture(Color.Lerp(fill, Color.black, 0.32f)));
+            }
+
+            int segmentCount = Mathf.Clamp(Mathf.FloorToInt(track.width / 44f), 3, 12);
+            for (int i = 1; i < segmentCount; i++)
+            {
+                float x = track.x + track.width * i / segmentCount;
+                GUI.DrawTexture(new Rect(x, track.y + 2f, 1f, track.height - 4f), GetTexture(new Color(0f, 0f, 0f, 0.28f)));
+                GUI.DrawTexture(new Rect(x + 1f, track.y + 2f, 1f, track.height - 4f), GetTexture(new Color(1f, 1f, 1f, 0.08f)));
+            }
         }
 
         public static void DrawInventoryBackdrop(Rect modalRect)
