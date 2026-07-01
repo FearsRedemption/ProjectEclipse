@@ -42,7 +42,7 @@ namespace ProjectEclipse.UI
         private void DrawPortSlot(CraftingPortSlot slot, string label, ItemHoverState hover)
         {
             Rect cell = GUILayoutUtility.GetRect(90f, 72f, GUILayout.Width(90f), GUILayout.Height(72f));
-            GameGuiStyles.DrawBox(cell, new Color(0.11f, 0.14f, 0.15f, 0.96f), new Color(0.29f, 0.36f, 0.35f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(cell);
             GUI.Label(new Rect(cell.x + 4f, cell.y + 3f, cell.width - 8f, 16f), label, GameGuiStyles.CenterLabel);
             CraftingPortDefinition port = inventoryCrafting != null ? inventoryCrafting.GetEquippedPort(slot) : null;
             Rect slotRect = new Rect(cell.x + (cell.width - ItemSlotView.SlotSize) * 0.5f, cell.y + 20f, ItemSlotView.SlotSize, ItemSlotView.SlotSize);

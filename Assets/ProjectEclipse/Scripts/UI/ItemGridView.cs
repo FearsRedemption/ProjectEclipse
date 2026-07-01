@@ -54,7 +54,7 @@ namespace ProjectEclipse.UI
             float outerWidth = gridWidth + ScrollbarWidth + 14f;
 
             Rect outerRect = GUILayoutUtility.GetRect(outerWidth, height, GUILayout.Width(outerWidth), GUILayout.Height(height));
-            GameGuiStyles.DrawBox(outerRect, GameGuiStyles.SubPanelColor, new Color(0.35f, 0.43f, 0.42f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(outerRect);
 
             Rect viewport = new Rect(outerRect.x + 6f, outerRect.y + 6f, gridWidth + ScrollbarWidth, Mathf.Max(10f, height - 12f));
             Rect content = new Rect(0f, 0f, gridWidth, contentHeight);

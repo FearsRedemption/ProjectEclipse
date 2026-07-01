@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce794da494d04da4ad32a6731f1cc114, type: 3}
-  m_Name: Sapling Drop Table
+  m_Name: TreeCreatureDropTable
   m_EditorClassIdentifier:
   tableId: sapling_drops
   entries:
   - item: {fileID: 11400000, guid: 99b0eba1173daaaabf53df1ac2def144, type: 2}
     minQuantity: 1
-    maxQuantity: 2
-    chance: 0.65
+    maxQuantity: 3
+    chance: 1
   rareEntries: []

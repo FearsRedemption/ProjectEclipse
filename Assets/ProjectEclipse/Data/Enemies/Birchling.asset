@@ -16,27 +16,28 @@ MonoBehaviour:
   displayName: Birchling
   rank: 0
   resourceTier: 0
-  maxHealth: 14
+  maxHealth: 16
   contactDamage: 2
-  moveSpeed: 1.05
-  chaseRange: 5.5
-  attackRange: 0.9
-  attackCooldown: 1.2
+  moveSpeed: 0.55
+  chaseRange: 5.6
+  attackRange: 0.92
+  attackCooldown: 1.18
   attackLungeForce: 0.7
-  attackKnockback: 2.8
-  rangedCastRange: 5.8
+  attackKnockback: 3
+  rangedCastRange: 5.5
   rangedCastDamage: 2
   rangedCastCooldown: 6.4
-  rangedCastChance: 0.4
-  rangedProjectileSpeed: 5.2
+  rangedCastChance: 0.34
+  rangedProjectileSpeed: 5.4
   rangedProjectileLifetime: 3
-  visualScale: {x: 0.9, y: 0.9}
-  colliderSize: {x: 0.78, y: 0.76}
-  spriteSheet: {fileID: 2800000, guid: df425af303adb864f98c98a72abe402e, type: 3}
-  placeholderColor: {r: 0.58, g: 0.74, b: 0.42, a: 1}
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 0.88, y: 0.88}
+  colliderSize: {x: 0.82, y: 0.82}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.46, g: 0.66, b: 0.36, a: 1}
   dropTable: {fileID: 11400000, guid: da0d8f76dbbc441db02d579b8017615e, type: 2}
   drops:
   - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
-    minQuantity: 4
-    maxQuantity: 7
+    minQuantity: 1
+    maxQuantity: 3
     chance: 1

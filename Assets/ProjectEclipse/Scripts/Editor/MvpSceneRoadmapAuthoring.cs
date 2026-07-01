@@ -35,8 +35,8 @@ namespace ProjectEclipse.EditorTools
         private const float PortalHeight = 1.55f;
         private const float PortalWidth = 0.9f;
         private const int RouteDepthCount = 5;
-        private const int ExpectedRouteRoomCount = 51;
-        private const int ExpectedPortalCount = 100;
+        private const int ExpectedRouteRoomCount = 47;
+        private const int ExpectedPortalCount = 92;
 
         private static readonly string[] HorizontalBaseOrder =
         {
@@ -108,9 +108,10 @@ namespace ProjectEclipse.EditorTools
             public string BaseEnemyId;
             public string MidEnemyId;
             public string HardEnemyId;
+            public int DepthCount;
             public string[] DepthNames;
 
-            public RouteSpec(string id, string displayName, int horizontalIndex, Color sky, Color ground, Color platform, Color portal, string backdropPath, string groundPath, string platformPath, string baseEnemyId, string midEnemyId, string hardEnemyId, string[] depthNames)
+            public RouteSpec(string id, string displayName, int horizontalIndex, Color sky, Color ground, Color platform, Color portal, string backdropPath, string groundPath, string platformPath, string baseEnemyId, string midEnemyId, string hardEnemyId, int depthCount, string[] depthNames)
             {
                 Id = id;
                 DisplayName = displayName;
@@ -125,6 +126,7 @@ namespace ProjectEclipse.EditorTools
                 BaseEnemyId = baseEnemyId;
                 MidEnemyId = midEnemyId;
                 HardEnemyId = hardEnemyId;
+                DepthCount = Mathf.Clamp(depthCount, 1, RouteDepthCount);
                 DepthNames = depthNames;
             }
         }
@@ -148,6 +150,7 @@ namespace ProjectEclipse.EditorTools
                 return;
             }
 
+            RouteProgressionDataAuthoring.EnsureRouteProgressionData();
             BuildSceneRouteMap(scene);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -193,6 +196,7 @@ namespace ProjectEclipse.EditorTools
                 return;
             }
 
+            RouteProgressionDataAuthoring.EnsureRouteProgressionData();
             BuildSceneRouteMap(scene);
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -391,7 +395,7 @@ namespace ProjectEclipse.EditorTools
             RouteSpec[] routes = CreateRouteSpecs();
             for (int i = 0; i < routes.Length; i++)
             {
-                for (int depth = 1; depth < RouteDepthCount; depth++)
+                for (int depth = 1; depth < routes[i].DepthCount; depth++)
                 {
                     LinkRooms(mapRoot.transform, specsById, rooms, GetDepthRoomId(routes[i].Id, depth), PortalSide.Up, GetDepthRoomId(routes[i].Id, depth + 1), PortalSide.Down);
                 }
@@ -415,7 +419,7 @@ namespace ProjectEclipse.EditorTools
             for (int i = 0; i < routes.Length; i++)
             {
                 RouteSpec route = routes[i];
-                for (int depth = 1; depth <= RouteDepthCount; depth++)
+                for (int depth = 1; depth <= route.DepthCount; depth++)
                 {
                     int depthIndex = depth - 1;
                     float depthTint = depthIndex * 0.045f;
@@ -453,16 +457,16 @@ namespace ProjectEclipse.EditorTools
 
             return new[]
             {
-                new RouteSpec("saplings", "Saplings", -1, new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f), forestBackdrop, forestGround, forestPlatform, "sapling", "birchling", "birchling", new[] { "Saplings", "Saplings + Birchlings", "Birchlings", "Birchlings + Pine", "Pine Stand" }),
-                new RouteSpec("birch", "Birch", -2, new Color(0.28f, 0.52f, 0.45f), new Color(0.24f, 0.36f, 0.19f), new Color(0.53f, 0.42f, 0.24f), new Color(0.64f, 0.9f, 0.58f), forestBackdrop, forestGround, forestPlatform, "birchling", "birchling", "birchling", new[] { "Birchlings", "Thick Birchlings", "Birch Grove", "Dense Birch Grove", "Old Birch Grove" }),
-                new RouteSpec("pine", "Pine", -3, new Color(0.22f, 0.46f, 0.43f), new Color(0.18f, 0.32f, 0.18f), new Color(0.3f, 0.22f, 0.14f), new Color(0.38f, 0.8f, 0.43f), forestBackdrop, forestGround, forestPlatform, "sapling", "birchling", "birchling", new[] { "Pine Saplings", "Pine + Birchlings", "Pine Timber", "Pine Timber + Heartwood", "Heartwood Stand" }),
-                new RouteSpec("rocks", "Rocks", 1, new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f), stoneBackdrop, forestGround, stonePlatform, "rock_creature", "rock_creature", "copper_orelet", new[] { "Rocklets", "Rocklets + Rocklings", "Rocklings", "Rocklings + Dense Rock", "Dense Rock Cluster" }),
-                new RouteSpec("coal", "Coal", 2, new Color(0.26f, 0.3f, 0.34f), new Color(0.21f, 0.21f, 0.2f), new Color(0.36f, 0.35f, 0.34f), new Color(0.84f, 0.62f, 0.42f), coalBackdrop, forestGround, coalPlatform, "coal_sprite", "coal_sprite", "coal_sprite", new[] { "Coal Sprites", "Coal Sprites + Dense Coal", "Dense Coal", "Dense Coal + Coal Nodes", "Coal Node Cluster" }),
-                new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), copperBackdrop, forestGround, copperPlatform, "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
-                new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), stoneBackdrop, forestGround, stonePlatform, "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Tin Chips", "Tin Chips + Tinlings", "Tinlings", "Tinlings + Tin Nodes", "Tin Node Cluster" }),
-                new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), stoneBackdrop, forestGround, stonePlatform, "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Zync Chips", "Zync Chips + Zynclings", "Zynclings", "Zynclings + Zync Nodes", "Zync Node Cluster" }),
-                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), copperBackdrop, forestGround, copperPlatform, "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
-                new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), stoneBackdrop, forestGround, stonePlatform, "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Iron Chips", "Iron Chips + Ironlings", "Ironlings", "Ironlings + Iron Nodes", "Iron Node Cluster" })
+                new RouteSpec("saplings", "Saplings", -1, new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f), forestBackdrop, forestGround, forestPlatform, "sapling", "sapling", "sapling", 1, new[] { "Saplings" }),
+                new RouteSpec("birch", "Birch", -2, new Color(0.28f, 0.52f, 0.45f), new Color(0.24f, 0.36f, 0.19f), new Color(0.53f, 0.42f, 0.24f), new Color(0.64f, 0.9f, 0.58f), forestBackdrop, forestGround, forestPlatform, "birchlet", "birchling", "birchtree", RouteDepthCount, new[] { "Birchlets", "Birchlets + Birchlings", "Birchlings", "Birchlings + Birchtrees", "Birchtree Stand" }),
+                new RouteSpec("pine", "Pine", -3, new Color(0.22f, 0.46f, 0.43f), new Color(0.18f, 0.32f, 0.18f), new Color(0.3f, 0.22f, 0.14f), new Color(0.38f, 0.8f, 0.43f), forestBackdrop, forestGround, forestPlatform, "pinelet", "pineling", "pinetree", RouteDepthCount, new[] { "Pinelets", "Pinelets + Pinelings", "Pinelings", "Pinelings + Pinetrees", "Pinetree Stand" }),
+                new RouteSpec("rocks", "Rocks", 1, new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f), stoneBackdrop, forestGround, stonePlatform, "rocklet", "rockling", "rock_node", RouteDepthCount, new[] { "Rocklets", "Rocklets + Rocklings", "Rocklings", "Rocklings + Rock Nodes", "Rock Node Cluster" }),
+                new RouteSpec("coal", "Coal", 2, new Color(0.26f, 0.3f, 0.34f), new Color(0.21f, 0.21f, 0.2f), new Color(0.36f, 0.35f, 0.34f), new Color(0.84f, 0.62f, 0.42f), coalBackdrop, forestGround, coalPlatform, "coal_orelet", "coal_oreling", "coal_ore_node", RouteDepthCount, new[] { "Coal Orelets", "Orelets + Orelings", "Coal Orelings", "Orelings + Coal Nodes", "Coal Node Cluster" }),
+                new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), copperBackdrop, forestGround, copperPlatform, "copper_orelet", "copper_oreling", "copper_ore_node", RouteDepthCount, new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
+                new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), stoneBackdrop, forestGround, stonePlatform, "tin_orelet", "tin_oreling", "tin_ore_node", RouteDepthCount, new[] { "Tin Orelets", "Orelets + Orelings", "Tin Orelings", "Orelings + Tin Nodes", "Tin Node Cluster" }),
+                new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), stoneBackdrop, forestGround, stonePlatform, "zync_orelet", "zync_oreling", "zync_ore_node", RouteDepthCount, new[] { "Zync Orelets", "Orelets + Orelings", "Zync Orelings", "Orelings + Zync Nodes", "Zync Node Cluster" }),
+                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), copperBackdrop, forestGround, copperPlatform, "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", RouteDepthCount, new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
+                new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), stoneBackdrop, forestGround, stonePlatform, "iron_orelet", "iron_oreling", "iron_ore_node", RouteDepthCount, new[] { "Iron Orelets", "Orelets + Orelings", "Iron Orelings", "Orelings + Iron Nodes", "Iron Node Cluster" })
             };
         }
 
@@ -817,6 +821,8 @@ namespace ProjectEclipse.EditorTools
                 {
                     placedEnemies.arraySize = 0;
                 }
+
+                ApplyRouteEnemyDefinitions(managerObject);
                 managerObject.ApplyModifiedPropertiesWithoutUndo();
             }
 
@@ -847,6 +853,41 @@ namespace ProjectEclipse.EditorTools
             }
 
             return null;
+        }
+
+        private static void ApplyRouteEnemyDefinitions(SerializedObject managerObject)
+        {
+            SerializedProperty definitions = managerObject.FindProperty("routeEnemyDefinitions");
+            if (definitions == null)
+            {
+                return;
+            }
+
+            List<EnemyDefinition> routeDefinitions = new List<EnemyDefinition>();
+            RouteSpec[] routes = CreateRouteSpecs();
+            for (int i = 0; i < routes.Length; i++)
+            {
+                AddRouteDefinition(routeDefinitions, routes[i].BaseEnemyId);
+                AddRouteDefinition(routeDefinitions, routes[i].MidEnemyId);
+                AddRouteDefinition(routeDefinitions, routes[i].HardEnemyId);
+            }
+
+            definitions.arraySize = routeDefinitions.Count;
+            for (int i = 0; i < routeDefinitions.Count; i++)
+            {
+                definitions.GetArrayElementAtIndex(i).objectReferenceValue = routeDefinitions[i];
+            }
+        }
+
+        private static void AddRouteDefinition(List<EnemyDefinition> routeDefinitions, string enemyId)
+        {
+            EnemyDefinition definition = FindEnemyDefinition(enemyId);
+            if (definition == null || routeDefinitions.Contains(definition))
+            {
+                return;
+            }
+
+            routeDefinitions.Add(definition);
         }
 
         private static float GetPlayerFeetOffset()

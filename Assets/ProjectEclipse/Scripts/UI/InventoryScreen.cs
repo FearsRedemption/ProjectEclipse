@@ -259,7 +259,7 @@ namespace ProjectEclipse.UI
         private void DrawSelectedSummary()
         {
             Rect summary = GUILayoutUtility.GetRect(480f, SelectedSummaryHeight, GUILayout.Width(480f), GUILayout.Height(SelectedSummaryHeight));
-            GameGuiStyles.DrawBox(summary, new Color(0.1f, 0.13f, 0.14f, 0.96f), new Color(0.33f, 0.4f, 0.39f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(summary);
             if (selectedItem == null)
             {
                 GUI.Label(new Rect(summary.x + 10f, summary.y + 8f, summary.width - 20f, 20f), "Selected: None", GameGuiStyles.HeaderLabel);

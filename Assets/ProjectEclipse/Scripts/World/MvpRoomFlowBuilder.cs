@@ -117,9 +117,10 @@ namespace ProjectEclipse.World
             public string BaseEnemyId;
             public string MidEnemyId;
             public string HardEnemyId;
+            public int DepthCount;
             public string[] DepthNames;
 
-            public RouteSpec(string id, string displayName, int horizontalIndex, Color sky, Color ground, Color platform, Color portal, string baseEnemyId, string midEnemyId, string hardEnemyId, string[] depthNames)
+            public RouteSpec(string id, string displayName, int horizontalIndex, Color sky, Color ground, Color platform, Color portal, string baseEnemyId, string midEnemyId, string hardEnemyId, int depthCount, string[] depthNames)
             {
                 Id = id;
                 DisplayName = displayName;
@@ -131,6 +132,7 @@ namespace ProjectEclipse.World
                 BaseEnemyId = baseEnemyId;
                 MidEnemyId = midEnemyId;
                 HardEnemyId = hardEnemyId;
+                DepthCount = Mathf.Clamp(depthCount, 1, RouteDepthCount);
                 DepthNames = depthNames;
             }
         }
@@ -258,7 +260,7 @@ namespace ProjectEclipse.World
             RouteSpec[] routes = CreateRouteSpecs();
             for (int i = 0; i < routes.Length; i++)
             {
-                for (int depth = 1; depth < RouteDepthCount; depth++)
+                for (int depth = 1; depth < routes[i].DepthCount; depth++)
                 {
                     LinkRooms(root.transform, specs, GetDepthRoomId(routes[i].Id, depth), PortalSide.Up, GetDepthRoomId(routes[i].Id, depth + 1), PortalSide.Down);
                 }
@@ -281,7 +283,7 @@ namespace ProjectEclipse.World
             for (int i = 0; i < routes.Length; i++)
             {
                 RouteSpec route = routes[i];
-                for (int depth = 1; depth <= RouteDepthCount; depth++)
+                for (int depth = 1; depth <= route.DepthCount; depth++)
                 {
                     int depthIndex = depth - 1;
                     float depthTint = depthIndex * 0.045f;
@@ -308,16 +310,16 @@ namespace ProjectEclipse.World
         {
             return new[]
             {
-                new RouteSpec("saplings", "Saplings", -1, new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f), "sapling", "birchling", "birchling", new[] { "Saplings", "Saplings + Birchlings", "Birchlings", "Birchlings + Pine", "Pine Stand" }),
-                new RouteSpec("birch", "Birch", -2, new Color(0.28f, 0.52f, 0.45f), new Color(0.24f, 0.36f, 0.19f), new Color(0.53f, 0.42f, 0.24f), new Color(0.64f, 0.9f, 0.58f), "birchling", "birchling", "birchling", new[] { "Birchlings", "Thick Birchlings", "Birch Grove", "Dense Birch Grove", "Old Birch Grove" }),
-                new RouteSpec("pine", "Pine", -3, new Color(0.22f, 0.46f, 0.43f), new Color(0.18f, 0.32f, 0.18f), new Color(0.3f, 0.22f, 0.14f), new Color(0.38f, 0.8f, 0.43f), "sapling", "birchling", "birchling", new[] { "Pine Saplings", "Pine + Birchlings", "Pine Timber", "Pine Timber + Heartwood", "Heartwood Stand" }),
-                new RouteSpec("rocks", "Rocks", 1, new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f), "rock_creature", "rock_creature", "copper_orelet", new[] { "Rocklets", "Rocklets + Rocklings", "Rocklings", "Rocklings + Dense Rock", "Dense Rock Cluster" }),
-                new RouteSpec("coal", "Coal", 2, new Color(0.26f, 0.3f, 0.34f), new Color(0.21f, 0.21f, 0.2f), new Color(0.36f, 0.35f, 0.34f), new Color(0.84f, 0.62f, 0.42f), "coal_sprite", "coal_sprite", "coal_sprite", new[] { "Coal Sprites", "Coal Sprites + Dense Coal", "Dense Coal", "Dense Coal + Coal Nodes", "Coal Node Cluster" }),
-                new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
-                new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Tin Chips", "Tin Chips + Tinlings", "Tinlings", "Tinlings + Tin Nodes", "Tin Node Cluster" }),
-                new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Zync Chips", "Zync Chips + Zynclings", "Zynclings", "Zynclings + Zync Nodes", "Zync Node Cluster" }),
-                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
-                new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), "copper_orelet", "copper_oreling", "copper_ore_node", new[] { "Iron Chips", "Iron Chips + Ironlings", "Ironlings", "Ironlings + Iron Nodes", "Iron Node Cluster" })
+                new RouteSpec("saplings", "Saplings", -1, new Color(0.25f, 0.5f, 0.47f), new Color(0.23f, 0.37f, 0.2f), new Color(0.39f, 0.28f, 0.16f), new Color(0.42f, 0.86f, 0.48f), "sapling", "sapling", "sapling", 1, new[] { "Saplings" }),
+                new RouteSpec("birch", "Birch", -2, new Color(0.28f, 0.52f, 0.45f), new Color(0.24f, 0.36f, 0.19f), new Color(0.53f, 0.42f, 0.24f), new Color(0.64f, 0.9f, 0.58f), "birchlet", "birchling", "birchtree", RouteDepthCount, new[] { "Birchlets", "Birchlets + Birchlings", "Birchlings", "Birchlings + Birchtrees", "Birchtree Stand" }),
+                new RouteSpec("pine", "Pine", -3, new Color(0.22f, 0.46f, 0.43f), new Color(0.18f, 0.32f, 0.18f), new Color(0.3f, 0.22f, 0.14f), new Color(0.38f, 0.8f, 0.43f), "pinelet", "pineling", "pinetree", RouteDepthCount, new[] { "Pinelets", "Pinelets + Pinelings", "Pinelings", "Pinelings + Pinetrees", "Pinetree Stand" }),
+                new RouteSpec("rocks", "Rocks", 1, new Color(0.31f, 0.39f, 0.43f), new Color(0.31f, 0.31f, 0.32f), new Color(0.43f, 0.43f, 0.43f), new Color(0.66f, 0.74f, 0.86f), "rocklet", "rockling", "rock_node", RouteDepthCount, new[] { "Rocklets", "Rocklets + Rocklings", "Rocklings", "Rocklings + Rock Nodes", "Rock Node Cluster" }),
+                new RouteSpec("coal", "Coal", 2, new Color(0.26f, 0.3f, 0.34f), new Color(0.21f, 0.21f, 0.2f), new Color(0.36f, 0.35f, 0.34f), new Color(0.84f, 0.62f, 0.42f), "coal_orelet", "coal_oreling", "coal_ore_node", RouteDepthCount, new[] { "Coal Orelets", "Orelets + Orelings", "Coal Orelings", "Orelings + Coal Nodes", "Coal Node Cluster" }),
+                new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), "copper_orelet", "copper_oreling", "copper_ore_node", RouteDepthCount, new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
+                new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), "tin_orelet", "tin_oreling", "tin_ore_node", RouteDepthCount, new[] { "Tin Orelets", "Orelets + Orelings", "Tin Orelings", "Orelings + Tin Nodes", "Tin Node Cluster" }),
+                new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), "zync_orelet", "zync_oreling", "zync_ore_node", RouteDepthCount, new[] { "Zync Orelets", "Orelets + Orelings", "Zync Orelings", "Orelings + Zync Nodes", "Zync Node Cluster" }),
+                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", RouteDepthCount, new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
+                new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), "iron_orelet", "iron_oreling", "iron_ore_node", RouteDepthCount, new[] { "Iron Orelets", "Orelets + Orelings", "Iron Orelings", "Orelings + Iron Nodes", "Iron Node Cluster" })
             };
         }
 
@@ -615,9 +617,34 @@ namespace ProjectEclipse.World
             string id = enemy != null && enemy.Definition != null ? enemy.Definition.EnemyId.ToLowerInvariant() : string.Empty;
             string label = enemy != null && enemy.Definition != null ? enemy.Definition.DisplayName.ToLowerInvariant() : string.Empty;
             string haystack = id + " " + label;
-            if (haystack.Contains("birch"))
+            if (haystack.Contains("birchtree"))
             {
-                return GetRoomIndexOrDefault("saplings-d3", 0);
+                return GetRoomIndexOrDefault("birch-d5", 0);
+            }
+
+            if (haystack.Contains("birchling"))
+            {
+                return GetRoomIndexOrDefault("birch-d3", 0);
+            }
+
+            if (haystack.Contains("birchlet") || haystack.Contains("birch"))
+            {
+                return GetRoomIndexOrDefault("birch-d1", 0);
+            }
+
+            if (haystack.Contains("pinetree"))
+            {
+                return GetRoomIndexOrDefault("pine-d5", 0);
+            }
+
+            if (haystack.Contains("pineling"))
+            {
+                return GetRoomIndexOrDefault("pine-d3", 0);
+            }
+
+            if (haystack.Contains("pinelet") || haystack.Contains("pine"))
+            {
+                return GetRoomIndexOrDefault("pine-d1", 0);
             }
 
             if (haystack.Contains("sapling") || haystack.Contains("tree"))
@@ -625,32 +652,57 @@ namespace ProjectEclipse.World
                 return GetRoomIndexOrDefault("saplings-d1", 0);
             }
 
-            if (haystack.Contains("ore_node") || haystack.Contains("ore node") || haystack.Contains("node"))
+            if (haystack.Contains("route_gate") || haystack.Contains("sentinel") || haystack.Contains("boss"))
             {
-                return GetRoomIndexOrDefault("copper-d5", 0);
+                return GetRoomIndexOrDefault("miniboss-d5", 0);
             }
 
-            if (haystack.Contains("oreling"))
+            if (haystack.Contains("tin"))
             {
-                return GetRoomIndexOrDefault("copper-d3", 0);
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("tin", haystack), 0);
             }
 
-            if (haystack.Contains("copper") || haystack.Contains("orelet"))
+            if (haystack.Contains("zync") || haystack.Contains("zinc"))
             {
-                return GetRoomIndexOrDefault("copper-d1", 0);
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("zync", haystack), 0);
+            }
+
+            if (haystack.Contains("iron"))
+            {
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("iron", haystack), 0);
+            }
+
+            if (haystack.Contains("copper"))
+            {
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("copper", haystack), 0);
             }
 
             if (haystack.Contains("stone") || haystack.Contains("rock"))
             {
-                return GetRoomIndexOrDefault("rocks-d1", 0);
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("rocks", haystack), 0);
             }
 
             if (haystack.Contains("coal"))
             {
-                return GetRoomIndexOrDefault("coal-d1", 0);
+                return GetRoomIndexOrDefault(GetMaterialDepthRoom("coal", haystack), 0);
             }
 
             return GetRoomIndexOrDefault("saplings-d1", 0);
+        }
+
+        private static string GetMaterialDepthRoom(string routeId, string haystack)
+        {
+            if (haystack.Contains("node"))
+            {
+                return routeId + "-d5";
+            }
+
+            if (haystack.Contains("ling"))
+            {
+                return routeId + "-d3";
+            }
+
+            return routeId + "-d1";
         }
 
         private int GetRoomIndexOrDefault(string id, int fallback)

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: TinOreling
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectEclipse.Enemies.EnemyDefinition
+  enemyId: tin_oreling
+  displayName: Tin Oreling
+  rank: 0
+  resourceTier: 10
+  maxHealth: 32
+  contactDamage: 2
+  moveSpeed: 0.92
+  chaseRange: 5.8
+  attackRange: 0.92
+  attackCooldown: 1.18
+  attackLungeForce: 0.72
+  attackKnockback: 3.2
+  rangedCastRange: 5.2
+  rangedCastDamage: 2
+  rangedCastCooldown: 6.8
+  rangedCastChance: 0.28
+  rangedProjectileSpeed: 5.4
+  rangedProjectileLifetime: 3
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 1, y: 1}
+  colliderSize: {x: 0.86, y: 0.76}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.6256, g: 0.6696, b: 0.6696, a: 1}
+  dropTable: {fileID: 11400000, guid: 1a843d00cea168f47810d200796b6cc0, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: 177b64a5e97e02b4da6fe300b58a20f1, type: 2}
+    minQuantity: 1
+    maxQuantity: 3
+    chance: 1

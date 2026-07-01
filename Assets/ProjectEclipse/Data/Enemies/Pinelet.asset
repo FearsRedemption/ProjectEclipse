@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: Pinelet
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectEclipse.Enemies.EnemyDefinition
+  enemyId: pinelet
+  displayName: Pinelet
+  rank: 0
+  resourceTier: 0
+  maxHealth: 10
+  contactDamage: 1
+  moveSpeed: 0.76
+  chaseRange: 5.2
+  attackRange: 0.82
+  attackCooldown: 1.25
+  attackLungeForce: 0.5
+  attackKnockback: 2.4
+  rangedCastRange: 0
+  rangedCastDamage: 1
+  rangedCastCooldown: 7
+  rangedCastChance: 0.2
+  rangedProjectileSpeed: 5.4
+  rangedProjectileLifetime: 3
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 0.82, y: 0.82}
+  colliderSize: {x: 0.66, y: 0.58}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.286, g: 0.366, b: 0.1895, a: 1}
+  dropTable: {fileID: 11400000, guid: 6faa62f968aadb64cb17b25b0af5d030, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: ea9653bd7955e464ea4e900cbf832138, type: 2}
+    minQuantity: 1
+    maxQuantity: 2
+    chance: 1

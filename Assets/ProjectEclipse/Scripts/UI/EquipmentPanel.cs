@@ -43,7 +43,7 @@ namespace ProjectEclipse.UI
             GUILayout.BeginVertical(GUILayout.Width(132f));
             GUILayout.Label("Warrior", GameGuiStyles.HeaderLabel);
             Rect preview = GUILayoutUtility.GetRect(132f, 210f, GUILayout.Width(132f), GUILayout.Height(210f));
-            GameGuiStyles.DrawBox(preview, new Color(0.09f, 0.12f, 0.13f, 1f), new Color(0.35f, 0.42f, 0.4f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(preview);
             DrawPreviewSilhouette(preview);
             GUILayout.EndVertical();
         }
@@ -71,7 +71,7 @@ namespace ProjectEclipse.UI
         private void DrawSlot(EquipmentSlot slot, string label, ItemHoverState hover)
         {
             Rect row = GUILayoutUtility.GetRect(150f, SlotRowHeight, GUILayout.Width(150f), GUILayout.Height(SlotRowHeight));
-            GameGuiStyles.DrawBox(row, new Color(0.11f, 0.14f, 0.15f, 0.96f), new Color(0.29f, 0.36f, 0.35f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(row);
 
             ItemDefinition item = equipment != null ? equipment.GetEquippedItem(slot) : null;
             GUI.Label(new Rect(row.x + 7f, row.y + 6f, 86f, 17f), label, GameGuiStyles.SmallLabel);
@@ -89,7 +89,7 @@ namespace ProjectEclipse.UI
         private void DrawCompactSlot(EquipmentSlot slot, string label, ItemHoverState hover)
         {
             Rect cell = GUILayoutUtility.GetRect(56f, 66f, GUILayout.Width(56f), GUILayout.Height(66f));
-            GameGuiStyles.DrawBox(cell, new Color(0.11f, 0.14f, 0.15f, 0.96f), new Color(0.29f, 0.36f, 0.35f, 1f), 1f);
+            GameGuiStyles.DrawInsetPanel(cell);
             GUI.Label(new Rect(cell.x + 4f, cell.y + 3f, cell.width - 8f, 15f), label, GameGuiStyles.CenterLabel);
 
             ItemDefinition item = equipment != null ? equipment.GetEquippedItem(slot) : null;

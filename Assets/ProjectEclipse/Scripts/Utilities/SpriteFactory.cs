@@ -409,7 +409,23 @@ namespace ProjectEclipse.Utilities
                 return sprite;
             }
 
-            if (key.Contains("ore_node") || key.Contains("ore node") || key.Contains("node"))
+            int stage;
+            Color first;
+            Color second;
+            Color third;
+            if (TryGetTreeCreatureVisual(key, out stage, out first, out second, out third))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime " + definition.DisplayName, pixels => DrawTreeCreature(pixels, stage, first, second, third));
+            }
+            else if (TryGetOreCreatureVisual(key, out stage, out first, out second, out third))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime " + definition.DisplayName, pixels => DrawOreCreature(pixels, stage, first, second, third));
+            }
+            else if (key.Contains("route_gate") || key.Contains("sentinel") || key.Contains("boss"))
+            {
+                sprite = CreateCreatureLayerSprite("Runtime Route Gate Sentinel", DrawRouteGateSentinel);
+            }
+            else if (key.Contains("ore_node") || key.Contains("ore node") || key.Contains("node"))
             {
                 sprite = CreateCreatureLayerSprite("Runtime Copper Ore Node", DrawCopperOreNode);
             }
@@ -428,6 +444,128 @@ namespace ProjectEclipse.Utilities
 
             CreatureSprites[key] = sprite;
             return sprite;
+        }
+
+        private static bool TryGetTreeCreatureVisual(string key, out int stage, out Color bark, out Color leaf, out Color light)
+        {
+            stage = 0;
+            bark = new Color(0.42f, 0.28f, 0.15f, 1f);
+            leaf = new Color(0.3f, 0.62f, 0.25f, 1f);
+            light = new Color(0.62f, 0.86f, 0.42f, 1f);
+
+            if (key.Contains("birch"))
+            {
+                bark = new Color(0.74f, 0.7f, 0.54f, 1f);
+                leaf = new Color(0.42f, 0.65f, 0.34f, 1f);
+                light = new Color(0.75f, 0.9f, 0.48f, 1f);
+                stage = GetTreeStage(key);
+                return true;
+            }
+
+            if (key.Contains("pine"))
+            {
+                bark = new Color(0.38f, 0.25f, 0.13f, 1f);
+                leaf = new Color(0.2f, 0.52f, 0.26f, 1f);
+                light = new Color(0.48f, 0.76f, 0.32f, 1f);
+                stage = GetTreeStage(key);
+                return true;
+            }
+
+            if (key.Contains("sapling"))
+            {
+                bark = new Color(0.36f, 0.22f, 0.12f, 1f);
+                leaf = new Color(0.28f, 0.66f, 0.27f, 1f);
+                light = new Color(0.65f, 0.9f, 0.38f, 1f);
+                stage = 0;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static int GetTreeStage(string key)
+        {
+            if (key.Contains("tree"))
+            {
+                return 2;
+            }
+
+            if (key.Contains("ling"))
+            {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        private static bool TryGetOreCreatureVisual(string key, out int stage, out Color rock, out Color ore, out Color light)
+        {
+            stage = GetOreStage(key);
+            rock = new Color(0.48f, 0.46f, 0.42f, 1f);
+            ore = new Color(0.88f, 0.36f, 0.12f, 1f);
+            light = new Color(1f, 0.62f, 0.24f, 1f);
+
+            if (key.Contains("coal"))
+            {
+                rock = new Color(0.16f, 0.16f, 0.17f, 1f);
+                ore = new Color(0.74f, 0.52f, 0.3f, 1f);
+                light = new Color(1f, 0.72f, 0.38f, 1f);
+                return true;
+            }
+
+            if (key.Contains("tin"))
+            {
+                rock = new Color(0.5f, 0.53f, 0.53f, 1f);
+                ore = new Color(0.78f, 0.88f, 0.88f, 1f);
+                light = new Color(0.94f, 1f, 1f, 1f);
+                return true;
+            }
+
+            if (key.Contains("zync") || key.Contains("zinc"))
+            {
+                rock = new Color(0.43f, 0.48f, 0.43f, 1f);
+                ore = new Color(0.68f, 0.9f, 0.62f, 1f);
+                light = new Color(0.86f, 1f, 0.78f, 1f);
+                return true;
+            }
+
+            if (key.Contains("iron"))
+            {
+                rock = new Color(0.43f, 0.41f, 0.38f, 1f);
+                ore = new Color(0.72f, 0.47f, 0.3f, 1f);
+                light = new Color(0.9f, 0.66f, 0.46f, 1f);
+                return true;
+            }
+
+            if (key.Contains("rock") || key.Contains("stone"))
+            {
+                rock = new Color(0.5f, 0.52f, 0.54f, 1f);
+                ore = new Color(0.7f, 0.73f, 0.76f, 1f);
+                light = new Color(0.88f, 0.9f, 0.92f, 1f);
+                return true;
+            }
+
+            if (key.Contains("copper") || key.Contains("orelet") || key.Contains("oreling") || key.Contains("ore_node") || key.Contains("ore node"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private static int GetOreStage(string key)
+        {
+            if (key.Contains("node"))
+            {
+                return 2;
+            }
+
+            if (key.Contains("ling"))
+            {
+                return 1;
+            }
+
+            return 0;
         }
 
         public static Sprite GetRoomBackgroundSprite()
@@ -649,6 +787,180 @@ namespace ProjectEclipse.Utilities
             texture.SetPixels(pixels);
             texture.Apply();
             return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 96f);
+        }
+
+        private static void DrawOreCreature(Color[] pixels, int stage, Color rock, Color ore, Color oreLight)
+        {
+            Color outline = Color.Lerp(rock, Color.black, 0.72f);
+            Color rockShade = Color.Lerp(rock, Color.black, 0.28f);
+            Color rockLight = Color.Lerp(rock, Color.white, 0.3f);
+            Color eye = new Color(1f, 0.86f, 0.45f, 1f);
+
+            if (stage <= 0)
+            {
+                FillEllipse(pixels, 48, 31, 18, 16, outline);
+                FillEllipse(pixels, 48, 32, 16, 14, rock);
+                FillEllipse(pixels, 38, 18, 7, 7, outline);
+                FillEllipse(pixels, 58, 18, 7, 7, outline);
+                FillEllipse(pixels, 38, 19, 5, 5, rockLight);
+                FillEllipse(pixels, 58, 19, 5, 5, rockShade);
+                FillRect(pixels, 42, 42, 48, 45, outline);
+                FillRect(pixels, 49, 42, 55, 45, outline);
+                FillRect(pixels, 42, 43, 48, 45, rock);
+                FillRect(pixels, 49, 43, 55, 45, rockShade);
+                FillEllipse(pixels, 44, 49, 4, 4, ore);
+                FillEllipse(pixels, 56, 41, 3, 3, oreLight);
+                FillRect(pixels, 43, 28, 53, 31, outline);
+                FillRect(pixels, 45, 29, 47, 30, eye);
+                FillRect(pixels, 50, 29, 52, 30, eye);
+                return;
+            }
+
+            if (stage == 1)
+            {
+                FillEllipse(pixels, 48, 38, 23, 22, outline);
+                FillEllipse(pixels, 48, 39, 20, 19, rock);
+                FillEllipse(pixels, 36, 24, 10, 9, outline);
+                FillEllipse(pixels, 60, 24, 10, 9, outline);
+                FillEllipse(pixels, 36, 25, 8, 7, rockShade);
+                FillEllipse(pixels, 60, 25, 8, 7, rockLight);
+                FillEllipse(pixels, 31, 40, 7, 13, outline);
+                FillEllipse(pixels, 65, 40, 7, 13, outline);
+                FillEllipse(pixels, 31, 40, 5, 11, rock);
+                FillEllipse(pixels, 65, 40, 5, 11, rockShade);
+                FillRect(pixels, 38, 52, 46, 58, outline);
+                FillRect(pixels, 51, 52, 59, 58, outline);
+                FillRect(pixels, 39, 53, 46, 58, rockShade);
+                FillRect(pixels, 51, 53, 58, 58, rock);
+                FillEllipse(pixels, 39, 45, 5, 5, ore);
+                FillEllipse(pixels, 54, 48, 6, 6, ore);
+                FillEllipse(pixels, 59, 36, 5, 5, oreLight);
+                FillEllipse(pixels, 47, 58, 4, 4, ore);
+                FillRect(pixels, 41, 36, 55, 39, outline);
+                FillRect(pixels, 44, 37, 47, 38, eye);
+                FillRect(pixels, 51, 37, 54, 38, eye);
+                return;
+            }
+
+            FillEllipse(pixels, 48, 30, 30, 24, outline);
+            FillEllipse(pixels, 48, 31, 27, 21, rock);
+            FillEllipse(pixels, 29, 27, 14, 15, outline);
+            FillEllipse(pixels, 68, 26, 15, 16, outline);
+            FillEllipse(pixels, 29, 28, 12, 13, rockLight);
+            FillEllipse(pixels, 68, 27, 13, 14, rockShade);
+            FillEllipse(pixels, 43, 50, 22, 10, outline);
+            FillEllipse(pixels, 43, 51, 20, 8, rock);
+            FillEllipse(pixels, 62, 48, 18, 10, outline);
+            FillEllipse(pixels, 62, 49, 16, 8, rockLight);
+            FillEllipse(pixels, 31, 48, 9, 7, ore);
+            FillEllipse(pixels, 45, 55, 8, 7, oreLight);
+            FillEllipse(pixels, 57, 40, 10, 9, ore);
+            FillEllipse(pixels, 67, 57, 7, 6, oreLight);
+            FillEllipse(pixels, 74, 31, 6, 7, ore);
+            FillEllipse(pixels, 42, 30, 6, 6, oreLight);
+            FillEllipse(pixels, 25, 31, 5, 5, ore);
+            FillEllipse(pixels, 52, 20, 7, 6, ore);
+            FillRect(pixels, 38, 31, 59, 35, outline);
+            FillRect(pixels, 42, 32, 46, 33, eye);
+            FillRect(pixels, 53, 32, 57, 33, eye);
+        }
+
+        private static void DrawTreeCreature(Color[] pixels, int stage, Color bark, Color leaf, Color light)
+        {
+            Color outline = Color.Lerp(bark, Color.black, 0.72f);
+            Color barkShade = Color.Lerp(bark, Color.black, 0.3f);
+            Color leafShade = Color.Lerp(leaf, Color.black, 0.24f);
+            Color eye = new Color(1f, 0.86f, 0.42f, 1f);
+
+            if (stage <= 0)
+            {
+                FillEllipse(pixels, 48, 24, 17, 15, outline);
+                FillEllipse(pixels, 48, 25, 15, 13, leaf);
+                FillEllipse(pixels, 39, 31, 8, 7, leafShade);
+                FillEllipse(pixels, 57, 33, 9, 8, light);
+                FillRect(pixels, 41, 36, 55, 57, outline);
+                FillRect(pixels, 43, 37, 53, 57, bark);
+                FillRect(pixels, 44, 45, 51, 49, barkShade);
+                FillRect(pixels, 36, 57, 48, 62, outline);
+                FillRect(pixels, 48, 57, 60, 62, outline);
+                FillRect(pixels, 37, 58, 48, 60, barkShade);
+                FillRect(pixels, 48, 58, 59, 60, bark);
+                FillRect(pixels, 44, 39, 47, 40, eye);
+                FillRect(pixels, 51, 39, 54, 40, eye);
+                return;
+            }
+
+            if (stage == 1)
+            {
+                FillEllipse(pixels, 48, 24, 26, 18, outline);
+                FillEllipse(pixels, 48, 25, 23, 15, leaf);
+                FillEllipse(pixels, 32, 31, 13, 10, leafShade);
+                FillEllipse(pixels, 64, 32, 14, 11, light);
+                FillRect(pixels, 38, 36, 58, 67, outline);
+                FillRect(pixels, 41, 37, 55, 67, bark);
+                FillRect(pixels, 42, 44, 53, 49, barkShade);
+                FillEllipse(pixels, 36, 55, 10, 8, outline);
+                FillEllipse(pixels, 60, 55, 10, 8, outline);
+                FillEllipse(pixels, 36, 55, 8, 6, barkShade);
+                FillEllipse(pixels, 60, 55, 8, 6, bark);
+                FillRect(pixels, 33, 67, 47, 73, outline);
+                FillRect(pixels, 50, 67, 65, 73, outline);
+                FillRect(pixels, 34, 68, 47, 71, barkShade);
+                FillRect(pixels, 50, 68, 64, 71, bark);
+                FillRect(pixels, 43, 40, 46, 41, eye);
+                FillRect(pixels, 51, 40, 54, 41, eye);
+                return;
+            }
+
+            FillEllipse(pixels, 47, 22, 30, 18, outline);
+            FillEllipse(pixels, 47, 23, 27, 15, leaf);
+            FillEllipse(pixels, 29, 31, 16, 13, leafShade);
+            FillEllipse(pixels, 68, 32, 18, 14, light);
+            FillEllipse(pixels, 48, 41, 24, 13, leaf);
+            FillRect(pixels, 36, 43, 60, 78, outline);
+            FillRect(pixels, 39, 44, 57, 78, bark);
+            FillRect(pixels, 41, 48, 54, 55, barkShade);
+            FillRect(pixels, 46, 44, 49, 78, Color.Lerp(bark, Color.white, 0.12f));
+            FillEllipse(pixels, 30, 64, 13, 9, outline);
+            FillEllipse(pixels, 66, 64, 13, 9, outline);
+            FillEllipse(pixels, 30, 64, 10, 7, barkShade);
+            FillEllipse(pixels, 66, 64, 10, 7, bark);
+            FillRect(pixels, 28, 78, 47, 85, outline);
+            FillRect(pixels, 50, 78, 69, 85, outline);
+            FillRect(pixels, 30, 79, 47, 82, barkShade);
+            FillRect(pixels, 50, 79, 67, 82, bark);
+            FillRect(pixels, 42, 47, 46, 48, eye);
+            FillRect(pixels, 51, 47, 55, 48, eye);
+        }
+
+        private static void DrawRouteGateSentinel(Color[] pixels)
+        {
+            Color outline = new Color(0.11f, 0.08f, 0.16f, 1f);
+            Color stone = new Color(0.36f, 0.33f, 0.42f, 1f);
+            Color stoneLight = new Color(0.56f, 0.5f, 0.66f, 1f);
+            Color glow = new Color(0.82f, 0.66f, 1f, 1f);
+            Color eye = new Color(1f, 0.86f, 0.42f, 1f);
+
+            FillEllipse(pixels, 48, 26, 30, 19, outline);
+            FillEllipse(pixels, 48, 27, 27, 16, stone);
+            FillRect(pixels, 30, 32, 66, 67, outline);
+            FillRect(pixels, 33, 35, 63, 67, stone);
+            FillRect(pixels, 38, 39, 58, 63, stoneLight);
+            FillEllipse(pixels, 30, 47, 10, 16, outline);
+            FillEllipse(pixels, 66, 47, 10, 16, outline);
+            FillEllipse(pixels, 30, 48, 8, 13, stone);
+            FillEllipse(pixels, 66, 48, 8, 13, stone);
+            FillRect(pixels, 38, 23, 58, 29, outline);
+            FillRect(pixels, 40, 24, 56, 27, glow);
+            FillRect(pixels, 40, 49, 56, 53, outline);
+            FillRect(pixels, 43, 50, 46, 51, eye);
+            FillRect(pixels, 51, 50, 54, 51, eye);
+            FillEllipse(pixels, 48, 38, 8, 7, glow);
+            FillEllipse(pixels, 48, 38, 4, 4, Color.white);
+            FillRect(pixels, 34, 67, 44, 76, outline);
+            FillRect(pixels, 52, 67, 62, 76, outline);
+            FillRect(pixels, 35, 68, 43, 73, stone);
+            FillRect(pixels, 53, 68, 61, 73, stone);
         }
 
         private static void DrawCopperOrelet(Color[] pixels)

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce794da494d04da4ad32a6731f1cc114, type: 3}
-  m_Name: Birchling Drop Table
+  m_Name: BirchlingDropTable
   m_EditorClassIdentifier:
   tableId: birchling_drops
   entries:
   - item: {fileID: 11400000, guid: b8f0e122a3774c43a833d76d6132db01, type: 2}
     minQuantity: 1
-    maxQuantity: 2
-    chance: 0.5
+    maxQuantity: 3
+    chance: 1
   rareEntries: []

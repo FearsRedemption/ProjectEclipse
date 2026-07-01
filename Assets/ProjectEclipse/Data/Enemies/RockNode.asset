@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38d5bc795e69d4747a9c9f5221cd571c, type: 3}
+  m_Name: RockNode
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectEclipse.Enemies.EnemyDefinition
+  enemyId: rock_node
+  displayName: Rock Node
+  rank: 1
+  resourceTier: 1
+  maxHealth: 32
+  contactDamage: 3
+  moveSpeed: 0.46
+  chaseRange: 4.8
+  attackRange: 1.08
+  attackCooldown: 1.55
+  attackLungeForce: 0.35
+  attackKnockback: 4.7
+  rangedCastRange: 5.8
+  rangedCastDamage: 3
+  rangedCastCooldown: 8
+  rangedCastChance: 0.36
+  rangedProjectileSpeed: 5.4
+  rangedProjectileLifetime: 3
+  ignorePlayerAboveGearScore: -1
+  visualScale: {x: 1.24, y: 1.16}
+  colliderSize: {x: 1.28, y: 0.84}
+  spriteSheet: {fileID: 0}
+  placeholderColor: {r: 0.68, g: 0.7, b: 0.72, a: 1}
+  dropTable: {fileID: 11400000, guid: e101f379ee8549a4da76744e1f198634, type: 2}
+  drops:
+  - item: {fileID: 11400000, guid: 55bd2d59b58e57cb3fef5e95dd00611e, type: 2}
+    minQuantity: 2
+    maxQuantity: 4
+    chance: 1
