@@ -25,9 +25,9 @@ namespace ProjectEclipse.UI
         private bool initialized;
         private Rect inventoryWindowRect;
         private const float InventoryModalMaxWidth = 1180f;
-        private const float InventoryModalMaxHeight = 780f;
+        private const float InventoryModalMaxHeight = 720f;
         private const float InventoryModalMinWidth = 1128f;
-        private const float InventoryModalMinHeight = 720f;
+        private const float InventoryModalMinHeight = 620f;
 
         public static bool PointerBlocksGameplayInput { get; private set; }
 
@@ -128,7 +128,7 @@ namespace ProjectEclipse.UI
             inventoryWindowRect = GUILayout.Window(
                 2,
                 modal,
-                id => inventoryScreen.Draw(id, hover, modal.width - 32f, modal.height - 54f),
+                id => inventoryScreen.Draw(id, hover, modal.width - 42f, modal.height - 82f),
                 "Inventory / Equipment / Crafting",
                 GameGuiStyles.InventoryWindow);
             PointerBlocksGameplayInput = true;
@@ -143,7 +143,7 @@ namespace ProjectEclipse.UI
         private static Rect GetInventoryModalRect()
         {
             float horizontalMargin = Screen.width >= 1280 ? 48f : 16f;
-            float verticalMargin = Screen.height >= 800 ? 42f : 16f;
+            float verticalMargin = Screen.height >= 900 ? 56f : 24f;
             float maxWidth = Mathf.Max(320f, Screen.width - horizontalMargin * 2f);
             float maxHeight = Mathf.Max(320f, Screen.height - verticalMargin * 2f);
             float width = Mathf.Min(InventoryModalMaxWidth, maxWidth);

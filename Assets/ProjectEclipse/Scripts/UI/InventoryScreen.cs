@@ -16,8 +16,9 @@ namespace ProjectEclipse.UI
         private const float ManualDropLifetimeSeconds = 120f;
         private const float DefaultContentWidth = 1084f;
         private const float DefaultContentHeight = 668f;
+        private const float MinimumContentWidth = 960f;
+        private const float MinimumContentHeight = 540f;
         private const float LeftColumnWidth = 520f;
-        private const float RightColumnWidth = 512f;
         private const float ColumnGap = 16f;
         private const float EquipmentPanelHeight = 292f;
         private const float SelectedSummaryHeight = 76f;
@@ -66,16 +67,19 @@ namespace ProjectEclipse.UI
                 return;
             }
 
-            float contentWidth = Mathf.Max(DefaultContentWidth, availableWidth);
-            float contentHeight = Mathf.Max(DefaultContentHeight, availableHeight);
-            float innerHeight = Mathf.Max(560f, contentHeight - 24f);
+            float contentWidth = Mathf.Clamp(availableWidth, MinimumContentWidth, DefaultContentWidth);
+            float contentHeight = Mathf.Clamp(availableHeight, MinimumContentHeight, DefaultContentHeight);
+            float innerHeight = Mathf.Max(520f, contentHeight - 24f);
             float bodyHeight = !string.IsNullOrEmpty(feedback) ? innerHeight - 28f : innerHeight;
 
             GUILayout.BeginVertical(GameGuiStyles.InventorySurface, GUILayout.Width(contentWidth), GUILayout.Height(contentHeight));
             GUILayout.BeginHorizontal(GUILayout.Height(bodyHeight));
-            DrawLeftSide(hover, LeftColumnWidth, bodyHeight);
+            float usableWidth = Mathf.Max(MinimumContentWidth - 24f, contentWidth - 24f);
+            float leftWidth = Mathf.Clamp(usableWidth * 0.49f, 472f, LeftColumnWidth);
+            float rightWidth = Mathf.Max(420f, usableWidth - leftWidth - ColumnGap);
+            DrawLeftSide(hover, leftWidth, bodyHeight);
             GUILayout.Space(ColumnGap);
-            DrawRightSide(hover, RightColumnWidth, bodyHeight);
+            DrawRightSide(hover, rightWidth, bodyHeight);
             GUILayout.EndHorizontal();
 
             if (!string.IsNullOrEmpty(feedback))
@@ -96,7 +100,7 @@ namespace ProjectEclipse.UI
 
         private void DrawLeftSide(ItemHoverState hover, float width, float height)
         {
-            float craftingHeight = Mathf.Max(210f, height - EquipmentPanelHeight - 132f);
+            float craftingHeight = Mathf.Max(128f, height - EquipmentPanelHeight - 126f);
             GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(width), GUILayout.Height(height));
             GUILayout.Label("Character Equipment", GameGuiStyles.HeaderLabel);
             equipmentPanel.Draw(hover);
@@ -110,7 +114,7 @@ namespace ProjectEclipse.UI
 
         private void DrawRightSide(ItemHoverState hover, float width, float height)
         {
-            float gridHeight = Mathf.Max(300f, height - SelectedSummaryHeight - 86f);
+            float gridHeight = Mathf.Max(260f, height - SelectedSummaryHeight - 96f);
             GUILayout.BeginVertical(GameGuiStyles.SubPanel, GUILayout.Width(width), GUILayout.Height(height));
             DrawTabs();
             GUILayout.Space(6f);
@@ -155,23 +159,19 @@ namespace ProjectEclipse.UI
 
         private void DrawTabs()
         {
-            GUILayout.BeginHorizontal();
-            TabButton(InventoryTab.Equipment, "Equipment");
-            TabButton(InventoryTab.Usable, "Usable / Consum.");
-            TabButton(InventoryTab.Materials, "Materials");
+            GUILayout.BeginHorizontal(GameGuiStyles.TabRail, GUILayout.Height(32f));
+            TabButton(InventoryTab.Equipment, "Equip");
+            TabButton(InventoryTab.Usable, "Use");
+            TabButton(InventoryTab.Materials, "Material");
             TabButton(InventoryTab.Misc, "Misc");
-            TabButton(InventoryTab.KeyItems, "Key Items");
+            TabButton(InventoryTab.KeyItems, "Key");
             GUILayout.EndHorizontal();
-            if (selectedTab == InventoryTab.Equipment)
-            {
-                GUILayout.Label("Gear, accessories, weapons, armor, and crafting trinkets", GameGuiStyles.MutedLabel);
-            }
         }
 
         private void TabButton(InventoryTab tab, string label)
         {
-            GUIStyle style = selectedTab == tab ? GameGuiStyles.SelectedButton : GameGuiStyles.Button;
-            if (GUILayout.Button(label, style, GUILayout.Height(28f)))
+            GUIStyle style = selectedTab == tab ? GameGuiStyles.SelectedTabButton : GameGuiStyles.TabButton;
+            if (GUILayout.Button(label, style, GUILayout.Height(29f), GUILayout.MinWidth(76f)))
             {
                 selectedTab = tab;
             }

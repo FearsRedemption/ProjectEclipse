@@ -318,13 +318,18 @@ namespace ProjectEclipse.World
                 new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), "copper_orelet", "copper_oreling", "copper_ore_node", RouteDepthCount, new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
                 new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), "tin_orelet", "tin_oreling", "tin_ore_node", RouteDepthCount, new[] { "Tin Orelets", "Orelets + Orelings", "Tin Orelings", "Orelings + Tin Nodes", "Tin Node Cluster" }),
                 new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), "zync_orelet", "zync_oreling", "zync_ore_node", RouteDepthCount, new[] { "Zync Orelets", "Orelets + Orelings", "Zync Orelings", "Orelings + Zync Nodes", "Zync Node Cluster" }),
-                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", RouteDepthCount, new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
+                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", 1, new[] { "Route Gate Sentinel" }),
                 new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), "iron_orelet", "iron_oreling", "iron_ore_node", RouteDepthCount, new[] { "Iron Orelets", "Orelets + Orelings", "Iron Orelings", "Orelings + Iron Nodes", "Iron Node Cluster" })
             };
         }
 
         private static EnemySpawnSpec[] CreateSpawnSpecs(RouteSpec route, int depth)
         {
+            if (route.Id == "miniboss")
+            {
+                return new[] { new EnemySpawnSpec(route.BaseEnemyId, new Vector2(0.4f, 0f), 1, 1.2f, 24f, 3f) };
+            }
+
             switch (depth)
             {
                 case 1:
@@ -654,7 +659,7 @@ namespace ProjectEclipse.World
 
             if (haystack.Contains("route_gate") || haystack.Contains("sentinel") || haystack.Contains("boss"))
             {
-                return GetRoomIndexOrDefault("miniboss-d5", 0);
+                return GetRoomIndexOrDefault("miniboss-d1", 0);
             }
 
             if (haystack.Contains("tin"))

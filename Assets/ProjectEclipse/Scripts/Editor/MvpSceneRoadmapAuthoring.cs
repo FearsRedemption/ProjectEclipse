@@ -35,8 +35,8 @@ namespace ProjectEclipse.EditorTools
         private const float PortalHeight = 1.55f;
         private const float PortalWidth = 0.9f;
         private const int RouteDepthCount = 5;
-        private const int ExpectedRouteRoomCount = 47;
-        private const int ExpectedPortalCount = 92;
+        private const int ExpectedRouteRoomCount = 43;
+        private const int ExpectedPortalCount = 84;
 
         private static readonly string[] HorizontalBaseOrder =
         {
@@ -223,9 +223,7 @@ namespace ProjectEclipse.EditorTools
                 return true;
             }
 
-            Transform saplingsUpPortal = mapRoot.transform.Find("saplings-d1-up-portal");
-            float expectedUpPortalY = UpperPlatformSurfaceOffsetY + 0.75f;
-            if (saplingsUpPortal == null || Mathf.Abs(saplingsUpPortal.position.y - expectedUpPortalY) > 0.05f)
+            if (mapRoot.transform.Find("saplings-d1-up-portal") != null || mapRoot.transform.Find("miniboss-d1-up-portal") != null)
             {
                 return true;
             }
@@ -465,7 +463,7 @@ namespace ProjectEclipse.EditorTools
                 new RouteSpec("copper", "Copper", 3, new Color(0.3f, 0.32f, 0.34f), new Color(0.25f, 0.22f, 0.2f), new Color(0.56f, 0.34f, 0.22f), new Color(0.95f, 0.55f, 0.28f), copperBackdrop, forestGround, copperPlatform, "copper_orelet", "copper_oreling", "copper_ore_node", RouteDepthCount, new[] { "Copper Orelets", "Orelets + Orelings", "Copper Orelings", "Orelings + Ore Nodes", "Copper Ore Nodes" }),
                 new RouteSpec("tin", "Tin", 4, new Color(0.32f, 0.39f, 0.43f), new Color(0.28f, 0.28f, 0.3f), new Color(0.48f, 0.5f, 0.5f), new Color(0.78f, 0.86f, 0.9f), stoneBackdrop, forestGround, stonePlatform, "tin_orelet", "tin_oreling", "tin_ore_node", RouteDepthCount, new[] { "Tin Orelets", "Orelets + Orelings", "Tin Orelings", "Orelings + Tin Nodes", "Tin Node Cluster" }),
                 new RouteSpec("zync", "Zync", 5, new Color(0.3f, 0.36f, 0.4f), new Color(0.25f, 0.26f, 0.27f), new Color(0.47f, 0.51f, 0.46f), new Color(0.72f, 0.9f, 0.72f), stoneBackdrop, forestGround, stonePlatform, "zync_orelet", "zync_oreling", "zync_ore_node", RouteDepthCount, new[] { "Zync Orelets", "Orelets + Orelings", "Zync Orelings", "Orelings + Zync Nodes", "Zync Node Cluster" }),
-                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), copperBackdrop, forestGround, copperPlatform, "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", RouteDepthCount, new[] { "Route Gate", "Gate Approach", "Gate Pressure", "Gate Guards", "Mini Boss Gate" }),
+                new RouteSpec("miniboss", "Mini Boss", 6, new Color(0.28f, 0.26f, 0.33f), new Color(0.25f, 0.23f, 0.27f), new Color(0.45f, 0.39f, 0.52f), new Color(0.75f, 0.64f, 1f), copperBackdrop, forestGround, copperPlatform, "route_gate_sentinel", "route_gate_sentinel", "route_gate_sentinel", 1, new[] { "Route Gate Sentinel" }),
                 new RouteSpec("iron", "Iron Ore", 7, new Color(0.27f, 0.31f, 0.34f), new Color(0.23f, 0.23f, 0.24f), new Color(0.42f, 0.4f, 0.39f), new Color(0.74f, 0.76f, 0.8f), stoneBackdrop, forestGround, stonePlatform, "iron_orelet", "iron_oreling", "iron_ore_node", RouteDepthCount, new[] { "Iron Orelets", "Orelets + Orelings", "Iron Orelings", "Orelings + Iron Nodes", "Iron Node Cluster" })
             };
         }
@@ -575,6 +573,12 @@ namespace ProjectEclipse.EditorTools
             RouteSpec route;
             if (!TryGetRouteSpec(GetRouteId(spec.Id), out route))
             {
+                return;
+            }
+
+            if (route.Id == "miniboss")
+            {
+                CreateEnemySpawn(room, route.BaseEnemyId, new Vector2(0.4f, FloorSurfaceOffsetY), 1, 1.2f, 24f, 3f);
                 return;
             }
 

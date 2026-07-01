@@ -28,6 +28,9 @@ namespace ProjectEclipse.UI
         public static GUIStyle CenterLabel { get; private set; }
         public static GUIStyle Button { get; private set; }
         public static GUIStyle SelectedButton { get; private set; }
+        public static GUIStyle TabRail { get; private set; }
+        public static GUIStyle TabButton { get; private set; }
+        public static GUIStyle SelectedTabButton { get; private set; }
         public static GUIStyle StackLabel { get; private set; }
         public static GUIStyle BadgeLabel { get; private set; }
         public static GUIStyle FeedbackLabel { get; private set; }
@@ -82,6 +85,7 @@ namespace ProjectEclipse.UI
             Rect inner = new Rect(rect.x + 3f, rect.y + 3f, rect.width - 6f, rect.height - 6f);
             DrawBox(inner, new Color(0.12f, 0.15f, 0.15f, 0.96f), new Color(0.22f, 0.28f, 0.27f, 1f), 1f);
             GUI.DrawTexture(new Rect(rect.x + 4f, rect.y + 4f, rect.width - 8f, 1f), GetTexture(new Color(1f, 0.86f, 0.45f, 0.16f)));
+            DrawCornerPips(rect, new Color(0.82f, 0.62f, 0.3f, 0.55f), 2f);
         }
 
         public static void DrawSlot(Rect rect, bool selected)
@@ -118,6 +122,29 @@ namespace ProjectEclipse.UI
             GUI.DrawTexture(topBand, GetTexture(new Color(0.25f, 0.18f, 0.08f, 0.5f)));
             Rect bottomBand = new Rect(modalRect.x, modalRect.yMax - 18f, modalRect.width, 18f);
             GUI.DrawTexture(bottomBand, GetTexture(new Color(0.02f, 0.13f, 0.12f, 0.38f)));
+            DrawFrameCaps(modalRect);
+        }
+
+        private static void DrawFrameCaps(Rect rect)
+        {
+            Color metal = new Color(0.82f, 0.63f, 0.3f, 0.9f);
+            Color shadow = new Color(0.1f, 0.075f, 0.035f, 0.96f);
+            float cap = 18f;
+            DrawBox(new Rect(rect.x - 4f, rect.y - 4f, cap, cap), shadow, metal, 2f);
+            DrawBox(new Rect(rect.xMax - cap + 4f, rect.y - 4f, cap, cap), shadow, metal, 2f);
+            DrawBox(new Rect(rect.x - 4f, rect.yMax - cap + 4f, cap, cap), shadow, metal, 2f);
+            DrawBox(new Rect(rect.xMax - cap + 4f, rect.yMax - cap + 4f, cap, cap), shadow, metal, 2f);
+            DrawCornerPips(rect, new Color(1f, 0.85f, 0.45f, 0.72f), 4f);
+        }
+
+        private static void DrawCornerPips(Rect rect, Color color, float inset)
+        {
+            Texture2D texture = GetTexture(color);
+            const float size = 3f;
+            GUI.DrawTexture(new Rect(rect.x + inset, rect.y + inset, size, size), texture);
+            GUI.DrawTexture(new Rect(rect.xMax - inset - size, rect.y + inset, size, size), texture);
+            GUI.DrawTexture(new Rect(rect.x + inset, rect.yMax - inset - size, size, size), texture);
+            GUI.DrawTexture(new Rect(rect.xMax - inset - size, rect.yMax - inset - size, size, size), texture);
         }
 
         private static void EnsureInitialized(GUISkin skin)
@@ -201,6 +228,33 @@ namespace ProjectEclipse.UI
             SelectedButton.normal.background = GetStyleTexture("button-selected", new Color(0.48f, 0.33f, 0.12f, 1f), new Color(0.95f, 0.74f, 0.32f, 1f), new Color(0.62f, 0.43f, 0.18f, 1f), new Color(1f, 0.92f, 0.54f, 0.32f));
             SelectedButton.normal.textColor = new Color(1f, 0.97f, 0.82f, 1f);
 
+            TabRail = new GUIStyle();
+            TabRail.normal.background = GetStyleTexture("tab-rail", new Color(0.045f, 0.06f, 0.055f, 0.95f), new Color(0.22f, 0.29f, 0.23f, 1f), new Color(0.08f, 0.11f, 0.1f, 1f), new Color(0.65f, 0.5f, 0.25f, 0.12f));
+            TabRail.padding = new RectOffset(5, 5, 3, 0);
+            TabRail.margin = new RectOffset(0, 0, 0, 2);
+            TabRail.border = new RectOffset(4, 4, 4, 4);
+
+            TabButton = new GUIStyle(baseButton);
+            TabButton.normal.background = GetTabTexture("tab", new Color(0.18f, 0.25f, 0.21f, 1f), new Color(0.46f, 0.39f, 0.24f, 1f), new Color(0.72f, 0.58f, 0.28f, 0.16f), false);
+            TabButton.hover.background = GetTabTexture("tab-hover", new Color(0.23f, 0.32f, 0.26f, 1f), new Color(0.68f, 0.52f, 0.28f, 1f), new Color(1f, 0.86f, 0.42f, 0.22f), false);
+            TabButton.active.background = GetTabTexture("tab-active", new Color(0.12f, 0.17f, 0.16f, 1f), new Color(0.36f, 0.31f, 0.22f, 1f), new Color(0.8f, 0.62f, 0.3f, 0.1f), false);
+            TabButton.normal.textColor = new Color(0.82f, 0.88f, 0.8f, 1f);
+            TabButton.hover.textColor = Color.white;
+            TabButton.active.textColor = new Color(0.92f, 0.94f, 0.86f, 1f);
+            TabButton.alignment = TextAnchor.MiddleCenter;
+            TabButton.fontSize = 12;
+            TabButton.fontStyle = FontStyle.Bold;
+            TabButton.padding = new RectOffset(8, 8, 5, 4);
+            TabButton.margin = new RectOffset(1, 1, 0, 0);
+            TabButton.border = new RectOffset(7, 7, 7, 5);
+
+            SelectedTabButton = new GUIStyle(TabButton);
+            SelectedTabButton.normal.background = GetTabTexture("tab-selected", new Color(0.47f, 0.33f, 0.14f, 1f), new Color(0.95f, 0.74f, 0.32f, 1f), new Color(1f, 0.9f, 0.52f, 0.35f), true);
+            SelectedTabButton.hover.background = SelectedTabButton.normal.background;
+            SelectedTabButton.active.background = SelectedTabButton.normal.background;
+            SelectedTabButton.normal.textColor = new Color(1f, 0.96f, 0.75f, 1f);
+            SelectedTabButton.padding = new RectOffset(8, 8, 3, 6);
+
             StackLabel = new GUIStyle(SmallLabel);
             StackLabel.alignment = TextAnchor.LowerRight;
             StackLabel.normal.textColor = Color.white;
@@ -263,6 +317,69 @@ namespace ProjectEclipse.UI
                     }
 
                     pixels[y * size + x] = pixel;
+                }
+            }
+
+            texture.SetPixels(pixels);
+            texture.Apply();
+            StyleTextures[key] = texture;
+            return texture;
+        }
+
+        private static Texture2D GetTabTexture(string key, Color fill, Color border, Color glow, bool selected)
+        {
+            Texture2D texture;
+            if (StyleTextures.TryGetValue(key, out texture))
+            {
+                return texture;
+            }
+
+            const int width = 48;
+            const int height = 28;
+            texture = new Texture2D(width, height);
+            texture.name = "Runtime UI Tab " + key;
+            texture.hideFlags = HideFlags.HideAndDontSave;
+            texture.filterMode = FilterMode.Point;
+            texture.wrapMode = TextureWrapMode.Clamp;
+
+            Color[] pixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            {
+                float vertical = (float)y / (height - 1);
+                for (int x = 0; x < width; x++)
+                {
+                    bool transparentCorner = y < 4 && (x < 4 - y || x >= width - (4 - y));
+                    if (transparentCorner)
+                    {
+                        pixels[y * width + x] = Color.clear;
+                        continue;
+                    }
+
+                    bool borderPixel = x <= 1 || x >= width - 2 || y <= 1 || (!selected && y >= height - 2);
+                    bool bevelPixel = x <= 3 || x >= width - 4 || y <= 3 || (!selected && y >= height - 4);
+                    Color pixel = Color.Lerp(fill, Color.black, (1f - vertical) * 0.1f);
+                    if (borderPixel)
+                    {
+                        pixel = border;
+                    }
+                    else if (bevelPixel)
+                    {
+                        pixel = Color.Lerp(fill, border, 0.32f);
+                    }
+                    else if (selected && y >= height - 4)
+                    {
+                        pixel = Color.Lerp(pixel, glow, 0.48f);
+                    }
+                    else if (y >= 5 && y <= 7)
+                    {
+                        pixel = Color.Lerp(pixel, glow, 0.34f);
+                    }
+                    else if (((x * 3 + y) % 17) == 0)
+                    {
+                        pixel = Color.Lerp(pixel, Color.white, 0.035f);
+                    }
+
+                    pixels[y * width + x] = pixel;
                 }
             }
 
