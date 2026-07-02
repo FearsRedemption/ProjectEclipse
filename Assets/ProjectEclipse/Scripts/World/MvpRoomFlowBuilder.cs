@@ -498,8 +498,9 @@ namespace ProjectEclipse.World
             portal.transform.position = new Vector3(portalPosition.x, portalPosition.y, 0f);
             portal.transform.localScale = new Vector3(portalSize.x, portalSize.y, 1f);
 
-            CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), SpriteFactory.GetPortalPadSprite(), ArtTint(spec.Portal, 0.72f), 1);
-            CreateLocalSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), SpriteFactory.GetPortalColumnSprite(), ArtTint(Lighten(spec.Portal, 0.18f), 0.72f), 2);
+            CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.48f, 0.02f), new Vector3(1.12f, 0.48f, 1f), SpriteFactory.GetPortalPadSprite(), ArtTint(spec.Portal, 0.72f), 1);
+            GameObject column = CreateLocalSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.68f, 0.01f), new Vector3(0.78f, 0.96f, 1f), SpriteFactory.GetPortalColumnSprite(), ArtTint(Lighten(spec.Portal, 0.18f), 0.82f), 2);
+            ConfigurePortalAnimator(column, spec.Portal);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
@@ -512,6 +513,22 @@ namespace ProjectEclipse.World
             RoomPortal2D portalLink = portal.AddComponent<RoomPortal2D>();
             portalLink.Configure(owningRoom, arrival.transform, null);
             return portalLink;
+        }
+
+        private static void ConfigurePortalAnimator(GameObject column, Color portalColor)
+        {
+            if (column == null)
+            {
+                return;
+            }
+
+            PortalVisualAnimator animator = column.GetComponent<PortalVisualAnimator>();
+            if (animator == null)
+            {
+                animator = column.AddComponent<PortalVisualAnimator>();
+            }
+
+            animator.Configure(null, 96, 144, 96f, 10f, ArtTint(Lighten(portalColor, 0.18f), 0.9f));
         }
 
         private void LinkRooms(Transform root, RoomSpec[] specs, string fromId, PortalSide fromSide, string toId, PortalSide toSide)

@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using ProjectEclipse.Enemies;
+using ProjectEclipse.Equipment;
 using ProjectEclipse.Player;
 using ProjectEclipse.World;
 using UnityEditor;
@@ -16,9 +17,11 @@ namespace ProjectEclipse.EditorTools
         private const string MvpScenePath = "Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity";
         private const string MapRootName = "Scene Authored Route Map";
         private const string RuntimeMapRootName = "Editable MVP Map";
-        private const string PainterlyStyleMarkerName = "safe-painterly-style-anchor-v2";
+        private const string PainterlyStyleMarkerName = "safe-painterly-style-anchor-v3";
         private const string PortalPadPath = "Assets/ProjectEclipse/Art/World/portal_pad.png";
         private const string PortalColumnPath = "Assets/ProjectEclipse/Art/World/portal_column.png";
+        private const string PortalColumnSheetPath = "Assets/ProjectEclipse/Art/World/portal_column_sheet.png";
+        private const string PlayerPaperDollBasePath = "Assets/ProjectEclipse/Art/Player/player_paperdoll_base.png";
         private const float RoomWidth = 24f;
         private const float RoomHeight = 11.5f;
         private const float HorizontalRoomSpacing = 36f;
@@ -317,6 +320,7 @@ namespace ProjectEclipse.EditorTools
             SpriteRenderer column = FindChildRenderer(portal, "Teleport Column");
             return pad == null
                 || column == null
+                || column.GetComponent<PortalVisualAnimator>() == null
                 || AssetDatabase.GetAssetPath(pad.sprite) != PortalPadPath
                 || AssetDatabase.GetAssetPath(column.sprite) != PortalColumnPath;
         }
@@ -380,6 +384,7 @@ namespace ProjectEclipse.EditorTools
 
         private static void BuildSceneRouteMap(Scene scene)
         {
+            EnsureVisualImportSettings();
             ClearLegacyAndGeneratedMap(scene);
 
             GameObject mapRoot = new GameObject(MapRootName);
@@ -707,8 +712,9 @@ namespace ProjectEclipse.EditorTools
             portal.transform.position = new Vector3(position.x, position.y, 0f);
             portal.transform.localScale = new Vector3(PortalWidth, PortalHeight, 1f);
 
-            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), PortalPadPath, ArtTint(spec.Portal, 0.72f), 1);
-            CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), PortalColumnPath, ArtTint(Lighten(spec.Portal, 0.18f), 0.72f), 2);
+            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.48f, 0.02f), new Vector3(1.12f, 0.48f, 1f), PortalPadPath, ArtTint(spec.Portal, 0.72f), 1);
+            GameObject column = CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.68f, 0.01f), new Vector3(0.78f, 0.96f, 1f), PortalColumnPath, ArtTint(Lighten(spec.Portal, 0.18f), 0.82f), 2);
+            ConfigurePortalAnimator(column, spec.Portal);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
@@ -891,6 +897,7 @@ namespace ProjectEclipse.EditorTools
             if (player != null)
             {
                 NormalizePlayerCollider(player);
+                ConfigurePlayerPaperDoll(player);
                 player.transform.position = new Vector3(-1.8f, FloorSurfaceOffsetY + GetPlayerFeetOffset() + StandingSurfaceClearance, 0f);
                 Rigidbody2D body = player.GetComponent<Rigidbody2D>();
                 if (body != null)
@@ -898,6 +905,42 @@ namespace ProjectEclipse.EditorTools
                     body.linearVelocity = Vector2.zero;
                 }
             }
+        }
+
+        private static void ConfigurePlayerPaperDoll(PlayerController player)
+        {
+            if (player == null)
+            {
+                return;
+            }
+
+            CharacterVisualController visual = player.GetComponent<CharacterVisualController>();
+            if (visual == null)
+            {
+                visual = player.gameObject.AddComponent<CharacterVisualController>();
+            }
+
+            Sprite baseSprite = AssetDatabase.LoadAssetAtPath<Sprite>(PlayerPaperDollBasePath);
+            visual.ConfigurePaperDollSprites(baseSprite, null, null, null);
+            EditorUtility.SetDirty(visual);
+        }
+
+        private static void ConfigurePortalAnimator(GameObject column, Color portalColor)
+        {
+            if (column == null)
+            {
+                return;
+            }
+
+            PortalVisualAnimator animator = column.GetComponent<PortalVisualAnimator>();
+            if (animator == null)
+            {
+                animator = column.AddComponent<PortalVisualAnimator>();
+            }
+
+            Texture2D sheet = AssetDatabase.LoadAssetAtPath<Texture2D>(PortalColumnSheetPath);
+            animator.Configure(sheet, 96, 144, 96f, 10f, ArtTint(Lighten(portalColor, 0.18f), 0.9f));
+            EditorUtility.SetDirty(animator);
         }
 
         private static EnemyDefinition FindEnemyDefinition(string enemyId)
@@ -979,6 +1022,86 @@ namespace ProjectEclipse.EditorTools
             box.size = new Vector2(PlayerColliderWidth, PlayerColliderHeight);
             box.offset = new Vector2(0f, PlayerColliderOffsetY);
             EditorUtility.SetDirty(box);
+        }
+
+        private static void EnsureVisualImportSettings()
+        {
+            EnsureSpriteImportSettings(PortalPadPath, 96f, new Vector2(0.5f, 0.5f));
+            EnsureSpriteImportSettings(PortalColumnPath, 96f, new Vector2(0.5f, 0.06f));
+            EnsureSpriteImportSettings(PortalColumnSheetPath, 96f, new Vector2(0.5f, 0.06f));
+            EnsureSpriteImportSettings(PlayerPaperDollBasePath, 96f, new Vector2(0.5f, 0.08f));
+        }
+
+        private static void EnsureSpriteImportSettings(string path, float pixelsPerUnit, Vector2 pivot)
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                changed = true;
+            }
+
+            if (importer.spriteImportMode != SpriteImportMode.Single)
+            {
+                importer.spriteImportMode = SpriteImportMode.Single;
+                changed = true;
+            }
+
+            if (!Mathf.Approximately(importer.spritePixelsPerUnit, pixelsPerUnit))
+            {
+                importer.spritePixelsPerUnit = pixelsPerUnit;
+                changed = true;
+            }
+
+            TextureImporterSettings settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            bool settingsChanged = false;
+            if (settings.spriteAlignment != (int)SpriteAlignment.Custom)
+            {
+                settings.spriteAlignment = (int)SpriteAlignment.Custom;
+                settingsChanged = true;
+            }
+
+            if ((settings.spritePivot - pivot).sqrMagnitude > 0.0001f)
+            {
+                settings.spritePivot = pivot;
+                settingsChanged = true;
+            }
+
+            if (settingsChanged)
+            {
+                importer.SetTextureSettings(settings);
+                changed = true;
+            }
+
+            if (importer.mipmapEnabled)
+            {
+                importer.mipmapEnabled = false;
+                changed = true;
+            }
+
+            if (importer.filterMode != FilterMode.Bilinear)
+            {
+                importer.filterMode = FilterMode.Bilinear;
+                changed = true;
+            }
+
+            if (!importer.alphaIsTransparency)
+            {
+                importer.alphaIsTransparency = true;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                importer.SaveAndReimport();
+            }
         }
 
         private static Color Lighten(Color color, float amount)

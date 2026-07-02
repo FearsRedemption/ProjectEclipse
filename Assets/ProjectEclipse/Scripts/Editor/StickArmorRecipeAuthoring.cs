@@ -113,8 +113,8 @@ namespace ProjectEclipse.EditorTools
                 return false;
             }
 
-            Sprite icon = LoadSprite(EquipmentArtFolder + "/" + iconFileName, 64f);
-            Sprite equipped = LoadSprite(EquipmentArtFolder + "/" + equippedFileName, 96f);
+            Sprite icon = LoadSprite(EquipmentArtFolder + "/" + iconFileName, 64f, new Vector2(0.5f, 0.5f));
+            Sprite equipped = LoadSprite(EquipmentArtFolder + "/" + equippedFileName, 96f, new Vector2(0.5f, 0.08f));
             SerializedObject serialized = new SerializedObject(output);
             bool changed = false;
             if (icon != null)
@@ -137,13 +137,13 @@ namespace ProjectEclipse.EditorTools
             return changed;
         }
 
-        private static Sprite LoadSprite(string path, float pixelsPerUnit)
+        private static Sprite LoadSprite(string path, float pixelsPerUnit, Vector2 pivot)
         {
-            EnsureSpriteImportSettings(path, pixelsPerUnit);
+            EnsureSpriteImportSettings(path, pixelsPerUnit, pivot);
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
-        private static void EnsureSpriteImportSettings(string path, float pixelsPerUnit)
+        private static void EnsureSpriteImportSettings(string path, float pixelsPerUnit, Vector2 pivot)
         {
             TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
             if (importer == null)
@@ -167,6 +167,27 @@ namespace ProjectEclipse.EditorTools
             if (!Mathf.Approximately(importer.spritePixelsPerUnit, pixelsPerUnit))
             {
                 importer.spritePixelsPerUnit = pixelsPerUnit;
+                changed = true;
+            }
+
+            TextureImporterSettings settings = new TextureImporterSettings();
+            importer.ReadTextureSettings(settings);
+            bool settingsChanged = false;
+            if (settings.spriteAlignment != (int)SpriteAlignment.Custom)
+            {
+                settings.spriteAlignment = (int)SpriteAlignment.Custom;
+                settingsChanged = true;
+            }
+
+            if ((settings.spritePivot - pivot).sqrMagnitude > 0.0001f)
+            {
+                settings.spritePivot = pivot;
+                settingsChanged = true;
+            }
+
+            if (settingsChanged)
+            {
+                importer.SetTextureSettings(settings);
                 changed = true;
             }
 

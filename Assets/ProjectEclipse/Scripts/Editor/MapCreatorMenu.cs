@@ -10,6 +10,7 @@ namespace ProjectEclipse.EditorTools
     {
         private const string PortalPadPath = "Assets/ProjectEclipse/Art/World/portal_pad.png";
         private const string PortalColumnPath = "Assets/ProjectEclipse/Art/World/portal_column.png";
+        private const string PortalColumnSheetPath = "Assets/ProjectEclipse/Art/World/portal_column_sheet.png";
 
         [MenuItem("Project Eclipse/Map Creator/Create Area")]
         public static void CreateArea()
@@ -59,8 +60,9 @@ namespace ProjectEclipse.EditorTools
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
             trigger.size = new Vector2(0.9f, 1.55f);
-            CreatePortalVisual(portal.transform, "Teleport Pad", PortalPadPath, new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), new Color(0.55f, 0.9f, 1f, 1f), 1);
-            CreatePortalVisual(portal.transform, "Teleport Column", PortalColumnPath, new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), new Color(0.8f, 0.96f, 1f, 1f), 2);
+            CreatePortalVisual(portal.transform, "Teleport Pad", PortalPadPath, new Vector3(0f, -0.48f, 0.02f), new Vector3(1.12f, 0.48f, 1f), new Color(0.55f, 0.9f, 1f, 1f), 1);
+            GameObject column = CreatePortalVisual(portal.transform, "Teleport Column", PortalColumnPath, new Vector3(0f, -0.68f, 0.01f), new Vector3(0.78f, 0.96f, 1f), new Color(0.8f, 0.96f, 1f, 1f), 2);
+            ConfigurePortalAnimator(column);
 
             GameObject arrival = new GameObject("Arrival Point");
             arrival.transform.SetParent(portal.transform);
@@ -72,7 +74,7 @@ namespace ProjectEclipse.EditorTools
             return portalLink;
         }
 
-        private static void CreatePortalVisual(Transform portal, string name, string spritePath, Vector3 localPosition, Vector3 localScale, Color color, int sortingOrder)
+        private static GameObject CreatePortalVisual(Transform portal, string name, string spritePath, Vector3 localPosition, Vector3 localScale, Color color, int sortingOrder)
         {
             GameObject visual = new GameObject(name);
             visual.transform.SetParent(portal);
@@ -83,6 +85,24 @@ namespace ProjectEclipse.EditorTools
             renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
             renderer.color = color;
             renderer.sortingOrder = sortingOrder;
+            return visual;
+        }
+
+        private static void ConfigurePortalAnimator(GameObject column)
+        {
+            if (column == null)
+            {
+                return;
+            }
+
+            PortalVisualAnimator animator = column.GetComponent<PortalVisualAnimator>();
+            if (animator == null)
+            {
+                animator = column.AddComponent<PortalVisualAnimator>();
+            }
+
+            Texture2D sheet = AssetDatabase.LoadAssetAtPath<Texture2D>(PortalColumnSheetPath);
+            animator.Configure(sheet, 96, 144, 96f, 10f, new Color(0.8f, 0.96f, 1f, 1f));
         }
 
         private static Vector3 GetScenePlacementPosition()

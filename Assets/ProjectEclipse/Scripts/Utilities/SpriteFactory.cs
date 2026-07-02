@@ -312,8 +312,8 @@ namespace ProjectEclipse.Utilities
                 return portalColumnSprite;
             }
 
-            int width = 64;
-            int height = 112;
+            int width = 96;
+            int height = 144;
             Texture2D texture = CreateTransparentTexture(width, height, "Runtime Portal Column");
             Color[] pixels = new Color[width * height];
             for (int y = 0; y < height; y++)
@@ -321,19 +321,34 @@ namespace ProjectEclipse.Utilities
                 for (int x = 0; x < width; x++)
                 {
                     float nx = (x + 0.5f) / width * 2f - 1f;
-                    float vertical = (float)y / (height - 1);
-                    bool column = Mathf.Abs(nx) < 0.28f && y > 14 && y < 100;
-                    bool cap = (Mathf.Abs(nx) < 0.48f && ((y > 94 && y < 106) || (y > 8 && y < 20)));
-                    bool core = nx * nx * 1.7f + (vertical * 2f - 1.05f) * (vertical * 2f - 1.05f) < 0.52f;
+                    float vertical = (y + 0.5f) / height;
+                    float taper = Mathf.Sin(vertical * Mathf.PI);
+                    float column = Mathf.Abs(nx) / Mathf.Lerp(0.54f, 0.34f, Mathf.Abs(vertical - 0.5f) * 2f);
+                    float capTop = nx * nx * 1.9f + (vertical - 0.91f) * (vertical - 0.91f) * 95f;
+                    float capBottom = nx * nx * 1.7f + (vertical - 0.08f) * (vertical - 0.08f) * 78f;
+                    float sparkle = Mathf.Sin(x * 0.43f + y * 0.31f) + Mathf.Sin(x * 0.19f - y * 0.47f);
                     Color pixel = Color.clear;
-                    if (column || cap)
+                    if (column < 1f && vertical > 0.08f && vertical < 0.92f)
                     {
-                        float light = Mathf.Lerp(0.42f, 0.84f, Mathf.Clamp01((nx + 1f) * 0.5f));
-                        pixel = new Color(light, light, light, 1f);
+                        float edge = Mathf.Clamp01(1f - column);
+                        float alpha = Mathf.Clamp01(0.18f + edge * 0.5f + taper * 0.2f);
+                        pixel = new Color(0.42f + edge * 0.48f, 0.86f + edge * 0.14f, 1f, alpha);
                     }
-                    else if (core)
+                    else if (column < 1.24f && vertical > 0.06f && vertical < 0.94f)
                     {
-                        pixel = new Color(1f, 1f, 1f, 0.42f);
+                        pixel = new Color(0.55f, 0.88f, 1f, 0.24f);
+                    }
+
+                    if (capTop < 1f || capBottom < 1f)
+                    {
+                        float edge = 1f - Mathf.Min(capTop, capBottom);
+                        pixel = Color.Lerp(pixel, new Color(0.86f, 0.98f, 1f, 0.86f), Mathf.Clamp01(edge * 1.2f));
+                    }
+
+                    if (sparkle > 1.72f && column < 1.15f && vertical > 0.1f && vertical < 0.9f)
+                    {
+                        pixel = Color.Lerp(pixel, Color.white, 0.82f);
+                        pixel.a = Mathf.Max(pixel.a, 0.84f);
                     }
 
                     pixels[y * width + x] = pixel;
@@ -342,7 +357,7 @@ namespace ProjectEclipse.Utilities
 
             texture.SetPixels(pixels);
             texture.Apply();
-            portalColumnSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.08f), 64f);
+            portalColumnSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.06f), 96f);
             return portalColumnSprite;
         }
 
@@ -353,8 +368,8 @@ namespace ProjectEclipse.Utilities
                 return portalPadSprite;
             }
 
-            int width = 96;
-            int height = 36;
+            int width = 128;
+            int height = 48;
             Texture2D texture = CreateTransparentTexture(width, height, "Runtime Portal Pad");
             Color[] pixels = new Color[width * height];
             for (int y = 0; y < height; y++)
@@ -363,16 +378,17 @@ namespace ProjectEclipse.Utilities
                 {
                     float nx = (x + 0.5f) / width * 2f - 1f;
                     float ny = (y + 0.5f) / height * 2f - 1f;
-                    float ellipse = nx * nx + ny * ny * 4.2f;
+                    float ellipse = nx * nx + ny * ny * 5.2f;
+                    float glow = nx * nx + ny * ny * 3.2f;
                     Color pixel = Color.clear;
                     if (ellipse <= 1f)
                     {
-                        float rim = ellipse > 0.72f ? 0.88f : 0.54f;
-                        pixel = new Color(rim, rim, rim, 1f);
+                        float rim = ellipse > 0.72f ? 0.95f : 0.58f;
+                        pixel = new Color(0.34f + rim * 0.45f, 0.78f + rim * 0.2f, 1f, 0.88f);
                     }
-                    else if (ellipse <= 1.22f)
+                    else if (glow <= 1.36f)
                     {
-                        pixel = new Color(1f, 1f, 1f, 0.28f);
+                        pixel = new Color(0.58f, 0.9f, 1f, 0.24f);
                     }
 
                     pixels[y * width + x] = pixel;
@@ -381,7 +397,7 @@ namespace ProjectEclipse.Utilities
 
             texture.SetPixels(pixels);
             texture.Apply();
-            portalPadSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 64f);
+            portalPadSprite = Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 96f);
             return portalPadSprite;
         }
 

@@ -9,6 +9,10 @@ namespace ProjectEclipse.Equipment
         [SerializeField] private List<EquipmentVisualAnchor> anchors = new List<EquipmentVisualAnchor>();
         [SerializeField] private bool buildRuntimePaperDoll = true;
         [SerializeField] private int baseSortingOrder = 10;
+        [SerializeField] private Sprite configuredBaseBodySprite;
+        [SerializeField] private Sprite configuredUndershirtSprite;
+        [SerializeField] private Sprite configuredShortsSprite;
+        [SerializeField] private Sprite configuredHairFaceSprite;
 
         private int facingDirection = 1;
         private SpriteRenderer baseRenderer;
@@ -43,15 +47,24 @@ namespace ProjectEclipse.Equipment
 
             if (baseRenderer != null)
             {
-                baseRenderer.sprite = SpriteFactory.GetPlayerBaseBodySprite();
+                baseRenderer.sprite = configuredBaseBodySprite != null ? configuredBaseBodySprite : SpriteFactory.GetPlayerBaseBodySprite();
                 baseRenderer.color = Color.white;
                 baseRenderer.sortingOrder = baseSortingOrder;
                 baseRenderer.enabled = true;
             }
 
-            CreateStaticLayer("PaperDoll Undershirt", SpriteFactory.GetPlayerUndershirtSprite(), baseSortingOrder + 1);
-            CreateStaticLayer("PaperDoll Shorts", SpriteFactory.GetPlayerShortsSprite(), baseSortingOrder + 2);
-            CreateStaticLayer("PaperDoll Hair Face", SpriteFactory.GetPlayerHairFaceSprite(), baseSortingOrder + 7);
+            if (configuredBaseBodySprite != null)
+            {
+                CreateStaticLayer("PaperDoll Undershirt", configuredUndershirtSprite, baseSortingOrder + 1);
+                CreateStaticLayer("PaperDoll Shorts", configuredShortsSprite, baseSortingOrder + 2);
+                CreateStaticLayer("PaperDoll Hair Face", configuredHairFaceSprite, baseSortingOrder + 7);
+            }
+            else
+            {
+                CreateStaticLayer("PaperDoll Undershirt", SpriteFactory.GetPlayerUndershirtSprite(), baseSortingOrder + 1);
+                CreateStaticLayer("PaperDoll Shorts", SpriteFactory.GetPlayerShortsSprite(), baseSortingOrder + 2);
+                CreateStaticLayer("PaperDoll Hair Face", SpriteFactory.GetPlayerHairFaceSprite(), baseSortingOrder + 7);
+            }
             EnsureAnchor(EquipmentSlot.Back, EquippedVisualLayer.Back, baseSortingOrder - 1);
             EnsureAnchor(EquipmentSlot.Boots, EquippedVisualLayer.Boots, baseSortingOrder + 3);
             EnsureAnchor(EquipmentSlot.Chest, EquippedVisualLayer.Chest, baseSortingOrder + 4);
@@ -85,6 +98,15 @@ namespace ProjectEclipse.Equipment
         {
             EnsureRuntimeLayers();
             SetFacingDirection(facingDirection);
+        }
+
+        public void ConfigurePaperDollSprites(Sprite baseBody, Sprite undershirt, Sprite shorts, Sprite hairFace)
+        {
+            configuredBaseBodySprite = baseBody;
+            configuredUndershirtSprite = undershirt;
+            configuredShortsSprite = shorts;
+            configuredHairFaceSprite = hairFace;
+            EnsureRuntimeLayers();
         }
 
         public void ApplyEquipment(EquipmentSlot slot, EquipmentDefinition equipment)
