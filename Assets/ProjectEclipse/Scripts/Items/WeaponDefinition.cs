@@ -25,6 +25,7 @@ namespace ProjectEclipse.Items
         public float Cooldown { get { return Mathf.Max(0.05f, cooldown); } }
         public float Knockback { get { return Mathf.Max(0f, knockback); } }
         public Sprite EquippedVisualSprite { get { return equippedVisualSprite != null ? equippedVisualSprite : WorldDropSprite; } }
+        public bool HasExplicitEquippedVisualSprite { get { return equippedVisualSprite != null; } }
         public Vector2 EquippedVisualOffset { get { return equippedVisualOffset; } }
         public float EquippedVisualRotation { get { return equippedVisualRotation; } }
         public Vector2 EquippedVisualScale { get { return equippedVisualScale; } }

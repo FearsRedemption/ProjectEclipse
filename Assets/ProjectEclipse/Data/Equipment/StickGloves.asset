@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.58, g: 0.39, b: 0.18, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: e17b86bfe4cc4c84e8ac97465201a943, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: e17b86bfe4cc4c84e8ac97465201a943, type: 3}
   description: Thin stick guards wrapped around the hands.
   droppedBy:
   craftingUsage: First armor craft; tiny defense only.
@@ -41,7 +41,7 @@ MonoBehaviour:
   materialTierRequirement: 0
   routeRequirement: Wood Route Depth 1
   unlockRequirement: Handcraft from Sticks
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: b14c78c51458ee3449936225ba1de794, type: 3}
   visualLayer: 4
   equipmentType: Gloves
   specialEffectsPlaceholder: Primitive stick armor starter piece.

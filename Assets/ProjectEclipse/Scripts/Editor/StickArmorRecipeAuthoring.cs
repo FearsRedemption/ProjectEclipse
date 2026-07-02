@@ -10,6 +10,7 @@ namespace ProjectEclipse.EditorTools
     public static class StickArmorRecipeAuthoring
     {
         private const string SticksPath = "Assets/ProjectEclipse/Data/Items/TreeMaterial.asset";
+        private const string EquipmentArtFolder = "Assets/ProjectEclipse/Art/Equipment";
 
         static StickArmorRecipeAuthoring()
         {
@@ -31,6 +32,10 @@ namespace ProjectEclipse.EditorTools
             changed |= RepairRecipe("Assets/ProjectEclipse/Data/Recipes/StickChestRecipe.asset", "Assets/ProjectEclipse/Data/Equipment/StickChest.asset", sticks, 16);
             changed |= RepairRecipe("Assets/ProjectEclipse/Data/Recipes/StickGlovesRecipe.asset", "Assets/ProjectEclipse/Data/Equipment/StickGloves.asset", sticks, 6);
             changed |= RepairRecipe("Assets/ProjectEclipse/Data/Recipes/StickBootsRecipe.asset", "Assets/ProjectEclipse/Data/Equipment/StickBoots.asset", sticks, 6);
+            changed |= RepairEquipmentArt("Assets/ProjectEclipse/Data/Equipment/StickHelmet.asset", "stick_helmet_icon.png", "stick_helmet_equipped.png");
+            changed |= RepairEquipmentArt("Assets/ProjectEclipse/Data/Equipment/StickChest.asset", "stick_chest_icon.png", "stick_chest_equipped.png");
+            changed |= RepairEquipmentArt("Assets/ProjectEclipse/Data/Equipment/StickGloves.asset", "stick_gloves_icon.png", "stick_gloves_equipped.png");
+            changed |= RepairEquipmentArt("Assets/ProjectEclipse/Data/Equipment/StickBoots.asset", "stick_boots_icon.png", "stick_boots_equipped.png");
 
             if (changed)
             {
@@ -98,6 +103,107 @@ namespace ProjectEclipse.EditorTools
             }
 
             return changed;
+        }
+
+        private static bool RepairEquipmentArt(string equipmentPath, string iconFileName, string equippedFileName)
+        {
+            ItemDefinition output = AssetDatabase.LoadAssetAtPath<ItemDefinition>(equipmentPath);
+            if (output == null)
+            {
+                return false;
+            }
+
+            Sprite icon = LoadSprite(EquipmentArtFolder + "/" + iconFileName, 64f);
+            Sprite equipped = LoadSprite(EquipmentArtFolder + "/" + equippedFileName, 96f);
+            SerializedObject serialized = new SerializedObject(output);
+            bool changed = false;
+            if (icon != null)
+            {
+                changed |= SetObject(serialized, "icon", icon);
+                changed |= SetObject(serialized, "worldDropSprite", icon);
+            }
+
+            if (equipped != null)
+            {
+                changed |= SetObject(serialized, "visualSprite", equipped);
+            }
+
+            if (changed)
+            {
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(output);
+            }
+
+            return changed;
+        }
+
+        private static Sprite LoadSprite(string path, float pixelsPerUnit)
+        {
+            EnsureSpriteImportSettings(path, pixelsPerUnit);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static void EnsureSpriteImportSettings(string path, float pixelsPerUnit)
+        {
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                changed = true;
+            }
+
+            if (importer.spriteImportMode != SpriteImportMode.Single)
+            {
+                importer.spriteImportMode = SpriteImportMode.Single;
+                changed = true;
+            }
+
+            if (!Mathf.Approximately(importer.spritePixelsPerUnit, pixelsPerUnit))
+            {
+                importer.spritePixelsPerUnit = pixelsPerUnit;
+                changed = true;
+            }
+
+            if (importer.mipmapEnabled)
+            {
+                importer.mipmapEnabled = false;
+                changed = true;
+            }
+
+            if (importer.filterMode != FilterMode.Bilinear)
+            {
+                importer.filterMode = FilterMode.Bilinear;
+                changed = true;
+            }
+
+            if (!importer.alphaIsTransparency)
+            {
+                importer.alphaIsTransparency = true;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                importer.SaveAndReimport();
+            }
+        }
+
+        private static bool SetObject(SerializedObject serialized, string name, Object value)
+        {
+            SerializedProperty property = serialized.FindProperty(name);
+            if (property == null || property.objectReferenceValue == value)
+            {
+                return false;
+            }
+
+            property.objectReferenceValue = value;
+            return true;
         }
     }
 }

@@ -16,6 +16,7 @@ namespace ProjectEclipse.EditorTools
         private const string MvpScenePath = "Assets/ProjectEclipse/Scenes/ProjectEclipse_MVP.unity";
         private const string MapRootName = "Scene Authored Route Map";
         private const string RuntimeMapRootName = "Editable MVP Map";
+        private const string PainterlyStyleMarkerName = "safe-painterly-style-anchor-v2";
         private const string PortalPadPath = "Assets/ProjectEclipse/Art/World/portal_pad.png";
         private const string PortalColumnPath = "Assets/ProjectEclipse/Art/World/portal_column.png";
         private const float RoomWidth = 24f;
@@ -229,6 +230,11 @@ namespace ProjectEclipse.EditorTools
             }
 
             if (!HasGeneratedChildNamed(mapRoot, "safe-atmosphere-wash"))
+            {
+                return true;
+            }
+
+            if (!HasGeneratedChildNamed(mapRoot, PainterlyStyleMarkerName))
             {
                 return true;
             }
@@ -511,21 +517,22 @@ namespace ProjectEclipse.EditorTools
             MapArea2D area = room.AddComponent<MapArea2D>();
             area.Configure(spec.Id, spec.Name, new Vector2(RoomWidth, RoomHeight));
 
-            CreateSprite(room.transform, "Backdrop", Vector3.forward * 2.5f, new Vector3(6.2f, 4.4f, 1f), spec.BackdropPath, spec.Sky, -40);
+            CreateSprite(room.transform, "Backdrop", Vector3.forward * 2.5f, new Vector3(6.2f, 4.4f, 1f), spec.BackdropPath, ArtTint(spec.Sky, 0.34f), -40);
             CreateRoomDressing(room.transform, spec);
-            CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(RoomWidth + 0.8f, GroundFillVisualHeight), spec.GroundPath, spec.Ground, -18);
+            CreateTiledSprite(room.transform, "Ground Fill", new Vector3(0f, FloorSurfaceOffsetY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(RoomWidth + 0.8f, GroundFillVisualHeight), spec.GroundPath, ArtTint(spec.Ground, 0.48f), -18);
             CreateFloor(room.transform, spec);
             CreateRoomPlatforms(room.transform, spec);
             CreateSpawn(room.transform, spec);
             CreateEnemySpawns(room.transform, spec);
+            CreateStyleMarker(room.transform, spec);
             return bounds;
         }
 
         private static void CreateRoomDressing(Transform room, RoomSpec spec)
         {
-            Color wash = WithAlpha(Lighten(spec.Sky, 0.08f), 0.34f);
-            Color deepShadow = WithAlpha(Color.Lerp(spec.Ground, Color.black, 0.42f), 0.5f);
-            Color accent = WithAlpha(Lighten(spec.Portal, 0.18f), 0.48f);
+            Color wash = WithAlpha(ArtTint(spec.Sky, 0.28f), 0.26f);
+            Color deepShadow = WithAlpha(Color.Lerp(spec.Ground, Color.black, 0.34f), 0.34f);
+            Color accent = WithAlpha(ArtTint(spec.Portal, 0.46f), 0.42f);
             CreateSprite(room, spec.Id + "-atmosphere-wash", new Vector3(0f, 1.15f, 2.35f), new Vector3(7.6f, 2.6f, 1f), spec.BackdropPath, wash, -39);
             CreateSprite(room, spec.Id + "-distant-left-form", new Vector3(-RoomWidth * 0.42f, FloorSurfaceOffsetY + 1.85f, 2.08f), new Vector3(1.6f, 1.95f, 1f), spec.PlatformPath, deepShadow, -30);
             CreateSprite(room, spec.Id + "-distant-right-form", new Vector3(RoomWidth * 0.43f, FloorSurfaceOffsetY + 1.55f, 2.08f), new Vector3(1.35f, 1.65f, 1f), spec.PlatformPath, deepShadow, -30);
@@ -550,6 +557,19 @@ namespace ProjectEclipse.EditorTools
         {
             string route = spec.Route != null ? spec.Route.ToLowerInvariant() : string.Empty;
             return route.Contains("safe") || route.Contains("sapling") || route.Contains("birch") || route.Contains("pine");
+        }
+
+        private static void CreateStyleMarker(Transform room, RoomSpec spec)
+        {
+            if (spec.Id != "safe")
+            {
+                return;
+            }
+
+            GameObject marker = new GameObject(PainterlyStyleMarkerName);
+            marker.transform.SetParent(room);
+            marker.transform.localPosition = Vector3.zero;
+            marker.hideFlags = HideFlags.HideInHierarchy;
         }
 
         private static void CreateFloor(Transform room, RoomSpec spec)
@@ -579,7 +599,7 @@ namespace ProjectEclipse.EditorTools
 
         private static void CreateOneWayPlatform(Transform room, string id, Vector2 center, float width, string spritePath, Color color)
         {
-            CreateTiledSprite(room, id + "-art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), spritePath, color, -12);
+            CreateTiledSprite(room, id + "-art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), spritePath, ArtTint(color, 0.58f), -12);
 
             GameObject surface = new GameObject(id);
             surface.transform.SetParent(room);
@@ -687,8 +707,8 @@ namespace ProjectEclipse.EditorTools
             portal.transform.position = new Vector3(position.x, position.y, 0f);
             portal.transform.localScale = new Vector3(PortalWidth, PortalHeight, 1f);
 
-            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), PortalPadPath, spec.Portal, 1);
-            CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), PortalColumnPath, Lighten(spec.Portal, 0.18f), 2);
+            CreateSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), PortalPadPath, ArtTint(spec.Portal, 0.72f), 1);
+            CreateSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), PortalColumnPath, ArtTint(Lighten(spec.Portal, 0.18f), 0.72f), 2);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
@@ -964,6 +984,13 @@ namespace ProjectEclipse.EditorTools
         private static Color Lighten(Color color, float amount)
         {
             return Color.Lerp(color, Color.white, Mathf.Clamp01(amount));
+        }
+
+        private static Color ArtTint(Color color, float strength)
+        {
+            Color tinted = Color.Lerp(Color.white, color, Mathf.Clamp01(strength));
+            tinted.a = color.a;
+            return tinted;
         }
 
         private static Color WithAlpha(Color color, float alpha)

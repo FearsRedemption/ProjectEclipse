@@ -13,6 +13,8 @@ namespace ProjectEclipse.EditorTools
         private const string ItemsFolder = "Assets/ProjectEclipse/Data/Items";
         private const string EnemiesFolder = "Assets/ProjectEclipse/Data/Enemies";
         private const string DropTablesFolder = "Assets/ProjectEclipse/Data/DropTables";
+        private const string CreatureArtFolder = "Assets/ProjectEclipse/Art/Creatures/Route";
+        private const string ItemArtFolder = "Assets/ProjectEclipse/Art/Items";
 
         private static bool running;
 
@@ -141,6 +143,8 @@ namespace ProjectEclipse.EditorTools
                 EnsureFolder(ItemsFolder);
                 EnsureFolder(EnemiesFolder);
                 EnsureFolder(DropTablesFolder);
+                EnsureFolder(CreatureArtFolder);
+                EnsureFolder(ItemArtFolder);
 
                 bool changed = false;
                 ItemDefinition sticks = AssetDatabase.LoadAssetAtPath<ItemDefinition>(ItemsFolder + "/TreeMaterial.asset");
@@ -184,6 +188,9 @@ namespace ProjectEclipse.EditorTools
                 changed |= EnsureEnemyFamily("Pine", "pine", ResourceTier.Wood, pineLog, new Color(0.34f, 0.24f, 0.14f, 1f), new Color(0.22f, 0.52f, 0.25f, 1f), 10, 20, 36, 1.0f, 0.9f, 0.58f);
                 changed |= EnsureOreFamily("Rock", "rock", "rocks", ResourceTier.Stone, stone, new Color(0.48f, 0.5f, 0.52f, 1f), new Color(0.68f, 0.7f, 0.72f, 1f), 9, 18, 32);
                 changed |= EnsureOreFamily("Coal", "coal", "coal", ResourceTier.Coal, coal, new Color(0.13f, 0.14f, 0.15f, 1f), new Color(0.78f, 0.55f, 0.32f, 1f), 12, 24, 40);
+                changed |= EnsureEnemySpriteSheetOnly(EnemiesFolder + "/CopperCreature.asset", "copper_orelet");
+                changed |= EnsureEnemySpriteSheetOnly(EnemiesFolder + "/CopperOreling.asset", "copper_oreling");
+                changed |= EnsureEnemySpriteSheetOnly(EnemiesFolder + "/CopperOreNode.asset", "copper_ore_node");
                 changed |= EnsureOreFamily("Tin", "tin", "tin", ResourceTier.Tin, tinOre, new Color(0.55f, 0.58f, 0.58f, 1f), new Color(0.82f, 0.9f, 0.9f, 1f), 16, 32, 52);
                 changed |= EnsureOreFamily("Zync", "zync", "zync", ResourceTier.Zinc, zyncOre, new Color(0.44f, 0.5f, 0.45f, 1f), new Color(0.72f, 0.92f, 0.68f, 1f), 20, 40, 64);
                 changed |= EnsureOreFamily("Iron", "iron", "iron", ResourceTier.Iron, ironOre, new Color(0.45f, 0.43f, 0.4f, 1f), new Color(0.73f, 0.48f, 0.32f, 1f), 26, 52, 84);
@@ -279,6 +286,25 @@ namespace ProjectEclipse.EditorTools
             return changed;
         }
 
+        private static bool EnsureEnemySpriteSheetOnly(string enemyPath, string sheetId)
+        {
+            EnemyDefinition enemy = AssetDatabase.LoadAssetAtPath<EnemyDefinition>(enemyPath);
+            if (enemy == null)
+            {
+                return false;
+            }
+
+            SerializedObject serialized = new SerializedObject(enemy);
+            bool changed = SetObject(serialized, "spriteSheet", LoadCreatureSheet(sheetId));
+            if (changed)
+            {
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(enemy);
+            }
+
+            return changed;
+        }
+
         private static ItemDefinition EnsureItem(ItemSpec spec, ref bool changed)
         {
             ItemDefinition item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(spec.Path);
@@ -307,6 +333,13 @@ namespace ProjectEclipse.EditorTools
             itemChanged |= SetString(serialized, "description", spec.Description);
             itemChanged |= SetString(serialized, "droppedBy", spec.DroppedBy);
             itemChanged |= SetString(serialized, "craftingUsage", spec.CraftingUsage);
+
+            Sprite icon = LoadSprite(ItemArtFolder + "/" + spec.Id + "_icon.png", 64f);
+            if (icon != null)
+            {
+                itemChanged |= SetObject(serialized, "icon", icon);
+                itemChanged |= SetObject(serialized, "worldDropSprite", icon);
+            }
 
             if (itemChanged)
             {
@@ -418,7 +451,7 @@ namespace ProjectEclipse.EditorTools
             changed |= SetInt(serialized, "ignorePlayerAboveGearScore", -1);
             changed |= SetVector2(serialized, "visualScale", spec.Scale);
             changed |= SetVector2(serialized, "colliderSize", spec.Collider);
-            changed |= SetObject(serialized, "spriteSheet", null);
+            changed |= SetObject(serialized, "spriteSheet", LoadCreatureSheet(spec.Id));
             changed |= SetColor(serialized, "placeholderColor", spec.Color);
             changed |= SetObject(serialized, "dropTable", table);
 
@@ -445,6 +478,86 @@ namespace ProjectEclipse.EditorTools
             }
 
             return changed;
+        }
+
+        private static Texture2D LoadCreatureSheet(string enemyId)
+        {
+            if (string.IsNullOrEmpty(enemyId))
+            {
+                return null;
+            }
+
+            string path = CreatureArtFolder + "/" + enemyId + "_sheet.png";
+            EnsureTextureImportSettings(path, 96f, true);
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
+
+        private static Sprite LoadSprite(string path, float pixelsPerUnit)
+        {
+            EnsureTextureImportSettings(path, pixelsPerUnit, false);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static void EnsureTextureImportSettings(string path, float pixelsPerUnit, bool readable)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                changed = true;
+            }
+
+            if (importer.spriteImportMode != SpriteImportMode.Single)
+            {
+                importer.spriteImportMode = SpriteImportMode.Single;
+                changed = true;
+            }
+
+            if (!Mathf.Approximately(importer.spritePixelsPerUnit, pixelsPerUnit))
+            {
+                importer.spritePixelsPerUnit = pixelsPerUnit;
+                changed = true;
+            }
+
+            if (importer.mipmapEnabled)
+            {
+                importer.mipmapEnabled = false;
+                changed = true;
+            }
+
+            if (importer.filterMode != FilterMode.Bilinear)
+            {
+                importer.filterMode = FilterMode.Bilinear;
+                changed = true;
+            }
+
+            if (!importer.alphaIsTransparency)
+            {
+                importer.alphaIsTransparency = true;
+                changed = true;
+            }
+
+            if (importer.isReadable != readable)
+            {
+                importer.isReadable = readable;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                importer.SaveAndReimport();
+            }
         }
 
         private static void EnsureFolder(string path)

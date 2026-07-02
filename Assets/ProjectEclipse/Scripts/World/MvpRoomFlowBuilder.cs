@@ -374,9 +374,9 @@ namespace ProjectEclipse.World
             Transform spawn = CreateSpawn(root, spec, index);
             builtSpawns.Add(spawn);
 
-            CreateSprite(root, spec.Name + " Background", new Vector3(spec.Center.x, spec.Center.y, 2.5f), new Vector3((spec.Size.x + 1.4f) * 0.5f, (spec.Size.y + 1f) * 0.34f, 1f), SpriteFactory.GetRoomBackgroundSprite(), spec.Sky, -40);
+            CreateSprite(root, spec.Name + " Background", new Vector3(spec.Center.x, spec.Center.y, 2.5f), new Vector3((spec.Size.x + 1.4f) * 0.5f, (spec.Size.y + 1f) * 0.34f, 1f), SpriteFactory.GetRoomBackgroundSprite(), ArtTint(spec.Sky, 0.34f), -40);
             CreateRoomDressing(root, spec);
-            CreateTiledSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(spec.Size.x + 0.8f, GroundFillVisualHeight), SpriteFactory.GetGroundFillSprite(), spec.Ground, -18);
+            CreateTiledSprite(root, spec.Name + " Ground Fill", new Vector3(spec.Center.x, spec.Center.y + floorSurfaceY - GroundFillVisualHeight * 0.5f, 1.8f), new Vector2(spec.Size.x + 0.8f, GroundFillVisualHeight), SpriteFactory.GetGroundFillSprite(), ArtTint(spec.Ground, 0.48f), -18);
             CreateSolidFloor(root, spec);
 
             CreateRoomPlatforms(root, spec);
@@ -385,9 +385,9 @@ namespace ProjectEclipse.World
 
         private void CreateRoomDressing(Transform root, RoomSpec spec)
         {
-            Color wash = WithAlpha(Lighten(spec.Sky, 0.08f), 0.34f);
-            Color deepShadow = WithAlpha(Color.Lerp(spec.Ground, Color.black, 0.42f), 0.5f);
-            Color accent = WithAlpha(Lighten(spec.Portal, 0.18f), 0.48f);
+            Color wash = WithAlpha(ArtTint(spec.Sky, 0.28f), 0.26f);
+            Color deepShadow = WithAlpha(Color.Lerp(spec.Ground, Color.black, 0.34f), 0.34f);
+            Color accent = WithAlpha(ArtTint(spec.Portal, 0.46f), 0.42f);
             CreateSprite(root, spec.Name + " Atmosphere Wash", new Vector3(spec.Center.x, spec.Center.y + 1.15f, 2.35f), new Vector3(7.6f, 2.6f, 1f), SpriteFactory.GetRoomBackgroundSprite(), wash, -39);
             CreateSprite(root, spec.Name + " Distant Left Form", new Vector3(spec.Center.x - spec.Size.x * 0.42f, spec.Center.y + floorSurfaceY + 1.85f, 2.08f), new Vector3(1.6f, 1.95f, 1f), SpriteFactory.GetPlatformStripSprite(), deepShadow, -30);
             CreateSprite(root, spec.Name + " Distant Right Form", new Vector3(spec.Center.x + spec.Size.x * 0.43f, spec.Center.y + floorSurfaceY + 1.55f, 2.08f), new Vector3(1.35f, 1.65f, 1f), SpriteFactory.GetPlatformStripSprite(), deepShadow, -30);
@@ -477,7 +477,7 @@ namespace ProjectEclipse.World
 
         private void CreateOneWayPlatform(Transform root, string name, Vector2 center, float width, Color color)
         {
-            CreateTiledSprite(root, name + " Art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), SpriteFactory.GetPlatformStripSprite(), color, -12);
+            CreateTiledSprite(root, name + " Art", new Vector3(center.x, center.y + 0.04f - OneWayPlatformVisualHeight * 0.5f, 1.55f), new Vector2(width, OneWayPlatformVisualHeight), SpriteFactory.GetPlatformStripSprite(), ArtTint(color, 0.58f), -12);
 
             GameObject surface = new GameObject(name + " Surface");
             surface.transform.SetParent(root);
@@ -498,8 +498,8 @@ namespace ProjectEclipse.World
             portal.transform.position = new Vector3(portalPosition.x, portalPosition.y, 0f);
             portal.transform.localScale = new Vector3(portalSize.x, portalSize.y, 1f);
 
-            CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), SpriteFactory.GetPortalPadSprite(), spec.Portal, 1);
-            CreateLocalSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), SpriteFactory.GetPortalColumnSprite(), spec.Portal, 2);
+            CreateLocalSprite(portal.transform, "Teleport Pad", new Vector3(0f, -0.52f, 0.02f), new Vector3(1.15f, 0.52f, 1f), SpriteFactory.GetPortalPadSprite(), ArtTint(spec.Portal, 0.72f), 1);
+            CreateLocalSprite(portal.transform, "Teleport Column", new Vector3(0f, -0.64f, 0.01f), new Vector3(0.72f, 0.92f, 1f), SpriteFactory.GetPortalColumnSprite(), ArtTint(Lighten(spec.Portal, 0.18f), 0.72f), 2);
 
             BoxCollider2D trigger = portal.AddComponent<BoxCollider2D>();
             trigger.isTrigger = true;
@@ -1119,6 +1119,13 @@ namespace ProjectEclipse.World
         private static Color Lighten(Color color, float amount)
         {
             return Color.Lerp(color, Color.white, Mathf.Clamp01(amount));
+        }
+
+        private static Color ArtTint(Color color, float strength)
+        {
+            Color tinted = Color.Lerp(Color.white, color, Mathf.Clamp01(strength));
+            tinted.a = color.a;
+            return tinted;
         }
 
         private static Color WithAlpha(Color color, float alpha)

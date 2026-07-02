@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.5, g: 0.32, b: 0.15, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: db6db15ecbef3234a820d92c67580cb1, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: db6db15ecbef3234a820d92c67580cb1, type: 3}
   description: A simple stick chest guard that makes the starter body look less bare.
   droppedBy:
   craftingUsage: First armor craft; tiny defense and a small HP regeneration bonus.
@@ -41,7 +41,7 @@ MonoBehaviour:
   materialTierRequirement: 0
   routeRequirement: Wood Route Depth 1
   unlockRequirement: Handcraft from Sticks
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: f9831974457ea834d98f8134fd4b6b7f, type: 3}
   visualLayer: 3
   equipmentType: Chest Armor
   specialEffectsPlaceholder: Adds a small always-on HP regeneration bonus.

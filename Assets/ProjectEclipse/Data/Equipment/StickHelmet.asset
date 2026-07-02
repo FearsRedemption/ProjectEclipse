@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.56, g: 0.38, b: 0.18, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: b8c7043454e7c5a4a90c8407bf09585d, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: b8c7043454e7c5a4a90c8407bf09585d, type: 3}
   description: A rough bundle of sticks tied into the first primitive helmet.
   droppedBy:
   craftingUsage: First armor craft; tiny defense while learning early combat.
@@ -41,7 +41,7 @@ MonoBehaviour:
   materialTierRequirement: 0
   routeRequirement: Wood Route Depth 1
   unlockRequirement: Handcraft from Sticks
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: c83d0ae5504c86844a408ce7bd419946, type: 3}
   visualLayer: 2
   equipmentType: Helmet
   specialEffectsPlaceholder: Primitive stick armor starter piece.

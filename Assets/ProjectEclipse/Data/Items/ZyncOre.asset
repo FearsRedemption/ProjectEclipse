@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 12
   stackLimit: 999
   placeholderColor: {r: 0.62, g: 0.72, b: 0.58, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: 78228a291b7543543b78018c8fcf8d32, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 78228a291b7543543b78018c8fcf8d32, type: 3}
   description: Green-gray zync ore gathered after the tin route.
   droppedBy: Zync Orelets, Zync Orelings, and Zync Ore Nodes
   craftingUsage: Future brass crafting, trinkets, and route upgrades.

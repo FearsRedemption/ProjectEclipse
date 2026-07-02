@@ -56,8 +56,38 @@ namespace ProjectEclipse.Equipment
                 return;
             }
 
+            WeaponDefinition weapon = equipment as WeaponDefinition;
+            if (weapon != null && equipment.Slot == EquipmentSlot.Mainhand)
+            {
+                ApplyWeapon(weapon);
+                return;
+            }
+
             rendererOverride.sprite = GetSprite(equipment);
             rendererOverride.enabled = rendererOverride.sprite != null;
+            ApplyTransform();
+        }
+
+        private void ApplyWeapon(WeaponDefinition weapon)
+        {
+            rendererOverride.sprite = weapon.HasExplicitEquippedVisualSprite
+                ? weapon.EquippedVisualSprite
+                : SpriteFactory.GetWeaponOverlaySprite(weapon);
+            rendererOverride.enabled = rendererOverride.sprite != null;
+
+            if (weapon.HasExplicitEquippedVisualSprite)
+            {
+                localOffset = weapon.EquippedVisualOffset;
+                localRotation = weapon.EquippedVisualRotation;
+                localScale = ClampVisualScale(weapon.EquippedVisualScale, 0.68f);
+            }
+            else
+            {
+                localOffset = Vector2.zero;
+                localRotation = 0f;
+                localScale = Vector2.one;
+            }
+
             ApplyTransform();
         }
 
@@ -68,15 +98,17 @@ namespace ProjectEclipse.Equipment
                 return null;
             }
 
-            WeaponDefinition weapon = equipment as WeaponDefinition;
-            if (weapon != null && equipment.Slot == EquipmentSlot.Mainhand)
-            {
-                return SpriteFactory.GetWeaponOverlaySprite(weapon);
-            }
-
             return equipment.HasExplicitVisualSprite
                 ? equipment.VisualSprite
                 : SpriteFactory.GetEquipmentOverlaySprite(equipment.Slot, equipment.PlaceholderColor);
+        }
+
+        private static Vector2 ClampVisualScale(Vector2 requestedScale, float maxVisualScale)
+        {
+            float max = Mathf.Max(0.05f, maxVisualScale);
+            float x = Mathf.Clamp(Mathf.Abs(requestedScale.x), 0.05f, max);
+            float y = Mathf.Clamp(Mathf.Abs(requestedScale.y), 0.05f, max);
+            return new Vector2(x, y);
         }
 
         private void ApplyTransform()

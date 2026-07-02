@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 10
   stackLimit: 999
   placeholderColor: {r: 0.7, g: 0.76, b: 0.76, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: 3571c4e5ec39ee74294d8c06386ac1c9, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: 3571c4e5ec39ee74294d8c06386ac1c9, type: 3}
   description: Pale tin ore gathered after copper route progression opens.
   droppedBy: Tin Orelets, Tin Orelings, and Tin Ore Nodes
   craftingUsage: Future bronze crafting, trinkets, and route upgrades.

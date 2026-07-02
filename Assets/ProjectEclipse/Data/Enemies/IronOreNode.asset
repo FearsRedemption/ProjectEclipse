@@ -33,7 +33,7 @@ MonoBehaviour:
   ignorePlayerAboveGearScore: -1
   visualScale: {x: 1.24, y: 1.16}
   colliderSize: {x: 1.28, y: 0.84}
-  spriteSheet: {fileID: 0}
+  spriteSheet: {fileID: 2800000, guid: 594a37f19f8f1074393d64c8264e8ba2, type: 3}
   placeholderColor: {r: 0.73, g: 0.48, b: 0.32, a: 1}
   dropTable: {fileID: 11400000, guid: 978df2c208159b94f89ad30caa11c7c7, type: 2}
   drops:

@@ -18,8 +18,8 @@ MonoBehaviour:
   resourceTier: 0
   stackLimit: 1
   placeholderColor: {r: 0.48, g: 0.3, b: 0.14, a: 1}
-  icon: {fileID: 0}
-  worldDropSprite: {fileID: 0}
+  icon: {fileID: 21300000, guid: b019de0c1ba1a4e4b809758a99085bfe, type: 3}
+  worldDropSprite: {fileID: 21300000, guid: b019de0c1ba1a4e4b809758a99085bfe, type: 3}
   description: Crude stick foot guards for the first armor tier.
   droppedBy:
   craftingUsage: First armor craft; tiny defense only.
@@ -41,7 +41,7 @@ MonoBehaviour:
   materialTierRequirement: 0
   routeRequirement: Wood Route Depth 1
   unlockRequirement: Handcraft from Sticks
-  visualSprite: {fileID: 0}
+  visualSprite: {fileID: 21300000, guid: 5b12d9b3a6185314ebb7137f379b7665, type: 3}
   visualLayer: 5
   equipmentType: Boots
   specialEffectsPlaceholder: Primitive stick armor starter piece.

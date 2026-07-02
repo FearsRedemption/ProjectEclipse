@@ -32,7 +32,7 @@ MonoBehaviour:
   rangedProjectileLifetime: 2.6
   visualScale: {x: 0.78, y: 0.78}
   colliderSize: {x: 0.7, y: 0.55}
-  spriteSheet: {fileID: 0}
+  spriteSheet: {fileID: 2800000, guid: ccd7d9856357d35498e057b752c90c9c, type: 3}
   placeholderColor: {r: 0.66, g: 0.53, b: 0.43, a: 1}
   dropTable: {fileID: 11400000, guid: 0569510f747944a1bee03fdf8e1f1cbc, type: 2}
   drops:
